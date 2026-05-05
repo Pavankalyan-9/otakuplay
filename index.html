@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OtakuPlay — Best Anime & PC Games</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Orbitron:wght@700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#09090f" />
+</head>
+<body>
+
+  <div class="bg-orbs">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon">⚡</span>
+        <span class="logo-text">OtakuPlay</span>
+      </div>
+      <nav class="nav">
+        <a href="#" class="nav-link active" data-tab="anime">Anime</a>
+        <a href="#" class="nav-link" data-tab="games">PC Games</a>
+      </nav>
+      <div class="header-right">
+        <button class="jp-toggle" id="jp-toggle" title="Show Japanese titles">🇯🇵 JP</button>
+        <div class="header-badge">1960s → 2026</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-content">
+      <div class="hero-tag">Classics to Modern · All Eras · Ranked</div>
+      <h1 class="hero-title">
+        Every Era.<br />
+        <span class="gradient-text">Every Legend.</span><br />
+        One List.
+      </h1>
+      <p class="hero-subtitle">
+        The most comprehensive ranked collection of best-ever anime and PC games — from 1960s pioneers to 2025 masterpieces, organized decade by decade.
+      </p>
+      <div class="hero-stats">
+        <div class="stat"><span class="stat-num" id="stat-anime">65</span><span class="stat-label">Anime</span></div>
+        <div class="stat-divider"></div>
+        <div class="stat"><span class="stat-num" id="stat-games">70</span><span class="stat-label">Games</span></div>
+        <div class="stat-divider"></div>
+        <div class="stat"><span class="stat-num">60+</span><span class="stat-label">Years Covered</span></div>
+      </div>
+      <div class="hero-cta">
+        <button class="btn-primary" onclick="switchTab('anime')">Browse Anime</button>
+        <button class="btn-secondary" onclick="switchTab('games')">Browse Games</button>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="floating-cards">
+        <div class="float-card card-a">🎌<span>Cowboy Bebop '98</span></div>
+        <div class="float-card card-b">🎮<span>Half-Life 2 '04</span></div>
+        <div class="float-card card-c">⚔️<span>Berserk '97</span></div>
+        <div class="float-card card-d">🔥<span>Elden Ring '22</span></div>
+        <div class="float-card card-e">🌟<span>Frieren '23</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB SWITCHER -->
+  <div class="tab-container" id="top-tabs">
+    <div class="tab-switcher">
+      <button class="tab-btn active" data-target="anime-section">
+        <span class="tab-icon">🎌</span> Best Anime
+        <span class="tab-count" id="tab-anime-count">65</span>
+      </button>
+      <button class="tab-btn" data-target="games-section">
+        <span class="tab-icon">🎮</span> Best PC Games
+        <span class="tab-count" id="tab-games-count">70</span>
+      </button>
+      <button class="tab-btn" data-target="stats-section">
+        <span class="tab-icon">📊</span> Insights
+      </button>
+    </div>
+  </div>
+
+  <!-- ANIME SECTION -->
+  <section class="content-section active" id="anime-section">
+    <div class="section-header">
+      <div class="section-tag">🏆 1963 — 2026</div>
+      <h2 class="section-title">Best Anime of All Time</h2>
+      <p class="section-desc">From Osamu Tezuka's first masterpiece to today's seasonal gems — every era's greatest works, ranked and organized by year.</p>
+    </div>
+
+    <div class="decade-jump-bar" id="anime-jump-bar"></div>
+
+    <div class="controls-row">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" class="search-input" id="anime-search" placeholder="Search titles, studios, genres…" autocomplete="off" />
+        <button class="search-clear" id="anime-search-clear" aria-label="Clear search">✕</button>
+      </div>
+      <div class="rating-filter-row">
+        <span class="rating-filter-label">Min Rating: <span id="anime-rating-val">Any</span></span>
+        <input type="range" class="rating-slider" id="anime-rating-slider" min="0" max="10" step="0.5" value="0" />
+      </div>
+      <div class="filter-bar" id="anime-filters">
+        <button class="filter-btn active" data-filter="all">All Genres</button>
+        <button class="filter-btn" data-filter="action">Action</button>
+        <button class="filter-btn" data-filter="fantasy">Fantasy</button>
+        <button class="filter-btn" data-filter="thriller">Thriller</button>
+        <button class="filter-btn" data-filter="scifi">Sci-Fi</button>
+        <button class="filter-btn" data-filter="drama">Drama</button>
+        <button class="filter-btn" data-filter="mecha">Mecha</button>
+        <button class="filter-btn" data-filter="sports">Sports</button>
+        <button class="filter-btn" data-filter="psychological">Psychological</button>
+        <button class="filter-btn" data-filter="horror">Horror</button>
+        <button class="filter-btn" data-filter="comedy">Comedy</button>
+        <button class="filter-btn" data-filter="romance">Romance</button>
+        <button class="filter-btn" data-filter="new">🆕 New</button>
+        <button class="filter-btn fav-filter-btn" data-filter="favorites">♥ Favorites</button>
+      </div>
+      <div class="sort-bar">
+        <span class="sort-label">Sort:</span>
+        <button class="sort-btn active" data-sort="year-asc" data-section="anime">Year ↑</button>
+        <button class="sort-btn" data-sort="year-desc" data-section="anime">Year ↓</button>
+        <button class="sort-btn" data-sort="rating" data-section="anime">Rating</button>
+        <button class="sort-btn" data-sort="alpha" data-section="anime">A→Z</button>
+        <button class="sort-btn" data-sort="tier" data-section="anime">Tier</button>
+        <span class="sort-divider"></span>
+        <button class="btn-random" id="anime-random">🎲 Random</button>
+      </div>
+      <div class="status-filter-row" id="anime-status-row">
+        <span class="status-filter-label">Status:</span>
+        <button class="status-btn active" data-status="all">All</button>
+        <button class="status-btn" data-status="watched">Watched</button>
+        <button class="status-btn" data-status="watching">Watching</button>
+        <button class="status-btn" data-status="plan">Plan to Watch</button>
+        <button class="status-btn" data-status="dropped">Dropped</button>
+      </div>
+      <div class="data-actions-row">
+        <button class="data-action-btn" onclick="exportData()">⬇ Export</button>
+        <button class="data-action-btn" onclick="document.getElementById('import-file').click()">⬆ Import</button>
+      </div>
+    </div>
+
+    <div class="cards-grid" id="anime-grid"></div>
+  </section>
+
+  <!-- GAMES SECTION -->
+  <section class="content-section" id="games-section" style="display:none;">
+    <div class="section-header">
+      <div class="section-tag">🕹️ 1993 — 2026</div>
+      <h2 class="section-title">Best PC Games of All Time</h2>
+      <p class="section-desc">From the original Doom to Black Myth: Wukong — three decades of PC gaming legends ranked and organized by year.</p>
+    </div>
+
+    <div class="decade-jump-bar" id="games-jump-bar"></div>
+
+    <div class="controls-row">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" class="search-input" id="games-search" placeholder="Search titles, studios, genres…" autocomplete="off" />
+        <button class="search-clear" id="games-search-clear" aria-label="Clear search">✕</button>
+      </div>
+      <div class="rating-filter-row">
+        <span class="rating-filter-label">Min Rating: <span id="games-rating-val">Any</span></span>
+        <input type="range" class="rating-slider" id="games-rating-slider" min="0" max="10" step="0.5" value="0" />
+      </div>
+      <div class="filter-bar" id="games-filters">
+        <button class="filter-btn active" data-filter="all">All Genres</button>
+        <button class="filter-btn" data-filter="rpg">RPG</button>
+        <button class="filter-btn" data-filter="action">Action</button>
+        <button class="filter-btn" data-filter="strategy">Strategy</button>
+        <button class="filter-btn" data-filter="fps">FPS</button>
+        <button class="filter-btn" data-filter="adventure">Adventure</button>
+        <button class="filter-btn" data-filter="openworld">Open World</button>
+        <button class="filter-btn" data-filter="indie">Indie</button>
+        <button class="filter-btn" data-filter="soulslike">Souls-like</button>
+        <button class="filter-btn" data-filter="survival">Survival</button>
+        <button class="filter-btn" data-filter="puzzle">Puzzle</button>
+        <button class="filter-btn" data-filter="horror">Horror</button>
+        <button class="filter-btn" data-filter="new">🆕 New</button>
+        <button class="filter-btn fav-filter-btn" data-filter="favorites">♥ Favorites</button>
+      </div>
+      <div class="sort-bar">
+        <span class="sort-label">Sort:</span>
+        <button class="sort-btn active" data-sort="year-asc" data-section="games">Year ↑</button>
+        <button class="sort-btn" data-sort="year-desc" data-section="games">Year ↓</button>
+        <button class="sort-btn" data-sort="rating" data-section="games">Rating</button>
+        <button class="sort-btn" data-sort="alpha" data-section="games">A→Z</button>
+        <button class="sort-btn" data-sort="tier" data-section="games">Tier</button>
+        <span class="sort-divider"></span>
+        <button class="btn-random" id="games-random">🎲 Random</button>
+      </div>
+      <div class="status-filter-row" id="games-status-row">
+        <span class="status-filter-label">Status:</span>
+        <button class="status-btn active" data-status="all">All</button>
+        <button class="status-btn" data-status="watched">Played</button>
+        <button class="status-btn" data-status="watching">Playing</button>
+        <button class="status-btn" data-status="plan">Plan to Play</button>
+        <button class="status-btn" data-status="dropped">Dropped</button>
+      </div>
+      <div class="data-actions-row">
+        <button class="data-action-btn" onclick="exportData()">⬇ Export</button>
+        <button class="data-action-btn" onclick="document.getElementById('import-file').click()">⬆ Import</button>
+      </div>
+    </div>
+
+    <div class="cards-grid" id="games-grid"></div>
+  </section>
+
+  <!-- STATS SECTION -->
+  <section class="content-section" id="stats-section" style="display:none;">
+    <div class="section-header">
+      <div class="section-tag">📊 Data & Insights</div>
+      <h2 class="section-title">Collection Insights</h2>
+      <p class="section-desc">Deep stats on 200+ entries — ratings, genres, decades, studios, and award winners across the full catalogue.</p>
+    </div>
+    <div id="stats-content"></div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <span class="logo-icon">⚡</span>
+          <span class="logo-text">OtakuPlay</span>
+        </div>
+        <p class="footer-desc">The definitive ranked collection of best-ever anime and PC games — from 1960s pioneers to 2025 masterpieces.</p>
+        <p class="footer-tagline">1963 → 2026 · 200+ Titles · Every Era Ranked</p>
+      </div>
+      <div class="footer-col">
+        <h5 class="footer-col-head">Browse</h5>
+        <div class="footer-nav-links">
+          <a href="#" onclick="switchTab('anime');return false">🎌 Best Anime</a>
+          <a href="#" onclick="switchTab('games');return false">🎮 Best PC Games</a>
+          <a href="#" onclick="switchTab('stats');return false">📊 Insights</a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h5 class="footer-col-head">Info</h5>
+        <div class="footer-nav-links">
+          <a href="#">About OtakuPlay</a>
+          <a href="#">Submit a Pick</a>
+          <a href="#">Contact Us</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p class="footer-copy">© 2026 OtakuPlay · Made with ❤️ for fans, by fans.</p>
+      <p class="footer-copy-right">All rankings are curated picks.</p>
+    </div>
+  </footer>
+
+  <!-- SCROLL TO TOP -->
+  <button class="scroll-top" id="scroll-top" aria-label="Scroll to top">↑</button>
+
+  <!-- DETAIL MODAL -->
+  <div class="modal-overlay" id="detail-modal">
+    <div class="modal-box">
+      <button class="modal-close" id="modal-close" aria-label="Close">✕</button>
+      <div class="modal-banner" id="modal-banner"></div>
+      <div class="modal-body" id="modal-body"></div>
+    </div>
+  </div>
+
+  <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(this)" />
+  <script src="app.js"></script>
+</body>
+</html>
