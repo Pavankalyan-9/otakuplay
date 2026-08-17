@@ -3,10 +3,12 @@
   "version": "1.0.0",
   "description": "Ranked collection of the best anime and PC games, by era.",
   "scripts": {
-    "test": "playwright test",
+    "build": "eleventy",
+    "dev": "eleventy --serve --port=5173",
+    "serve": "npx --yes http-server _site -p 5173 -c-1",
+    "test": "npm run build && playwright test",
     "test:ui": "playwright test --ui",
-    "art": "node scripts/fetch-art.mjs",
-    "serve": "npx --yes http-server . -p 5173 -c-1"
+    "art": "node scripts/fetch-art.mjs"
   },
   "repository": {
     "type": "git",
@@ -19,6 +21,7 @@
   },
   "homepage": "https://github.com/Pavankalyan-9/otakuplay#readme",
   "devDependencies": {
+    "@11ty/eleventy": "^3.1.6",
     "@playwright/test": "^1.62.1"
   },
   "private": true

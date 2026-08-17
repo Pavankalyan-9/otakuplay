@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ title }}</title>
+
+  <meta name="description" content="{{ description }}" />
+  <link rel="canonical" href="{{ page.url | absoluteUrl(site.url) }}" />
+  <meta name="color-scheme" content="dark" />
+  <meta name="theme-color" content="#09090f" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="{{ site.name }}" />
+  <meta property="og:title" content="{{ title }}" />
+  <meta property="og:description" content="{{ description }}" />
+  <meta property="og:url" content="{{ page.url | absoluteUrl(site.url) }}" />
+  <meta property="og:image" content="{{ 'icons/og-image.png' | absoluteUrl(site.url) }}" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="{{ title }}" />
+  <meta name="twitter:description" content="{{ description }}" />
+  <meta name="twitter:image" content="{{ 'icons/og-image.png' | absoluteUrl(site.url) }}" />
+
+  <link rel="icon" href="{{ root }}icons/favicon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="{{ root }}icons/icon-180.png" />
+  <link rel="manifest" href="{{ root }}manifest.json" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Orbitron:wght@700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ root }}style.css" />
+
+  {# Every page needs the catalogue: the landing page shows highlights from it,
+     and the section pages render it in full. #}
+  <script>window.OTAKU_ROOT = "{{ root }}";</script>
+  <script src="{{ root }}data.js" defer></script>
+  <script src="{{ root }}app.js" defer></script>
+</head>
+<body data-page="{{ pageKey }}">
+
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <div class="bg-orbs" aria-hidden="true">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  {% include "partials/header.njk" %}
+
+  <main id="main">
+    {{ content | safe }}
+  </main>
+
+  {% include "partials/footer.njk" %}
+
+  <button class="scroll-top" id="scroll-top" aria-label="Scroll to top">↑</button>
+
+  {% include "partials/modal.njk" %}
+
+  <input type="file" id="import-file" accept="application/json,.json" hidden aria-hidden="true" tabindex="-1" />
+</body>
+</html>

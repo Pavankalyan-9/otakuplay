@@ -1,0 +1,21 @@
+<header class="header">
+  <div class="header-inner">
+    <a class="logo" href="{{ root }}{% if root == '' %}{% endif %}">
+      <span class="logo-icon" aria-hidden="true">⚡</span>
+      <span class="logo-text">OtakuPlay</span>
+    </a>
+    <nav class="nav" aria-label="Main">
+      {% for item in site.nav %}
+        <a href="{{ root }}{{ item.url }}"
+           class="nav-link{% if pageKey == item.key %} active{% endif %}"
+           {% if pageKey == item.key %}aria-current="page"{% endif %}>{{ item.label }}</a>
+      {% endfor %}
+    </nav>
+    <div class="header-right">
+      {% if pageKey == 'anime' or pageKey == 'games' %}
+        <button class="jp-toggle" id="jp-toggle" title="Show Japanese titles" aria-label="Toggle Japanese titles">🇯🇵 JP</button>
+      {% endif %}
+      <div class="header-badge">{{ site.firstYear }} → {{ site.lastYear }}</div>
+    </div>
+  </div>
+</header>

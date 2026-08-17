@@ -1,0 +1,74 @@
+---
+layout: layouts/base.njk
+permalink: /about/
+pageKey: about
+title: About OtakuPlay — how the rankings work
+description: How OtakuPlay's 219 anime and PC game rankings are chosen, what the tiers and ratings mean, where the cover art comes from, and how your library is stored.
+---
+
+<section class="content-section active prose-section">
+  <div class="section-header">
+    <div class="section-tag">📖 About</div>
+    <h1 class="section-title">About OtakuPlay</h1>
+    <p class="section-desc">What this is, how the rankings are made, and what happens to your data.</p>
+  </div>
+
+  <div class="prose">
+    <h2>What it is</h2>
+    <p>
+      OtakuPlay is a curated, ranked collection of {{ '219' }} titles — 108 anime spanning
+      {{ site.firstYear }}–{{ site.lastYear }} and 111 PC games spanning 1993–{{ site.lastYear }}.
+      Everything is grouped by decade so you can see how each medium evolved, rather than
+      scrolling one flat list where the 1970s never get a look in.
+    </p>
+
+    <h2>How rankings are chosen</h2>
+    <p>
+      These are editorial picks, not an aggregate score scraped from review sites. A title earns
+      its place by mattering — for craft, for influence, or because it defined what came after it.
+      That means some beloved shows are missing and some divisive ones are here.
+    </p>
+    <ul>
+      <li><strong>Tier S</strong> — landmark works. The ones you'd hand someone to explain the medium.</li>
+      <li><strong>Tier A</strong> — excellent and worth your time, without quite reshaping the field.</li>
+      <li><strong>Rating</strong> — a 0–10 score reflecting overall quality, shown with a star summary.</li>
+      <li><strong>Awards</strong> — badges mark Game of the Year, Anime of the Year and critics' picks where they apply.</li>
+    </ul>
+    <p>
+      Disagree with a placement? <a href="{{ site.repo }}/issues/new?title=Pick%20suggestion" target="_blank" rel="noopener noreferrer">Open an issue</a> —
+      the whole catalogue lives in a single file in the repo.
+    </p>
+
+    <h2>Your library stays yours</h2>
+    <p>
+      Statuses, personal ratings, notes and favorites are stored in your browser's local storage.
+      There is no account, no login and no server: nothing you track is transmitted anywhere, and
+      nobody — including us — can see it.
+    </p>
+    <p>
+      The trade-off is that it's per-device and per-browser. Use <strong>Export library</strong> in
+      the ⋯ menu to save a JSON copy, and <strong>Import</strong> to restore it elsewhere or after
+      clearing your browser data.
+    </p>
+
+    <h2>Cover art and data</h2>
+    <p>
+      Artwork is loaded from the official sources — <a href="https://anilist.co" target="_blank" rel="noopener noreferrer">AniList</a>
+      for anime and the Steam store for games — and remains the property of its respective rights
+      holders. Nothing is rehosted here. Five titles have no cover because they aren't sold on
+      Steam; those fall back to a gradient.
+    </p>
+    <p>
+      Streaming and store badges show where a title was available at the time of writing and may
+      drift as licensing changes.
+    </p>
+
+    <h2>Built with</h2>
+    <p>
+      Plain HTML, CSS and JavaScript with no runtime framework, assembled by
+      <a href="https://www.11ty.dev" target="_blank" rel="noopener noreferrer">Eleventy</a> and served as a
+      static site. It's an installable PWA that works offline after the first visit, and the
+      whole thing is <a href="{{ site.repo }}" target="_blank" rel="noopener noreferrer">open source</a>.
+    </p>
+  </div>
+</section>

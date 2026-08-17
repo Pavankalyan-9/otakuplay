@@ -21,10 +21,10 @@ export default defineConfig({
     { name: 'desktop', use: { ...devices['Desktop Chrome'] } },
     { name: 'mobile',  use: { ...devices['Pixel 5'] } },
   ],
-  // Serves the repo root as-is: the site has no build step.
+  // Serves the Eleventy output — "npm test" builds before running.
   webServer: {
-    command: 'npx --yes http-server . -p 5174 -c-1 --silent',
-    url: 'http://127.0.0.1:5174/index.html',
+    command: 'npx --yes http-server _site -p 5174 -c-1 --silent',
+    url: 'http://127.0.0.1:5174/',
     reuseExistingServer: false,
     timeout: 60_000,
   },

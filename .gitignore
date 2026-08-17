@@ -25,3 +25,7 @@ test-results/
 playwright-report/
 blob-report/
 playwright/.cache/
+
+# Eleventy build output
+_site/
+.eleventy-cache/
