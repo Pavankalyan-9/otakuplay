@@ -29,6 +29,26 @@ eleventyComputed:
     <span>{{ entry.title }}</span>
   </nav>
 
+  {# By overall rating within the section — a well-defined order regardless of
+     which hub or search result brought you here. #}
+  <nav class="entry-pager" aria-label="Browse by rank">
+    {% if entry.prev %}
+      <a class="entry-pager-link entry-pager-prev" href="{{ root }}{{ entry.prev.url }}">
+        <span class="entry-pager-arrow" aria-hidden="true">←</span>
+        <span class="entry-pager-text"><span class="entry-pager-label">Higher ranked</span>{{ entry.prev.title }}</span>
+      </a>
+    {% else %}<span class="entry-pager-spacer"></span>{% endif %}
+
+    <span class="entry-pager-rank">#{{ entry.ratingRank }} of {{ entry.ratingTotal }}</span>
+
+    {% if entry.next %}
+      <a class="entry-pager-link entry-pager-next" href="{{ root }}{{ entry.next.url }}">
+        <span class="entry-pager-text"><span class="entry-pager-label">Lower ranked</span>{{ entry.next.title }}</span>
+        <span class="entry-pager-arrow" aria-hidden="true">→</span>
+      </a>
+    {% else %}<span class="entry-pager-spacer"></span>{% endif %}
+  </nav>
+
   <header class="entry-head">
     <div class="entry-meta-row">
       <span class="card-rank rank-{{ entry.rank | lower }} modal-tier">Tier {{ entry.rank }}</span>

@@ -6,7 +6,7 @@
   <title>{{ title }}</title>
 
   <meta name="description" content="{{ description }}" />
-  <link rel="canonical" href="{{ page.url | absoluteUrl(site.url) }}" />
+  {% if noindex %}<meta name="robots" content="noindex" />{% else %}<link rel="canonical" href="{{ page.url | absoluteUrl(site.url) }}" />{% endif %}
   <meta name="color-scheme" content="dark" />
   <meta name="theme-color" content="#09090f" />
 
@@ -61,8 +61,11 @@
   <button class="scroll-top" id="scroll-top" aria-label="Scroll to top">↑</button>
 
   {% include "partials/modal.njk" %}
+  {% include "partials/search-modal.njk" %}
+  {% include "partials/sync-modal.njk" %}
 
   <input type="file" id="import-file" accept="application/json,.json" hidden aria-hidden="true" tabindex="-1" />
+  <script src="{{ root }}vendor/qrcode.js" defer></script>
 
   {%- if site.analytics.code %}
   <script data-goatcounter="https://{{ site.analytics.code }}.goatcounter.com/count"

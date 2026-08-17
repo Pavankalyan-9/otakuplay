@@ -12,6 +12,9 @@
       {% endfor %}
     </nav>
     <div class="header-right">
+      <button class="search-trigger open-global-search" aria-label="Search all anime and games" title="Search (Ctrl+K)">
+        <span aria-hidden="true">🔍</span>
+      </button>
       {% if pageKey == 'anime' or pageKey == 'games' %}
         <button class="jp-toggle" id="jp-toggle" title="Show Japanese titles" aria-label="Toggle Japanese titles">🇯🇵 JP</button>
       {% endif %}

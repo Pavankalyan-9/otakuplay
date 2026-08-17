@@ -29,6 +29,13 @@ async function stubThirdParty(page) {
   });
 }
 
+/* Cards fade in on a staggered animation. Rather than sleep past an assumed
+   worst-case duration — timing-dependent and slow — every test in this file
+   asks for reduced motion, which the site's own CSS honours by skipping the
+   animation and rendering cards at full opacity immediately. Deterministic,
+   and it exercises a real user-facing state (prefers-reduced-motion) besides. */
+test.use({ reducedMotion: 'reduce' });
+
 test.describe('accessibility', () => {
   for (const [name, path] of PAGES) {
     test(`${name} page has no WCAG A/AA violations`, async ({ page }) => {
@@ -49,13 +56,15 @@ test.describe('accessibility', () => {
   test('the filter drawer stays accessible when open', async ({ page }) => {
     await stubThirdParty(page);
     await page.goto('/anime/');
+    await page.waitForLoadState('networkidle');
     await page.locator('#anime-filter-toggle').click();
     await expect(page.locator('#anime-filter-panel')).toBeVisible();
 
     const { violations } = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa'])
       .analyze();
-    expect(violations.map(v => v.id)).toEqual([]);
+    const summary = violations.map(v => `${v.id} (${v.impact}) — ${v.nodes.length} node(s): ${v.help}`);
+    expect(summary, summary.join('\n')).toEqual([]);
   });
 });
 

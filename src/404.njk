@@ -1,0 +1,29 @@
+---
+layout: layouts/base.njk
+permalink: /404.html
+pageKey: notfound
+noindex: true
+title: Page Not Found — OtakuPlay
+description: This page doesn't exist. Search the catalogue or browse anime and PC games from here.
+---
+
+<section class="content-section notfound-section">
+  <div class="notfound-emoji" aria-hidden="true">🔍</div>
+  <h1 class="notfound-title">Page not found</h1>
+  <p class="notfound-desc">
+    Whatever you were looking for isn't at this address — maybe a title got renamed,
+    or the link was mistyped. Try searching, or jump back in below.
+  </p>
+
+  <button class="btn-primary notfound-search-btn open-global-search">
+    🔍 Search anime &amp; PC games
+  </button>
+
+  <div class="notfound-links">
+    <a href="{{ root }}">Home</a>
+    <a href="{{ root }}anime/">Best Anime</a>
+    <a href="{{ root }}games/">Best PC Games</a>
+    <a href="{{ root }}insights/">Insights</a>
+    <a href="{{ root }}about/">About</a>
+  </div>
+</section>

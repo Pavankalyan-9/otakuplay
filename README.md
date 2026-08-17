@@ -10,12 +10,17 @@ A static, five-page site with no runtime framework and no backend: Eleventy asse
 - **Filter & sort** — genre (multi-select, any/all), year range, studio, minimum rating, watch/play status, favorites, new releases; sort by year, rating, A→Z or tier
 - **Personal library** — mark status (watched / watching / plan / dropped), rate 1–10, keep private notes
 - **Recommendations** — "because you liked X" picks scored from your own ratings, statuses and favorites
+- **Sort/filter by your own rating** — "My Rating" sort and a "★ My Ratings" filter, alongside the catalogue's rating
+- **Global search** — `Ctrl+K` searches every anime and game from any page, not just the one you're on
 - **Insights page** — your library stats plus catalogue breakdowns by decade, genre and studio
+- **Genre, decade & franchise hubs** — ~70 generated pages like *Best Mecha Anime* or *The Soulsborne Series*
+- **Sync across devices** — a link or QR code moves your library to another device; no account, nothing sent to a server
 - **Shareable URLs** — filters, sort, search and individual entries are all encoded in the hash
 - **Japanese titles** — toggle native titles with the 🇯🇵 button
-- **Keyboard** — `/` focuses search, `R` picks a random visible title, `Esc` closes the modal
+- **Keyboard** — `/` focuses search, `R` picks a random visible title, `Ctrl+K` opens global search, `Esc` closes any dialog
 - **Installable PWA** — works offline after the first visit
 - **Import / export** — take your library with you as JSON
+- **Custom 404** — search and quick links back in, instead of GitHub Pages' default
 
 ## Pages
 
@@ -27,8 +32,19 @@ A static, five-page site with no runtime framework and no backend: Eleventy asse
 | `/insights/` | Your library, recommendations, catalogue stats |
 | `/about/` | How rankings are chosen, data sources, where your data lives |
 | `/anime/<slug>/` | A page per title — 219 of them, generated from `data.js` |
+| `/anime/genre/<id>/`, `/anime/decade/<1990s>/` | Ranked hub pages — ~70 total, skipped when fewer than 3 entries qualify |
+| `/franchise/<slug>/` | Every entry in a franchise (`FRANCHISES` in `data.js`), in release order |
+| `/404.html` | Custom not-found page with search and quick links |
 
-Each page has its own title, description, canonical URL and social image. Entry pages also carry schema.org structured data (`TVSeries`, `Movie` or `VideoGame`) with the editorial score modelled as a `Review`, and all 224 URLs are listed in `sitemap.xml`.
+Each page has its own title, description, canonical URL and social image (entries and hubs use their own cover art, not the generic site card). Entry pages carry schema.org structured data (`TVSeries`, `Movie` or `VideoGame`, editorial score modelled as a `Review`) and hub pages carry `ItemList`. Every page is listed in `sitemap.xml` — a test asserts the count against the catalogue size, because this silently dropped to 6 URLs once when Eleventy's `collections.all` didn't pick up paginated pages.
+
+### Sync code
+
+Insights and the catalogue toolbar's `⋯` menu both offer **Sync to another device** — it builds a link (and a QR code) encoding your favorites, statuses, ratings and notes, gzip-compressed into the URL fragment. Fragments never reach a server, so this works entirely without a backend or an account; opening the link on another device offers to merge or replace. QR generation runs the [`qrcode`](https://www.npmjs.com/package/qrcode) package, bundled at build time (`scripts/build-vendor.mjs`) rather than hand-written, so the actual encoding — finder patterns, Reed–Solomon error correction — comes from a tested library.
+
+### Global search
+
+`Ctrl+K` or the header's 🔍 button opens search across both catalogues from any page, built from `search-index.json` (generated at build time, fetched lazily on first open).
 
 ## Running it locally
 
@@ -55,9 +71,13 @@ CI blocks the deploy if either fails.
   corrupt `localStorage`, an off-screen mobile header, an unreachable filter drawer),
   plus URL round-tripping, filters, the personal library, entry pages and offline rendering.
 - **`tests/quality.spec.js`** — axe accessibility checks (WCAG 2.1 A/AA) across all six
-  page types including the open filter drawer, and a layout-shift budget.
+  page types including the open filter drawer, and a layout-shift budget. Runs with
+  `reducedMotion: 'reduce'` so the card entrance animation can't be sampled mid-fade
+  and reported as a false contrast failure.
 
-Cross-origin requests (cover art, fonts) are stubbed so runs stay fast and hermetic.
+Cross-origin requests (cover art, fonts) are stubbed so runs stay fast and hermetic. The
+sync-code tests decode a rendered QR with an independent library ([`jsqr`](https://www.npmjs.com/package/jsqr))
+rather than just checking the canvas has *some* content.
 
 ## Analytics
 
@@ -79,7 +99,12 @@ It sets no cookies, collects no personal data and needs no consent banner.
 | --- | --- |
 | `src/` | Page templates plus the shared layout and partials |
 | `src/entry.njk` | Paginated template generating one page per catalogue entry |
-| `src/_data/catalogue.js` | Loads `data.js` into the build and assigns entry slugs |
+| `src/hub.njk` | Paginated template generating genre/decade/franchise hub pages |
+| `src/404.njk` | Custom not-found page (built to `/404.html`, where GitHub Pages looks for it) |
+| `src/search-index.njk` | Builds `search-index.json` from the catalogue for global search |
+| `src/_data/catalogue.js` | Loads `data.js` into the build, assigns slugs, computes rank/prev/next |
+| `src/_data/hubs.js` | Builds the genre/decade/franchise hub list from the catalogue |
+| `scripts/build-vendor.mjs` | Bundles `qrcode` for the browser (esbuild) — output isn't committed |
 | `.eleventy.js` | Build config — passthrough assets, depth-aware relative paths |
 | `data.js` | The catalogue: `ANIME`, `GAMES`, `STREAM_MAP`, `JP_TITLES`, `FRANCHISES` |
 | `app.js` | All UI logic — rendering, filtering, routing, stats, persistence |

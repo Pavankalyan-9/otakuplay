@@ -166,6 +166,14 @@ function setUserRating(title, rating) {
   });
   const display = document.getElementById('modal-pr-display');
   if (display) display.textContent = r > 0 ? `My rating: ${r}/10` : 'Not rated';
+
+  // Sorting or filtering by personal rating needs to reflect the change live,
+  // same as a status change patching the badge rather than waiting for reload.
+  const sect = lookup(title) ? sectionOf(title) : null;
+  if (sect && document.getElementById(ids(sect).grid)) {
+    if (state[sect].sort === 'myrating') renderSection(sect);
+    else if (state[sect].filters.has('rated')) applyFilter(sect);
+  }
 }
 
 let _noteTimer = null;
@@ -275,6 +283,352 @@ function clearUserData() {
   SECTION_KEYS.forEach(renderSection);
   renderStats();
   toast('Local library cleared.');
+}
+
+// ===================== SYNC CODE =====================
+/* Moves favorites/status/ratings/notes to another device via a link or QR code.
+   The payload lives entirely in the URL fragment, which browsers never send to
+   a server — no account, no backend, nothing transmitted anywhere. */
+
+function bufferToBase64url(bytes) {
+  let bin = '';
+  bytes.forEach(b => { bin += String.fromCharCode(b); });
+  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+function base64urlToBuffer(b64url) {
+  const pad = (4 - (b64url.length % 4)) % 4;
+  const b64 = b64url.replace(/-/g, '+').replace(/_/g, '/') + '='.repeat(pad);
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return bytes;
+}
+
+/* Gzip when the browser supports it (all evergreen browsers since ~2022) — a
+   typical library compresses to a fraction of its JSON size, which matters for
+   the QR code. Falls back to plain base64 so an old browser can still generate
+   a (longer) link; it just can't decode one someone else compressed. */
+async function gzipBase64url(text) {
+  if (!('CompressionStream' in window)) return null;
+  const stream = new Blob([text]).stream().pipeThrough(new CompressionStream('gzip'));
+  const buf = await new Response(stream).arrayBuffer();
+  return bufferToBase64url(new Uint8Array(buf));
+}
+async function gunzipBase64url(b64) {
+  const stream = new Blob([base64urlToBuffer(b64)]).stream().pipeThrough(new DecompressionStream('gzip'));
+  const buf = await new Response(stream).arrayBuffer();
+  return new TextDecoder().decode(buf);
+}
+
+function buildSyncPayload() {
+  return { v: 1, f: [...favorites], s: userStatus, r: userRatings, n: userNotes };
+}
+
+async function generateSyncLink() {
+  const json = JSON.stringify(buildSyncPayload());
+  const gz = await gzipBase64url(json);
+  // Leading digit records which decode path to use, independent of which
+  // browser generated the link or which one opens it.
+  const code = gz ? `1${gz}` : `0${bufferToBase64url(new TextEncoder().encode(json))}`;
+  const url = new URL(`${window.OTAKU_ROOT || ''}insights/`, location.href);
+  url.hash = `sync=${code}`;
+  return url.href;
+}
+
+/* Reuses sanitizeImport's validation (known titles only, valid statuses,
+   ratings clamped to 1-10) so a hand-edited or corrupted link can't inject
+   anything the file-import path wouldn't already accept. */
+async function decodeSyncCode(code) {
+  const flag = code[0];
+  const body = code.slice(1);
+  const json = flag === '1' ? await gunzipBase64url(body) : new TextDecoder().decode(base64urlToBuffer(body));
+  const data = JSON.parse(json);
+  return sanitizeImport({ favorites: data.f, status: data.s, ratings: data.r, notes: data.n });
+}
+
+function applySyncData(clean, mode) {
+  if (mode === 'replace') {
+    favorites = new Set(clean.favorites);
+    userStatus = clean.status;
+    userRatings = clean.ratings;
+    userNotes = clean.notes;
+  } else {
+    clean.favorites.forEach(t => favorites.add(t));
+    Object.assign(userStatus, clean.status);
+    Object.assign(userRatings, clean.ratings);
+    Object.assign(userNotes, clean.notes);
+  }
+  saveFavorites(); saveUserStatus(); saveUserRatings(); saveUserNotes();
+  SECTION_KEYS.forEach(k => { if (document.getElementById(ids(k).grid)) renderSection(k); });
+  if (PAGE === 'insights') { const c = document.getElementById('stats-content'); if (c) { c.innerHTML = ''; renderStats(); } }
+  toast(mode === 'replace' ? 'Library replaced from sync link.' : 'Library merged from sync link.');
+}
+
+function syncCounts(clean) {
+  return {
+    favorites: clean.favorites.length,
+    status: Object.keys(clean.status).length,
+    ratings: Object.keys(clean.ratings).length,
+    notes: Object.keys(clean.notes).length,
+  };
+}
+
+function openSyncModal(mode, data) {
+  const overlay = document.getElementById('sync-modal');
+  if (!overlay) return;
+  if (!overlay.classList.contains('open')) lastFocused = document.activeElement;
+
+  document.getElementById('sync-generate-view').hidden = mode !== 'generate';
+  document.getElementById('sync-incoming-view').hidden = mode !== 'incoming';
+
+  if (mode === 'generate') {
+    document.getElementById('sync-result').hidden = true;
+    document.getElementById('sync-link-input').value = '';
+  } else {
+    const counts = syncCounts(data);
+    const parts = [
+      counts.favorites && `${counts.favorites} favorite${counts.favorites === 1 ? '' : 's'}`,
+      counts.status && `${counts.status} status${counts.status === 1 ? '' : 'es'}`,
+      counts.ratings && `${counts.ratings} rating${counts.ratings === 1 ? '' : 's'}`,
+      counts.notes && `${counts.notes} note${counts.notes === 1 ? '' : 's'}`,
+    ].filter(Boolean);
+    document.getElementById('sync-incoming-summary').textContent =
+      parts.length ? `This link contains ${parts.join(', ')}.` : 'This link has no data in it.';
+    overlay.dataset.pending = JSON.stringify(data);
+  }
+
+  overlay.classList.add('open');
+  overlay.removeAttribute('aria-hidden');
+  overlay.removeAttribute('inert');
+  document.body.style.overflow = 'hidden';
+  document.getElementById('sync-modal-close')?.focus();
+}
+
+function closeSyncModal() {
+  const overlay = document.getElementById('sync-modal');
+  if (!overlay || !overlay.classList.contains('open')) return;
+  overlay.classList.remove('open');
+  overlay.setAttribute('aria-hidden', 'true');
+  overlay.setAttribute('inert', '');
+  delete overlay.dataset.pending;
+  document.body.style.overflow = '';
+  if (lastFocused && document.contains(lastFocused)) lastFocused.focus();
+  lastFocused = null;
+}
+
+function setupSyncModal() {
+  const overlay = document.getElementById('sync-modal');
+  if (!overlay) return;
+  overlay.setAttribute('inert', '');
+
+  document.getElementById('sync-modal-close')?.addEventListener('click', closeSyncModal);
+  document.getElementById('sync-cancel-btn')?.addEventListener('click', closeSyncModal);
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeSyncModal(); });
+
+  document.getElementById('sync-generate-btn')?.addEventListener('click', async () => {
+    const btn = document.getElementById('sync-generate-btn');
+    btn.disabled = true; btn.textContent = 'Generating…';
+    try {
+      const url = await generateSyncLink();
+      document.getElementById('sync-link-input').value = url;
+      document.getElementById('sync-result').hidden = false;
+      const canvas = document.getElementById('sync-qr-canvas');
+      if (window.QRCode && canvas) {
+        await window.QRCode.toCanvas(canvas, url, { width: 220, margin: 1 });
+      }
+    } catch {
+      toast('Could not generate a sync link on this browser — try exporting to a file instead.');
+    } finally {
+      btn.disabled = false; btn.textContent = 'Generate sync link';
+    }
+  });
+
+  document.getElementById('sync-copy-btn')?.addEventListener('click', e => {
+    const input = document.getElementById('sync-link-input');
+    input.select();
+    const done = () => { const b = e.currentTarget; b.textContent = '✓ Copied'; setTimeout(() => { b.textContent = 'Copy'; }, 1800); };
+    if (navigator.clipboard?.writeText) navigator.clipboard.writeText(input.value).then(done).catch(() => fallbackCopy(input.value, done));
+    else fallbackCopy(input.value, done);
+  });
+
+  document.getElementById('sync-merge-btn')?.addEventListener('click', () => {
+    const data = JSON.parse(overlay.dataset.pending || 'null');
+    if (data) applySyncData(data, 'merge');
+    closeSyncModal();
+  });
+  document.getElementById('sync-replace-btn')?.addEventListener('click', () => {
+    const data = JSON.parse(overlay.dataset.pending || 'null');
+    if (data && confirm('Replace everything on this device with the linked library? This cannot be undone.')) {
+      applySyncData(data, 'replace');
+      closeSyncModal();
+    }
+  });
+}
+
+/* Runs once on load. A sync link always points at /insights/, so this only
+   needs to check the hash there — but it's cheap to check everywhere in case
+   someone hand-edits the URL. */
+async function checkForSyncLink() {
+  const params = new URLSearchParams(location.hash.slice(1));
+  const code = params.get('sync');
+  if (!code) return;
+
+  // Strip it immediately so a reload (or the merge/replace action re-rendering
+  // the page) can't re-trigger the prompt.
+  params.delete('sync');
+  const rest = params.toString();
+  history.replaceState(null, '', rest ? `#${rest}` : location.pathname + location.search);
+
+  try {
+    const clean = await decodeSyncCode(code);
+    if (!clean) { toast('That sync link has no recognisable library data.'); return; }
+    openSyncModal('incoming', clean);
+  } catch {
+    toast('Could not read that sync link — it may be corrupted, or from a browser too old to decompress it.');
+  }
+}
+
+// ===================== GLOBAL SEARCH =====================
+/* Per-page search only knows about the catalogue rendered on that page — search
+   for "Elden Ring" on /anime/ finds nothing, because /games/ never loaded. This
+   searches a prebuilt index of every entry regardless of which page you're on. */
+let searchIndex = null;
+let searchIndexPromise = null;
+let searchActiveIndex = -1;
+
+function loadSearchIndex() {
+  if (searchIndexPromise) return searchIndexPromise;
+  searchIndexPromise = fetch(`${window.OTAKU_ROOT || ''}search-index.json`)
+    .then(r => r.json())
+    .then(data => { searchIndex = data; return data; })
+    .catch(() => { searchIndexPromise = null; throw new Error('index unavailable'); });
+  return searchIndexPromise;
+}
+
+function scoreEntry(entry, query) {
+  const title = entry.t.toLowerCase();
+  if (title === query) return 100;
+  if (title.startsWith(query)) return 80;
+  if (title.includes(query)) return 60;
+  if (entry.s.toLowerCase().includes(query)) return 30;
+  if (entry.g.some(t => t.includes(query))) return 20;
+  return 0;
+}
+
+function searchEntries(query) {
+  const q = query.trim().toLowerCase();
+  if (!q || !searchIndex) return [];
+  return searchIndex
+    .map(entry => ({ entry, score: scoreEntry(entry, q) }))
+    .filter(x => x.score > 0)
+    .sort((a, b) => b.score - a.score || b.entry.r - a.entry.r)
+    .slice(0, 8)
+    .map(x => x.entry);
+}
+
+function renderSearchResults(results, query) {
+  const list = document.getElementById('global-search-results');
+  const input = document.getElementById('global-search-input');
+  searchActiveIndex = -1;
+  input.setAttribute('aria-expanded', String(results.length > 0));
+
+  if (!query.trim()) {
+    list.innerHTML = '';
+    list.hidden = true;
+    return;
+  }
+  list.hidden = false;
+  if (!results.length) {
+    list.innerHTML = `<p class="search-box-empty">No matches for "${escapeHtml(query)}".</p>`;
+    return;
+  }
+  const root = window.OTAKU_ROOT || '';
+  list.innerHTML = results.map((r, i) => `
+    <a class="search-result" href="${root}${r.u}" role="option" id="search-result-${i}" data-index="${i}">
+      <span class="search-result-art" style="background:${r.i ? 'transparent' : '#1a1a2e'}">
+        ${r.i ? `<img src="${escapeHtml(r.i)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : `<span aria-hidden="true">${r.e}</span>`}
+      </span>
+      <span class="search-result-info">
+        <span class="search-result-title">${escapeHtml(r.t)}</span>
+        <span class="search-result-sub">${r.y} · ${escapeHtml(r.s)} · ${r.c === 'games' ? 'PC Game' : 'Anime'}</span>
+      </span>
+      <span class="search-result-rating">${r.r}</span>
+    </a>`).join('');
+}
+
+function moveSearchSelection(delta) {
+  const rows = [...document.querySelectorAll('.search-result')];
+  if (!rows.length) return;
+  rows[searchActiveIndex]?.classList.remove('active');
+  searchActiveIndex = (searchActiveIndex + delta + rows.length) % rows.length;
+  const row = rows[searchActiveIndex];
+  row.classList.add('active');
+  row.scrollIntoView({ block: 'nearest' });
+  document.getElementById('global-search-input').setAttribute('aria-activedescendant', row.id);
+}
+
+function openSearchModal() {
+  const overlay = document.getElementById('search-modal');
+  if (!overlay) return;
+  if (!overlay.classList.contains('open')) lastFocused = document.activeElement;
+  overlay.classList.add('open');
+  overlay.removeAttribute('aria-hidden');
+  overlay.removeAttribute('inert');
+  document.body.style.overflow = 'hidden';
+
+  const input = document.getElementById('global-search-input');
+  input.value = '';
+  document.getElementById('global-search-results').innerHTML = '';
+  document.getElementById('global-search-results').hidden = true;
+  input.focus();
+
+  loadSearchIndex().catch(() => {
+    document.getElementById('global-search-hint').textContent = 'Search is unavailable right now — try again in a moment.';
+  });
+}
+
+function closeSearchModal() {
+  const overlay = document.getElementById('search-modal');
+  if (!overlay || !overlay.classList.contains('open')) return;
+  overlay.classList.remove('open');
+  overlay.setAttribute('aria-hidden', 'true');
+  overlay.setAttribute('inert', '');
+  document.body.style.overflow = '';
+  if (lastFocused && document.contains(lastFocused)) lastFocused.focus();
+  lastFocused = null;
+}
+
+function setupGlobalSearch() {
+  const overlay = document.getElementById('search-modal');
+  if (!overlay) return;
+  overlay.setAttribute('inert', '');
+
+  document.addEventListener('click', e => { if (e.target.closest('.open-global-search')) openSearchModal(); });
+  document.getElementById('search-modal-close')?.addEventListener('click', closeSearchModal);
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeSearchModal(); });
+
+  document.addEventListener('keydown', e => {
+    const key = e.key.toLowerCase();
+    if ((e.ctrlKey || e.metaKey) && key === 'k') { e.preventDefault(); openSearchModal(); }
+  });
+
+  const input = document.getElementById('global-search-input');
+  let timer = null;
+  input.addEventListener('input', () => {
+    clearTimeout(timer);
+    timer = setTimeout(async () => {
+      try { await loadSearchIndex(); } catch { return; }
+      renderSearchResults(searchEntries(input.value), input.value);
+    }, 100);
+  });
+  input.addEventListener('keydown', e => {
+    if (e.key === 'ArrowDown') { e.preventDefault(); moveSearchSelection(1); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); moveSearchSelection(-1); }
+    else if (e.key === 'Enter') {
+      const active = document.querySelector('.search-result.active') || document.querySelector('.search-result');
+      if (active) { e.preventDefault(); active.click(); }
+    }
+  });
 }
 
 // ===================== HELPERS =====================
@@ -402,6 +756,14 @@ function sortData(data, sortKey) {
   switch (sortKey) {
     case 'year-desc': return d.sort((a, b) => b.year - a.year);
     case 'rating':    return d.sort((a, b) => b.rating - a.rating || a.title.localeCompare(b.title));
+    // Unrated titles sort to the end rather than mixing in as "0" among 1-10 scores.
+    case 'myrating':  return d.sort((a, b) => {
+      const ra = userRatings[a.title] || 0, rb = userRatings[b.title] || 0;
+      if (ra === 0 && rb === 0) return b.rating - a.rating;
+      if (ra === 0) return 1;
+      if (rb === 0) return -1;
+      return rb - ra || b.rating - a.rating;
+    });
     case 'alpha':     return d.sort((a, b) => a.title.localeCompare(b.title));
     case 'tier':      return d.sort((a, b) => rankIndex(a.rank) - rankIndex(b.rank) || b.rating - a.rating);
     case 'year-asc':
@@ -465,6 +827,7 @@ function applyFilter(sectKey) {
     let matchesFilter = true;
     if (filters.size) {
       if (filters.has('favorites'))  matchesFilter = favorites.has(title);
+      else if (filters.has('rated')) matchesFilter = (userRatings[title] || 0) > 0;
       else if (filters.has('new'))   matchesFilter = card.dataset.new === '1';
       else if (s.genreMode === 'all') matchesFilter = [...filters].every(f => tags.includes(f));
       else                           matchesFilter = tags.some(t => filters.has(t));
@@ -550,7 +913,7 @@ function setupFilters(sectKey) {
   const section = document.getElementById(ids(sectKey).section);
   const buttons = [...section.querySelectorAll('.filter-btn')];
   const allBtn  = buttons.find(b => b.dataset.filter === 'all');
-  const exclusive = new Set(['favorites', 'new']);
+  const exclusive = new Set(['favorites', 'new', 'rated']);
 
   buttons.forEach(btn => {
     btn.setAttribute('aria-pressed', String(btn.classList.contains('active')));
@@ -628,7 +991,7 @@ function renderChips(sectKey) {
   const chips = [];
 
   s.filters.forEach(f => {
-    const label = f === 'favorites' ? '♥ Favorites' : f === 'new' ? '🆕 New' : f;
+    const label = f === 'favorites' ? '♥ Favorites' : f === 'rated' ? '★ My Ratings' : f === 'new' ? '🆕 New' : f;
     chips.push({ label, kind: 'filter', value: f });
   });
   if (s.filters.size > 1 && s.genreMode === 'all') chips.push({ label: 'match all', kind: 'match' });
@@ -1027,20 +1390,25 @@ function setupModal() {
   overlay.setAttribute('inert', '');
   document.getElementById('modal-close').addEventListener('click', closeModal);
   overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
-
-  document.addEventListener('keydown', e => {
-    if (!overlay.classList.contains('open')) return;
-    if (e.key === 'Escape') { closeModal(); return; }
-    if (e.key !== 'Tab') return;
-
-    // Keep focus inside the dialog.
-    const items = [...overlay.querySelectorAll(FOCUSABLE)].filter(el => el.offsetParent !== null);
-    if (!items.length) return;
-    const first = items[0], last = items[items.length - 1];
-    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
-  });
 }
+
+/* Escape and focus-trapping apply to whichever .modal-overlay is currently
+   open — the detail modal and the sync modal share this rather than each
+   reimplementing it. */
+const MODAL_CLOSERS = { 'detail-modal': closeModal, 'sync-modal': closeSyncModal, 'search-modal': closeSearchModal };
+
+document.addEventListener('keydown', e => {
+  const overlay = document.querySelector('.modal-overlay.open');
+  if (!overlay) return;
+  if (e.key === 'Escape') { MODAL_CLOSERS[overlay.id]?.(); return; }
+  if (e.key !== 'Tab') return;
+
+  const items = [...overlay.querySelectorAll(FOCUSABLE)].filter(el => el.offsetParent !== null);
+  if (!items.length) return;
+  const first = items[0], last = items[items.length - 1];
+  if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+});
 
 function shareEntry(title, btn) {
   const item = lookup(title)?.item;
@@ -1362,7 +1730,7 @@ function setupScrollTop() {
 function setupKeyboardShortcuts() {
   document.addEventListener('keydown', e => {
     if (e.ctrlKey || e.metaKey || e.altKey) return;                       // don't hijack Ctrl+R etc.
-    if (document.getElementById('detail-modal').classList.contains('open')) return;
+    if (document.querySelector('.modal-overlay.open')) return;            // any open dialog owns the keyboard
     const tag = e.target.tagName;
     if (tag === 'INPUT' || tag === 'TEXTAREA' || e.target.isContentEditable) return;
 
@@ -1407,7 +1775,8 @@ function setupDelegation() {
 
     if (e.target.closest('.export-btn')) { exportData(); return; }
     if (e.target.closest('.import-btn')) { document.getElementById('import-file').click(); return; }
-    if (e.target.closest('.clear-btn'))  { clearUserData(); }
+    if (e.target.closest('.clear-btn'))  { clearUserData(); return; }
+    if (e.target.closest('.sync-open-btn')) { openSyncModal('generate'); }
   });
 }
 
@@ -1548,6 +1917,8 @@ function init() {
   setupEntryPage();
 
   setupModal();
+  setupSyncModal();
+  setupGlobalSearch();
   setupScrollTop();
   setupKeyboardShortcuts();
   setupDelegation();
@@ -1556,6 +1927,7 @@ function init() {
 
   readHash();
   window.addEventListener('hashchange', () => { if (!suppressHashRead) readHash(); });
+  checkForSyncLink();
 
   registerServiceWorker();
 }

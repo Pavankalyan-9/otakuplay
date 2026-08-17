@@ -55,6 +55,19 @@ const related = entry => {
     .map(e => e.x);
 };
 
+/* A stable ranking each entry can cite a position in — highest rated first,
+   ties broken by year so the order never depends on array insertion order. */
+const ranked = { anime: [...anime].sort(byRatingThenYear), games: [...games].sort(byRatingThenYear) };
+function byRatingThenYear(a, b) { return b.rating - a.rating || a.year - b.year; }
+
+function neighbours(entry) {
+  const order = ranked[entry.sect];
+  const i = order.findIndex(x => x.title === entry.title);
+  const at = n => (order[n] ? { title: order[n].title, url: order[n].url, rating: order[n].rating, year: order[n].year } : null);
+  // `ratingRank` — not `rank` — because entry.rank already means the tier letter (S/A/B/C).
+  return { ratingRank: i + 1, ratingTotal: order.length, prev: at(i - 1), next: at(i + 1) };
+}
+
 export default {
   anime,
   games,
@@ -64,6 +77,7 @@ export default {
     platforms: STREAM_MAP[entry.title] || [],
     franchise: FRANCHISES[entry.title] || null,
     related: related(entry),
+    ...neighbours(entry),
   })),
   counts: { anime: anime.length, games: games.length, total: entries.length },
 };

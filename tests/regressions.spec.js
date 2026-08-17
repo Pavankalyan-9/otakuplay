@@ -1,5 +1,6 @@
 // @ts-check
 import { test, expect } from '@playwright/test';
+import jsQR from 'jsqr';
 
 /**
  * Every test here pins a bug that actually shipped, or a feature whose failure
@@ -249,6 +250,40 @@ test.describe('toolbar and filter drawer', () => {
   });
 });
 
+test.describe('global search', () => {
+  test('finds a game while on the anime page, and Enter opens it', async ({ page }) => {
+    await page.keyboard.press('Control+k');
+    await expect(page.locator('#search-modal')).toHaveClass(/open/);
+    await expect(page.locator('#global-search-input')).toBeFocused();
+
+    await page.locator('#global-search-input').fill('elden');
+    await expect(page.locator('.search-result-title')).toHaveText('Elden Ring');
+
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('Enter');
+    await expect(page).toHaveURL(/\/games\/elden-ring\/$/);
+  });
+
+  test('an unmatched query shows an empty state, not a stale result', async ({ page }) => {
+    await page.locator('.open-global-search').first().click();
+    const input = page.locator('#global-search-input');
+    await input.fill('elden');
+    await expect(page.locator('.search-result')).toHaveCount(1);
+    await input.fill('zzzznotarealtitle');
+    await expect(page.locator('.search-box-empty')).toBeVisible();
+    await expect(page.locator('.search-result')).toHaveCount(0);
+  });
+
+  test('Escape closes it and returns focus to the trigger', async ({ page }) => {
+    const trigger = page.locator('.open-global-search').first();
+    await trigger.click();
+    await expect(page.locator('#search-modal')).toHaveClass(/open/);
+    await page.keyboard.press('Escape');
+    await expect(page.locator('#search-modal')).not.toHaveClass(/open/);
+    await expect(trigger).toBeFocused();
+  });
+});
+
 test.describe('modal interaction', () => {
   /* These use real mouse clicks on purpose. An `inert` modal shipped once: it
      opened, but every click fell through to the page behind it. Escape and
@@ -345,12 +380,96 @@ test.describe('entry pages', () => {
     await expect(page.locator('.card[data-title="Akira"] .card-badge-row')).toContainText('Watched');
   });
 
-  test('every entry is listed in the sitemap', async ({ request }) => {
-    const xml = await (await request.get('/sitemap.xml')).text();
+  /* The sitemap once silently dropped to 6 URLs — collections.all doesn't
+     reliably include paginated pages — while the site itself built fine and
+     every other test stayed green. Compare against the entry count the build
+     actually produced (search-index.json), not a hardcoded number, so this
+     scales with the catalogue but still catches that class of regression. */
+  test('the sitemap lists every entry, hub and top-level page', async ({ request }) => {
+    const [xml, index] = await Promise.all([
+      (await request.get('/sitemap.xml')).text(),
+      (await request.get('/search-index.json')).json(),
+    ]);
     const urls = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m => m[1]);
-    expect(urls.length).toBeGreaterThan(200);
+    const TOP_LEVEL_PAGES = 5; // /, /anime/, /games/, /insights/, /about/
+
+    expect(urls.length).toBeGreaterThanOrEqual(index.length + TOP_LEVEL_PAGES);
     expect(urls.some(u => u.endsWith('/anime/cowboy-bebop/'))).toBe(true);
     expect(urls.some(u => u.endsWith('/games/elden-ring/'))).toBe(true);
+    expect(urls.some(u => u.endsWith('/anime/genre/mecha/'))).toBe(true);
+    expect(urls.some(u => /\/decade\/\d{4}s\/$/.test(u))).toBe(true);
+    expect(urls.some(u => u.includes('/franchise/'))).toBe(true);
+  });
+});
+
+test.describe('sync code', () => {
+  test('generates a link and a genuinely scannable QR code', async ({ page }) => {
+    await page.goto('/insights/');
+    await page.evaluate(() => {
+      localStorage.setItem('otakuplay-ratings', JSON.stringify({ 'Cowboy Bebop': 9, 'Elden Ring': 10 }));
+      localStorage.setItem('otakuplay-status', JSON.stringify({ Akira: 'watched' }));
+    });
+    await page.reload();
+
+    await page.locator('#insights-sync-btn').click();
+    await page.locator('#sync-generate-btn').click();
+    await page.waitForSelector('#sync-result:not([hidden])');
+
+    const link = await page.locator('#sync-link-input').inputValue();
+    expect(link).toContain('/insights/#sync=');
+
+    // Decode the pixels that were actually drawn, with an independent decoder —
+    // not just "the canvas has some content", but that it encodes this exact link.
+    const raw = await page.evaluate(() => {
+      const c = document.getElementById('sync-qr-canvas');
+      const ctx = c.getContext('2d');
+      const img = ctx.getImageData(0, 0, c.width, c.height);
+      return { data: Array.from(img.data), width: c.width, height: c.height };
+    });
+    const decoded = jsQR(new Uint8ClampedArray(raw.data), raw.width, raw.height);
+    expect(decoded?.data).toBe(link);
+  });
+
+  test('opening a sync link on another device offers merge or replace', async ({ page, context }) => {
+    await page.goto('/insights/');
+    await page.evaluate(() => {
+      localStorage.setItem('otakuplay-favs', JSON.stringify(['Frieren: Beyond Journey\'s End']));
+      localStorage.setItem('otakuplay-ratings', JSON.stringify({ 'Dark Souls': 10 }));
+    });
+    await page.reload();
+    await page.locator('#insights-sync-btn').click();
+    await page.locator('#sync-generate-btn').click();
+    await page.waitForSelector('#sync-result:not([hidden])');
+    const link = await page.locator('#sync-link-input').inputValue();
+
+    // A second, empty tab — this device has never seen this library.
+    const incoming = await context.newPage();
+    await incoming.goto(link);
+    await expect(incoming.locator('#sync-modal')).toHaveClass(/open/);
+    await expect(incoming.locator('#sync-incoming-summary')).toContainText('1 favorite');
+    await expect(incoming.locator('#sync-incoming-summary')).toContainText('1 rating');
+
+    // The code must not survive in the URL — reloading shouldn't re-prompt.
+    expect(await incoming.evaluate(() => location.hash)).toBe('');
+
+    await incoming.locator('#sync-merge-btn').click();
+    await incoming.waitForTimeout(300);
+    const state = await incoming.evaluate(() => ({
+      favs: JSON.parse(localStorage.getItem('otakuplay-favs') || '[]'),
+      ratings: JSON.parse(localStorage.getItem('otakuplay-ratings') || '{}'),
+    }));
+    expect(state.favs).toContain("Frieren: Beyond Journey's End");
+    expect(state.ratings['Dark Souls']).toBe(10);
+  });
+
+  // A hand-edited or corrupted code must fail safely, not throw past the catch.
+  test('a corrupted sync code shows an error instead of crashing', async ({ page }) => {
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    await page.goto('/insights/#sync=1not-valid-base64-or-gzip');
+    await page.waitForTimeout(500);
+    expect(errors).toEqual([]);
+    await expect(page.locator('#sync-modal')).not.toHaveClass(/open/);
   });
 });
 

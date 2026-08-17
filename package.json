@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "Ranked collection of the best anime and PC games, by era.",
   "scripts": {
-    "build": "eleventy",
-    "dev": "eleventy --serve --port=5173",
+    "build": "node scripts/build-vendor.mjs && eleventy",
+    "dev": "node scripts/build-vendor.mjs && eleventy --serve --port=5173",
     "serve": "npx --yes http-server _site -p 5173 -c-1",
     "test": "npm run build && playwright test",
     "test:ui": "playwright test --ui",
@@ -23,7 +23,12 @@
   "devDependencies": {
     "@11ty/eleventy": "^3.1.6",
     "@axe-core/playwright": "^4.13.0",
-    "@playwright/test": "^1.62.1"
+    "@playwright/test": "^1.62.1",
+    "esbuild": "^0.28.2",
+    "jsqr": "^1.4.0"
   },
-  "private": true
+  "private": true,
+  "dependencies": {
+    "qrcode": "^1.5.4"
+  }
 }
