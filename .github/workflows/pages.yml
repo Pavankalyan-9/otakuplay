@@ -24,9 +24,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Node and Python are preinstalled on ubuntu-latest.
       - name: Check the site parses
         run: |
-          sudo apt-get update -qq && sudo apt-get install -y nodejs
           node --check data.js
           node --check app.js
           node --check sw.js
