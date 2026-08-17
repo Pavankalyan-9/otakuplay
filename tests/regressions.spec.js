@@ -249,6 +249,59 @@ test.describe('toolbar and filter drawer', () => {
   });
 });
 
+test.describe('entry pages', () => {
+  test('an entry has its own page with correct metadata', async ({ page }) => {
+    await page.goto('/anime/cowboy-bebop/');
+    await expect(page.locator('h1')).toHaveText('Cowboy Bebop');
+    await expect(page).toHaveTitle(/Cowboy Bebop \(1998\)/);
+    await expect(page.locator('link[rel=canonical]')).toHaveAttribute(
+      'href', /\/anime\/cowboy-bebop\/$/);
+    await expect(page.locator('.entry-related-card').first()).toBeVisible();
+  });
+
+  // Malformed structured data is worse than none — it gets the page penalised.
+  test('structured data is valid and describes the entry', async ({ page }) => {
+    await page.goto('/games/elden-ring/');
+    const raw = await page.locator('script[type="application/ld+json"]').textContent();
+    const data = JSON.parse(raw ?? '');
+    expect(data['@type']).toBe('VideoGame');
+    expect(data.name).toBe('Elden Ring');
+    expect(data.review.reviewRating.ratingValue).toBeGreaterThan(0);
+    expect(data.url).toContain('/games/elden-ring/');
+  });
+
+  test('catalogue cards link to entry pages but still open the modal', async ({ page }) => {
+    const link = page.locator('#anime-grid .card-open-btn').first();
+    await expect(link).toHaveAttribute('href', /\/anime\/[a-z0-9-]+\/$/);
+
+    // A plain click should open the modal, not navigate away.
+    await link.click();
+    await expect(page.locator('#detail-modal')).toHaveClass(/open/);
+    await expect(page).toHaveURL(/\/anime\/(#|$)/);
+  });
+
+  test('tracking on an entry page reaches the catalogue', async ({ page }) => {
+    await page.goto('/anime/akira/');
+    await page.locator('#entry-status .modal-status-opt[data-status="watched"]').click();
+    await page.locator('#entry-stars .modal-pr-star[data-r="9"]').click();
+
+    await page.reload();
+    await expect(page.locator('#entry-status .modal-status-opt.active')).toHaveAttribute('data-status', 'watched');
+    await expect(page.locator('#modal-pr-display')).toHaveText('My rating: 9/10');
+
+    await page.goto('/anime/');
+    await expect(page.locator('.card[data-title="Akira"] .card-badge-row')).toContainText('Watched');
+  });
+
+  test('every entry is listed in the sitemap', async ({ request }) => {
+    const xml = await (await request.get('/sitemap.xml')).text();
+    const urls = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m => m[1]);
+    expect(urls.length).toBeGreaterThan(200);
+    expect(urls.some(u => u.endsWith('/anime/cowboy-bebop/'))).toBe(true);
+    expect(urls.some(u => u.endsWith('/games/elden-ring/'))).toBe(true);
+  });
+});
+
 test.describe('personal library', () => {
   test('status survives a reload and drives the status filter', async ({ page }) => {
     await page.locator('#anime-grid .card-open-btn').first().click();

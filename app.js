@@ -47,6 +47,25 @@ const ids = k => ({
 const TITLE_INDEX = new Map();
 SECTION_KEYS.forEach(k => SECTIONS[k].data.forEach(item => TITLE_INDEX.set(item.title, { item, sect: k })));
 const lookup      = title => TITLE_INDEX.get(title) || null;
+
+/* Mirrors the slug rule in src/_data/catalogue.js so cards can link to the
+   generated entry pages. Duplicate base slugs are disambiguated by year there,
+   so do the same here. */
+const slugify = title => title.toLowerCase()
+  .replace(/['’]/g, '').replace(/&/g, ' and ')
+  .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+
+const SLUG_COUNTS = new Map();
+SECTION_KEYS.forEach(k => SECTIONS[k].data.forEach(item => {
+  const base = slugify(item.title);
+  SLUG_COUNTS.set(base, (SLUG_COUNTS.get(base) || 0) + 1);
+}));
+
+function entryUrl(item) {
+  const base = slugify(item.title);
+  const slug = SLUG_COUNTS.get(base) > 1 ? `${base}-${item.year}` : base;
+  return `${window.OTAKU_ROOT || ''}${sectionOf(item.title)}/${slug}/`;
+}
 const sectionOf   = title => (TITLE_INDEX.get(title)?.sect) || 'anime';
 const isNewEntry  = item => item.year >= NEW_SINCE;
 
@@ -331,7 +350,7 @@ function buildCard(item, idx, groupId) {
           </div>
         </div>
         <h3 class="card-title">
-          <button class="card-open-btn" data-title="${t}" aria-haspopup="dialog">${t}</button>
+          <a class="card-open-btn" href="${entryUrl(item)}" data-title="${t}">${t}</a>
         </h3>
         ${jpTitle}
         <div class="card-badge-row"${badges ? '' : ' hidden'}>${badges}</div>
@@ -929,6 +948,7 @@ function openModal(item) {
     <div class="modal-tags-row">${tagsHtml}</div>
     <p class="modal-info-row">${escapeHtml(item.info)}</p>
     <div class="modal-actions">
+      <a class="modal-page-btn" href="${entryUrl(item)}">📄 Open full page</a>
       <button class="modal-fav-btn${isFav ? ' active' : ''}" data-title="${t}" aria-pressed="${isFav}">${isFav ? '♥ Favorited' : '♡ Add to Favorites'}</button>
       <button class="modal-share-btn" data-title="${t}">🔗 Copy Link to This Entry</button>
       <a class="modal-trailer-btn" href="https://www.youtube.com/results?search_query=${trailerQuery}" target="_blank" rel="noopener noreferrer">▶ Watch Trailer on YouTube</a>
@@ -1018,12 +1038,10 @@ function setupModal() {
 }
 
 function shareEntry(title, btn) {
-  const sect   = sectionOf(title);
-  const params = new URLSearchParams({ entry: title });
-  // Always link to the section's own page, wherever the modal was opened from.
-  const base   = new URL(`${window.OTAKU_ROOT || ''}${sect}/`, location.href).href;
-  const url    = `${base}#${params.toString()}`;
-  const item   = lookup(title)?.item;
+  const item = lookup(title)?.item;
+  if (!item) return;
+  // Every entry has its own page now, so share that rather than a hash link.
+  const url = new URL(entryUrl(item), location.href).href;
 
   // On touch devices the native share sheet beats a clipboard copy.
   if (navigator.share && matchMedia('(pointer: coarse)').matches) {
@@ -1360,8 +1378,15 @@ function setupDelegation() {
     const fav = e.target.closest('.card-fav-btn');
     if (fav) { e.stopPropagation(); toggleFavorite(fav.dataset.title); return; }
 
+    // Card titles are real links to the entry page. A plain click opens the modal
+    // (faster, keeps your place); ctrl/cmd/shift-click follows the link as usual.
     const openBtn = e.target.closest('.card-open-btn, .stat-top-item, .rec-card, .highlight-item');
-    if (openBtn) { const found = lookup(openBtn.dataset.title); if (found) openModal(found.item); return; }
+    if (openBtn) {
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      const found = lookup(openBtn.dataset.title);
+      if (found) { e.preventDefault(); openModal(found.item); }
+      return;
+    }
 
     const card = e.target.closest('.card');
     if (card && !e.target.closest('a')) { const found = lookup(card.dataset.title); if (found) openModal(found.item); return; }
@@ -1402,6 +1427,51 @@ function registerServiceWorker() {
       });
     });
   }).catch(err => console.warn('OtakuPlay: service worker registration failed —', err.message));
+}
+
+// ===================== ENTRY PAGE =====================
+/* The page itself is static; the personal bits live in localStorage, so they're
+   filled in here rather than at build time. */
+function setupEntryPage() {
+  const article = document.querySelector('.entry[data-entry]');
+  if (!article) return;
+  const found = lookup(article.dataset.entry);
+  if (!found) return;
+  const { item } = found;
+  const labels = SECTIONS[sectionOf(item.title)].statusLabels;
+
+  const track = document.getElementById('entry-track');
+  if (track) track.hidden = false;
+
+  const statusWrap = document.getElementById('entry-status');
+  if (statusWrap) {
+    const current = userStatus[item.title] || '';
+    statusWrap.innerHTML = ['', 'watched', 'watching', 'plan', 'dropped'].map(s =>
+      `<button class="modal-status-opt${current === s ? ' active' : ''}" data-status="${s}" aria-pressed="${current === s}">${s === '' ? '— Clear' : labels[s]}</button>`
+    ).join('');
+    statusWrap.querySelectorAll('.modal-status-opt').forEach(btn =>
+      btn.addEventListener('click', () => setUserStatus(item.title, btn.dataset.status)));
+  }
+
+  const starWrap = document.getElementById('entry-stars');
+  if (starWrap) {
+    const rating = userRatings[item.title] || 0;
+    starWrap.innerHTML = Array.from({ length: 10 }, (_, i) => i + 1).map(n =>
+      `<button class="modal-pr-star${rating >= n ? ' filled' : ''}" data-r="${n}" aria-label="Rate ${n} out of 10">${n}</button>`
+    ).join('');
+    starWrap.querySelectorAll('.modal-pr-star').forEach(btn =>
+      btn.addEventListener('click', () => setUserRating(item.title, parseInt(btn.dataset.r, 10))));
+    const display = document.getElementById('modal-pr-display');
+    if (display) display.textContent = rating > 0 ? `My rating: ${rating}/10` : 'Not rated';
+  }
+
+  const notes = document.getElementById('modal-notes');
+  if (notes) {
+    notes.value = userNotes[item.title] || '';
+    notes.addEventListener('input', () => scheduleNoteSave(item.title));
+  }
+
+  document.querySelector('.entry-share')?.addEventListener('click', e => shareEntry(item.title, e.currentTarget));
 }
 
 // ===================== LANDING PAGE =====================
@@ -1452,9 +1522,10 @@ function init() {
   setText('stat-games', GAMES.length);
   setText('stat-years', `${new Date().getFullYear() - Math.min(...[...ANIME, ...GAMES].map(x => x.year))}+`);
 
-  // Only the section this page actually renders.
+  /* Entry pages share their section's page key (so the nav highlights correctly)
+     but render no catalogue, so gate on the grid actually being present. */
   const sect = activeSection();
-  if (sect) {
+  if (sect && document.getElementById(ids(sect).grid)) {
     renderSection(sect);
     setupFilters(sect);
     setupSort(sect);
@@ -1469,6 +1540,7 @@ function init() {
 
   if (PAGE === 'insights') renderStats();
   if (PAGE === 'home') renderHighlights();
+  setupEntryPage();
 
   setupModal();
   setupScrollTop();

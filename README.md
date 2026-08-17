@@ -26,8 +26,9 @@ A static, five-page site with no runtime framework and no backend: Eleventy asse
 | `/games/` | The full PC games catalogue with filters |
 | `/insights/` | Your library, recommendations, catalogue stats |
 | `/about/` | How rankings are chosen, data sources, where your data lives |
+| `/anime/<slug>/` | A page per title — 219 of them, generated from `data.js` |
 
-Each page has its own title, description, canonical URL and social image.
+Each page has its own title, description, canonical URL and social image. Entry pages also carry schema.org structured data (`TVSeries`, `Movie` or `VideoGame`) with the editorial score modelled as a `Review`, and all 224 URLs are listed in `sitemap.xml`.
 
 ## Running it locally
 
@@ -55,6 +56,8 @@ Cross-origin requests (cover art, fonts) are stubbed so runs stay fast and herme
 | File | What's in it |
 | --- | --- |
 | `src/` | Page templates plus the shared layout and partials |
+| `src/entry.njk` | Paginated template generating one page per catalogue entry |
+| `src/_data/catalogue.js` | Loads `data.js` into the build and assigns entry slugs |
 | `.eleventy.js` | Build config — passthrough assets, depth-aware relative paths |
 | `data.js` | The catalogue: `ANIME`, `GAMES`, `STREAM_MAP`, `JP_TITLES`, `FRANCHISES` |
 | `app.js` | All UI logic — rendering, filtering, routing, stats, persistence |

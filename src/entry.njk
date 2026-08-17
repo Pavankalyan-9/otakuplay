@@ -1,0 +1,141 @@
+---
+layout: layouts/base.njk
+pagination:
+  data: catalogue.entries
+  size: 1
+  alias: entry
+permalink: "/{{ entry.url }}"
+eleventyComputed:
+  pageKey: "{{ entry.sect }}"
+  title: "{{ entry.title }} ({{ entry.year }}) — {{ 'Best Anime' if entry.sect == 'anime' else 'Best PC Games' }} | OtakuPlay"
+  description: "{{ entry.desc | truncate(155) }}"
+---
+
+<article class="entry" data-entry="{{ entry.title }}">
+  <div class="entry-banner" style="background:{{ entry.bg }}">
+    {% if entry.img %}
+      <img class="entry-art-blur" src="{{ entry.img }}" alt="" aria-hidden="true" referrerpolicy="no-referrer" onerror="this.remove()">
+      <img class="entry-art" src="{{ entry.img }}" alt="Cover art for {{ entry.title }}" referrerpolicy="no-referrer" onerror="this.remove()">
+    {% else %}
+      <span class="entry-emoji" aria-hidden="true">{{ entry.emoji }}</span>
+    {% endif %}
+    <div class="entry-banner-overlay"></div>
+  </div>
+
+  <nav class="entry-crumbs" aria-label="Breadcrumb">
+    <a href="{{ root }}{{ entry.sect }}/">{{ 'Best Anime' if entry.sect == 'anime' else 'Best PC Games' }}</a>
+    <span aria-hidden="true">›</span>
+    <span>{{ entry.title }}</span>
+  </nav>
+
+  <header class="entry-head">
+    <div class="entry-meta-row">
+      <span class="card-rank rank-{{ entry.rank | lower }} modal-tier">Tier {{ entry.rank }}</span>
+      <span class="entry-year">{{ entry.year }}</span>
+      {% if entry.franchise %}<span class="franchise-badge">{{ entry.franchise }}</span>{% endif %}
+    </div>
+    <h1 class="entry-title">{{ entry.title }}</h1>
+    {% if entry.jp %}<p class="entry-jp">{{ entry.jp }}</p>{% endif %}
+    <p class="entry-studio">{{ entry.studio }} · {{ entry.info }}</p>
+
+    <div class="entry-rating">
+      <span class="entry-rating-num">{{ entry.rating }}</span>
+      <span class="entry-rating-denom">/ 10</span>
+    </div>
+
+    {% if entry.awards %}
+      <div class="modal-awards-row">
+        {% for award in entry.awards %}<span class="award-badge award-{{ award.cls }}">{{ award.text }}</span>{% endfor %}
+      </div>
+    {% endif %}
+
+    {% if entry.platforms.length %}
+      <div class="modal-platforms">
+        {% for p in entry.platforms %}<span class="platform-badge platform-{{ p | lower }}">{{ p }}</span>{% endfor %}
+      </div>
+    {% endif %}
+  </header>
+
+  <div class="entry-body">
+    <p class="entry-desc">{{ entry.desc }}</p>
+
+    <div class="entry-tags">
+      {% for tag in entry.tags %}
+        <a class="tag" href="{{ root }}{{ entry.sect }}/#filter={{ tag }}">{{ tag }}</a>
+      {% endfor %}
+    </div>
+
+    <div class="entry-actions">
+      <a class="modal-trailer-btn" href="https://www.youtube.com/results?search_query={{ (entry.title + (' gameplay trailer' if entry.sect == 'games' else ' anime trailer')) | urlencode }}" target="_blank" rel="noopener noreferrer">▶ Watch trailer on YouTube</a>
+      <button class="modal-share-btn entry-share" data-title="{{ entry.title }}">🔗 Copy link</button>
+    </div>
+
+    {# Personal tracking is hydrated by app.js — it lives in localStorage, so it
+       can't be rendered at build time. #}
+    <section class="entry-track" id="entry-track" hidden>
+      <span class="modal-user-label">My status</span>
+      <div class="modal-status-opts" id="entry-status"></div>
+
+      <div class="modal-personal-rating">
+        <span class="modal-user-label">My rating</span>
+        <div class="modal-pr-stars" id="entry-stars"></div>
+        <div class="modal-pr-display" id="modal-pr-display">Not rated</div>
+      </div>
+
+      <div class="modal-notes-section">
+        <label class="modal-user-label" for="modal-notes">Notes</label>
+        <textarea class="modal-notes-area" id="modal-notes" placeholder="Your thoughts…"></textarea>
+      </div>
+    </section>
+
+    {% if entry.related.length %}
+      <section class="entry-related">
+        <h2 class="entry-related-head">Similar picks</h2>
+        <div class="entry-related-grid">
+          {% for rel in entry.related %}
+            <a class="entry-related-card" href="{{ root }}{{ rel.url }}">
+              <span class="entry-related-art" style="background:{{ rel.bg }}">
+                {% if rel.img %}
+                  <img src="{{ rel.img }}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.remove()">
+                {% else %}
+                  <span aria-hidden="true">{{ rel.emoji }}</span>
+                {% endif %}
+              </span>
+              <span class="entry-related-name">{{ rel.title }}</span>
+              <span class="entry-related-sub">{{ rel.year }} · {{ rel.rating }}</span>
+            </a>
+          {% endfor %}
+        </div>
+      </section>
+    {% endif %}
+
+    <p class="entry-back">
+      <a href="{{ root }}{{ entry.sect }}/">← Back to all {{ 'anime' if entry.sect == 'anime' else 'PC games' }}</a>
+    </p>
+  </div>
+</article>
+
+{# The rating is our own editorial score, so it's modelled as a Review by the
+   site rather than an aggregateRating we don't have review counts for. #}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": {% if entry.sect == 'games' %}"VideoGame"{% elif 'Film' in entry.info %}"Movie"{% else %}"TVSeries"{% endif %},
+  "name": {{ entry.title | dump | safe }},
+  "description": {{ entry.desc | dump | safe }},
+  "url": {{ (entry.url | absoluteUrl(site.url)) | dump | safe }},
+  {% if entry.img %}"image": {{ entry.img | dump | safe }},{% endif %}
+  {% if entry.jp %}"alternateName": {{ entry.jp | dump | safe }},{% endif %}
+  "datePublished": "{{ entry.year }}",
+  "genre": {{ entry.tags | dump | safe }},
+  {% if entry.sect == 'games' %}"publisher"{% else %}"productionCompany"{% endif %}: {
+    "@type": "Organization",
+    "name": {{ entry.studio | dump | safe }}
+  },
+  "review": {
+    "@type": "Review",
+    "reviewRating": { "@type": "Rating", "ratingValue": {{ entry.rating }}, "bestRating": 10, "worstRating": 0 },
+    "author": { "@type": "Organization", "name": "OtakuPlay" }
+  }
+}
+</script>
