@@ -1,0 +1,16 @@
+{# Global search over both catalogues. The index (search-index.json) is fetched
+   lazily on first open, not on page load — it's small, but there's no reason to
+   pay for it on a visit that never searches. #}
+<div class="modal-overlay search-overlay" id="search-modal" role="dialog" aria-modal="true" aria-label="Search anime and games" aria-hidden="true">
+  <div class="search-box">
+    <div class="search-box-input-row">
+      <span class="search-icon" aria-hidden="true">🔍</span>
+      <input type="search" id="global-search-input" class="search-box-input"
+             placeholder="Search all anime and PC games…" autocomplete="off"
+             role="combobox" aria-expanded="false" aria-controls="global-search-results" aria-autocomplete="list" />
+      <button class="modal-close search-box-close" id="search-modal-close" aria-label="Close search">✕</button>
+    </div>
+    <div class="search-box-results" id="global-search-results" role="listbox"></div>
+    <p class="search-box-hint" id="global-search-hint">Search by title, studio or genre — results cover every anime and game in the catalogue.</p>
+  </div>
+</div>

@@ -1,0 +1,42 @@
+{# Cross-device library sync — a link/QR code, no account, nothing sent to a
+   server. The payload lives entirely in the URL fragment, which browsers never
+   include in an HTTP request, so this stays true to what /about/ promises. #}
+<div class="modal-overlay" id="sync-modal" role="dialog" aria-modal="true" aria-labelledby="sync-modal-title" aria-hidden="true">
+  <div class="modal-box sync-box">
+    <button class="modal-close" id="sync-modal-close" aria-label="Close">✕</button>
+    <div class="modal-body sync-modal-body">
+
+      <div id="sync-generate-view">
+        <h2 class="modal-title" id="sync-modal-title">Sync your library</h2>
+        <p class="modal-desc">
+          Move your favorites, statuses, ratings and notes to another device. The
+          link below contains everything — nothing is uploaded or sent anywhere.
+        </p>
+        <button class="btn-primary sync-generate-btn" id="sync-generate-btn">Generate sync link</button>
+
+        <div class="sync-result" id="sync-result" hidden>
+          <div class="sync-link-row">
+            <input class="sync-link-input" id="sync-link-input" type="text" readonly aria-label="Sync link" />
+            <button class="modal-share-btn sync-copy-btn" id="sync-copy-btn">Copy</button>
+          </div>
+          <div class="sync-qr-wrap">
+            <canvas id="sync-qr-canvas" width="220" height="220" aria-label="QR code for the sync link"></canvas>
+            <p class="sync-qr-hint">Scan with your other device's camera</p>
+          </div>
+        </div>
+      </div>
+
+      <div id="sync-incoming-view" hidden>
+        <h2 class="modal-title">Import library from link</h2>
+        <p class="modal-desc" id="sync-incoming-summary"></p>
+        <p class="sync-warning">This never leaves your browser — it isn't uploaded anywhere.</p>
+        <div class="sync-incoming-actions">
+          <button class="btn-primary" id="sync-merge-btn">Merge into my library</button>
+          <button class="btn-secondary" id="sync-replace-btn">Replace my library</button>
+          <button class="panel-reset" id="sync-cancel-btn">Cancel</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

@@ -25,6 +25,7 @@
           <option value="year-asc">Year ↑</option>
           <option value="year-desc">Year ↓</option>
           <option value="rating">Rating</option>
+          <option value="myrating">My Rating</option>
           <option value="alpha">A → Z</option>
           <option value="tier">Tier</option>
         </select>
@@ -33,6 +34,7 @@
       <div class="menu-wrap">
         <button class="more-btn" id="{{ sect }}-more" aria-haspopup="true" aria-expanded="false" aria-label="More actions">⋯</button>
         <div class="more-menu" id="{{ sect }}-more-menu" role="menu" hidden>
+          <button class="more-item sync-open-btn" role="menuitem">🔗 Sync to another device</button>
           <button class="more-item export-btn" role="menuitem">⬇ Export library</button>
           <button class="more-item import-btn" role="menuitem">⬆ Import library</button>
           <button class="more-item clear-btn" role="menuitem">🗑 Clear my data</button>
@@ -41,7 +43,7 @@
     </div>
 
     <div class="chips-row">
-      <span class="result-count" id="{{ sect }}-count" aria-live="polite"></span>
+      <span class="result-count" id="{{ sect }}-count" aria-live="polite" aria-atomic="true"></span>
       <div class="active-chips" id="{{ sect }}-chips" hidden></div>
     </div>
 
@@ -55,6 +57,7 @@
           {% endfor %}
           <button class="filter-btn" data-filter="new">🆕 New</button>
           <button class="filter-btn fav-filter-btn" data-filter="favorites">♥ Favorites</button>
+          <button class="filter-btn rated-filter-btn" data-filter="rated">★ My Ratings</button>
         </div>
         <div class="genre-mode">
           <span class="panel-label inline">Match</span>
