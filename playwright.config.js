@@ -25,12 +25,16 @@ export default defineConfig({
     { name: 'desktop', use: { ...devices['Desktop Chrome'] } },
     { name: 'mobile',  use: { ...devices['Pixel 5'] } },
   ],
-  // Serves the Eleventy output — "npm test" builds before running. Calls the
-  // local devDependency binary directly rather than `npx --yes http-server`:
-  // npx's own resolution step was intermittently slow enough to blow past the
-  // startup timeout on its own, with no test code involved.
+  // Serves the Eleventy output — "npm test" builds before running. Invokes the
+  // local devDependency's bin script through `node` directly (not the bare
+  // `http-server` command) so it doesn't depend on node_modules/.bin being on
+  // PATH — that's only true inside an `npm run`/`npm test` lifecycle. Running
+  // `playwright test` directly (bypassing npm) left `http-server` unresolvable,
+  // so the process never started and this timed out at 60s with zero tests run.
+  // `npx --yes http-server` was tried too, but its resolution step was
+  // intermittently slow enough to blow past the startup timeout on its own.
   webServer: {
-    command: 'http-server _site -p 5174 -c-1 --silent',
+    command: 'node node_modules/http-server/bin/http-server _site -p 5174 -c-1 --silent',
     url: 'http://127.0.0.1:5174/',
     reuseExistingServer: false,
     timeout: 60_000,
