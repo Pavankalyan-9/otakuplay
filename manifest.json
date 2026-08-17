@@ -2,15 +2,24 @@
   "name": "OtakuPlay — Best Anime & PC Games",
   "short_name": "OtakuPlay",
   "description": "The definitive ranked collection of best-ever anime and PC games across every era.",
+  "id": "/otakuplay/",
   "start_url": "./",
+  "scope": "./",
   "display": "standalone",
+  "orientation": "any",
   "background_color": "#09090f",
   "theme_color": "#09090f",
+  "categories": ["entertainment", "books", "games"],
+  "lang": "en",
   "icons": [
-    {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='32' fill='%2309090f'/><text y='130' x='20' font-size='130'>⚡</text></svg>",
-      "sizes": "192x192",
-      "type": "image/svg+xml"
-    }
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ],
+  "shortcuts": [
+    { "name": "Best Anime", "url": "./#tab=anime", "description": "Browse the ranked anime catalogue" },
+    { "name": "Best PC Games", "url": "./#tab=games", "description": "Browse the ranked PC games catalogue" },
+    { "name": "Insights", "url": "./#tab=stats", "description": "See collection and library stats" }
   ]
 }

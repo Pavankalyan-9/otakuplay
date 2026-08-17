@@ -825,6 +825,15 @@ body {
   .hero-stats { gap: 1.5rem; }
   .controls-row { margin: 0 -2rem 2rem; padding: 0.8rem 2rem; }
 }
+@media (max-width: 760px) {
+  /* The header used to overflow here and push the JP toggle off-screen. */
+  .header-inner { gap: 0.6rem; padding: 0 1rem; }
+  .logo-text { font-size: 0.95rem; }
+  .nav { margin-left: auto; gap: 0.1rem; min-width: 0; }
+  .nav-link { padding: 0.4rem 0.6rem; font-size: 0.8rem; white-space: nowrap; }
+  .header-right { flex-shrink: 0; }
+  .jp-toggle { padding: 0.3rem 0.5rem; }
+}
 @media (max-width: 640px) {
   .header-inner { padding: 0 1.25rem; }
   .hero { padding: calc(var(--header-h) + 24px) 1.25rem 3rem; }
@@ -838,4 +847,115 @@ body {
   .footer { padding: 2.5rem 1.25rem 0; }
   .footer-bottom { flex-direction: column; align-items: flex-start; }
   .tab-container { padding: 2rem 1.25rem 0; }
+}
+
+/* ===================== A11Y & CHROME (added in cleanup pass) ===================== */
+.skip-link {
+  position: absolute; left: -9999px; top: 0; z-index: 500;
+  background: var(--purple); color: #fff; padding: 0.6rem 1.1rem;
+  border-radius: 0 0 var(--radius-sm) 0; font-size: 0.85rem; font-weight: 700; text-decoration: none;
+}
+.skip-link:focus { left: 0; }
+
+:where(button, a, input, textarea, select, [tabindex]):focus-visible {
+  outline: 2px solid var(--purple-light);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.noscript-note {
+  max-width: 720px; margin: 0 auto 2rem; padding: 1rem 1.25rem;
+  background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25);
+  border-radius: var(--radius-sm); color: #fca5a5; font-size: 0.9rem; text-align: center;
+}
+
+/* Card title is a real button so the catalogue is reachable by keyboard. */
+.card-title .card-open-btn {
+  font: inherit; color: inherit; background: none; border: 0; padding: 0;
+  text-align: left; cursor: pointer; width: 100%;
+}
+.card-badge-row[hidden] { display: none; }
+
+.card-fav-btn { min-width: 32px; min-height: 32px; display: inline-flex; align-items: center; justify-content: center; }
+
+.decade-jump-btn[disabled] { opacity: 0.32; cursor: not-allowed; }
+.decade-jump-btn[disabled]:hover { border-color: var(--border); color: var(--text-muted); background: transparent; }
+.decade-jump-bar[hidden] { display: none; }
+
+/* ===================== MODAL ADDITIONS ===================== */
+.modal-banner-emoji { position: relative; z-index: 1; }
+.modal-tier { position: static; font-size: 0.65rem; }
+.modal-jp-title { font-size: 0.82rem; color: var(--text-dim); margin-bottom: 0.5rem; }
+.modal-platforms { display: flex; gap: 0.35rem; flex-wrap: wrap; margin-bottom: 0.9rem; }
+.modal-actions { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem; }
+.modal-actions .modal-share-btn, .modal-actions .modal-trailer-btn { margin-top: 0; }
+.modal-fav-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;
+  background: rgba(236,72,153,0.08); border: 1px solid rgba(236,72,153,0.22);
+  color: #f9a8d4; border-radius: var(--radius-sm); padding: 0.44rem 1rem;
+  font-size: 0.78rem; font-weight: 600; cursor: pointer; font-family: inherit;
+  width: 100%; transition: background 0.2s;
+}
+.modal-fav-btn:hover { background: rgba(236,72,153,0.16); }
+.modal-fav-btn.active { background: rgba(236,72,153,0.18); color: #ec4899; border-color: rgba(236,72,153,0.45); }
+
+/* Related picks are buttons now — reset the default button chrome. */
+.modal-related-item { width: 100%; background: transparent; font-family: inherit; text-align: left; }
+.modal-related-info { display: flex; flex-direction: column; }
+.modal-related-name, .modal-related-sub { display: block; }
+
+/* ===================== STATS ADDITIONS ===================== */
+.stats-section-head {
+  font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;
+  color: var(--text-dim); margin: 2.5rem 0 1rem;
+}
+.stat-empty { font-size: 0.78rem; color: var(--text-dim); padding: 0.4rem 0; }
+.stat-top-item {
+  width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--border);
+  font-family: inherit; text-align: left; cursor: pointer; border-radius: var(--radius-sm);
+  transition: background 0.18s;
+}
+.stat-top-item:hover { background: rgba(139,92,246,0.07); }
+.stat-top-info { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.stat-top-title, .stat-top-sub { display: block; }
+
+/* ===================== TOAST ===================== */
+.toast {
+  position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 140%);
+  z-index: 400; display: flex; align-items: center; gap: 0.75rem;
+  max-width: min(92vw, 460px);
+  background: var(--bg-elevated); border: 1px solid var(--border-mid);
+  box-shadow: var(--shadow-lg); border-radius: var(--radius);
+  padding: 0.75rem 1rem; font-size: 0.82rem; color: var(--text);
+  opacity: 0; pointer-events: none; transition: transform 0.28s ease, opacity 0.28s ease;
+}
+.toast.visible { transform: translate(-50%, 0); opacity: 1; pointer-events: auto; }
+.toast-msg { flex: 1; }
+.toast-action {
+  background: rgba(139,92,246,0.16); border: 1px solid rgba(139,92,246,0.35);
+  color: var(--purple-light); border-radius: var(--radius-sm);
+  padding: 0.35rem 0.8rem; font-size: 0.76rem; font-weight: 700;
+  font-family: inherit; cursor: pointer; white-space: nowrap;
+}
+.toast-action:hover { background: rgba(139,92,246,0.28); }
+
+/* ===================== TOUCH TARGETS ===================== */
+@media (pointer: coarse) {
+  .filter-btn, .sort-btn, .status-btn, .data-action-btn, .decade-jump-btn, .modal-status-opt, .tab-btn {
+    min-height: 40px;
+  }
+  .modal-pr-star { width: 40px; height: 40px; font-size: 0.85rem; }
+  .card-fav-btn, .search-clear, .modal-close { min-width: 44px; min-height: 44px; }
+  .scroll-top { width: 48px; height: 48px; }
+}
+
+/* ===================== REDUCED MOTION ===================== */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  .card { animation: none; opacity: 1; }
 }
