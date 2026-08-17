@@ -557,12 +557,15 @@ test.describe('offline support', () => {
   });
 
   test('shell and catalogue still render with the network cut', async ({ page, context }) => {
-    // Give the worker a chance to install and cache the shell.
-    await page.waitForFunction(async () => {
-      const reg = await navigator.serviceWorker.getRegistration();
-      return !!reg?.active;
-    }, null, { timeout: 15_000 });
-    await page.waitForTimeout(1000);
+    // `reg.active` only means the worker finished installing — it doesn't mean
+    // *this page* is under its control yet, which is the actual precondition
+    // for an offline reload to be intercepted rather than hit the network.
+    // Checking `serviceWorker.controller` directly caught a real gap: on a
+    // bigger build (more assets to cache during install) the old check could
+    // pass while this page still weren't controlled, and the reload below
+    // failed outright with ERR_INTERNET_DISCONNECTED instead of being served
+    // from cache.
+    await page.waitForFunction(() => !!navigator.serviceWorker.controller, null, { timeout: 20_000 });
 
     await context.setOffline(true);
     await page.reload();

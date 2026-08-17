@@ -4,7 +4,7 @@ export default {
   repo: 'https://github.com/Pavankalyan-9/otakuplay',
   tagline: 'Best Anime & PC Games, Ranked by Era',
   description:
-    'A ranked, decade-by-decade collection of the best anime (1963–2025) and best PC games (1993–2025) — 219 curated titles with genres, studios, ratings and personal tracking.',
+    'A ranked, decade-by-decade collection of the best anime (1963–2025) and best PC games (1992–2025) — 271 curated titles with genres, studios, ratings and personal tracking.',
   firstYear: 1963,
   lastYear: 2025,
 

@@ -1,5 +1,5 @@
 /**
- * Hub pages: the layer between the catalogue and the 219 entry pages.
+ * Hub pages: the layer between the catalogue and the per-title entry pages.
  *
  * People search "best mecha anime" and "best 90s pc games", not individual
  * titles, so each genre, decade and franchise gets its own ranked page built

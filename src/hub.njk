@@ -58,15 +58,13 @@ eleventyComputed:
     </a>
   </div>
 
-  {% set siblings = hubs[hub.kind] | selectattr('sect', 'equalto', hub.sect) %}
-  {% if siblings | length > 1 %}
+  {% set siblings = hubs[hub.kind] | hubSiblings(hub.sect, hub.slug) %}
+  {% if siblings | length > 0 %}
     <nav class="hub-siblings" aria-label="Other {{ hub.kind }} pages">
       <span class="panel-label">More {{ hub.kind }} pages</span>
       <div class="hub-sibling-links">
         {% for other in siblings %}
-          {% if other.slug != hub.slug %}
-            <a href="{{ root }}{{ other.url }}">{{ other.heading }}</a>
-          {% endif %}
+          <a href="{{ root }}{{ other.url }}">{{ other.heading }}</a>
         {% endfor %}
       </div>
     </nav>

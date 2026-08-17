@@ -1,6 +1,6 @@
 'use strict';
 
-// ===================== ANIME DATA (108 titles, 1963–2025) =====================
+// ===================== ANIME DATA (132 titles, 1963–2025) =====================
 const ANIME = [
   // ── 1960s ──────────────────────────────────────────────────────────────────
   { rank:"A", emoji:"🤖", bg:"linear-gradient(135deg,#001a1a,#003333)",
@@ -674,9 +674,154 @@ const ANIME = [
     tags:["comedy","drama","music"],
     desc:"A cripplingly shy girl who learned guitar hoping to make friends is recruited into a band before she has spoken to a single person her age. CloverWorks turns a slice-of-life premise into anime's most creative visual comedy — every episode bursts with inventive direction that externalises Bocchi's anxiety into pure comedy gold.",
     info:"12 Episodes", studio:"CloverWorks", img:"https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx130003-HTDmeL4RGeJ4.png", awards:[{cls:'aoty', text:'🏆 AOTY 2023 · Crunchyroll'}] },
+
+  // ── Additions: conspicuous omissions ─────────────────────────────────────
+  { rank:"S", emoji:"🎭", bg:"linear-gradient(135deg,#1a0010,#2e001f)",
+    title:"Perfect Blue", year:1997, rating:9.0,
+    tags:["psychological","thriller","horror","drama"],
+    desc:"A retiring pop idol turned actress finds her sense of self dissolving as a stalker, a phantom double, and her own television role bleed into reality. Satoshi Kon's directorial debut is one of the most disorienting, influential psychological thrillers ever animated — its fingerprints are all over Black Swan and Requiem for a Dream.",
+    info:"Film", studio:"Madhouse", img:"https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx437-69NMlXKFeuse.jpg" },
+
+  { rank:"S", emoji:"🎇", bg:"linear-gradient(135deg,#1a0800,#2e1400)",
+    title:"Grave of the Fireflies", year:1988, rating:9.1,
+    tags:["drama","historical"],
+    desc:"Two siblings orphaned by the firebombing of Kobe fight to survive in the last months of the Pacific War. Isao Takahata's devastating anti-war film is routinely named among the greatest animated works ever made, in any country, for any audience — a masterpiece it takes courage to watch twice.",
+    info:"Film", studio:"Studio Ghibli", img:"https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx578-vU6XcOlb1XFU.jpg" },
+
+  { rank:"S", emoji:"⭐", bg:"linear-gradient(135deg,#150015,#2a0025)",
+    title:"JoJo's Bizarre Adventure", year:2012, rating:8.6,
+    tags:["action","adventure","comedy","fantasy"],
+    desc:"Across generations of the Joestar bloodline, absurdly named heroes battle vampires, gods, and each other using manifestations of their fighting spirit called Stands. David Production's adaptation turned Hirohiko Araki's decades-running manga into one of anime's most quotable, most memed, and most fervently beloved franchises.",
+    info:"190+ Episodes", studio:"David Production", img:"https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx14719-VT5dRzTBSZ0w.jpg" },
+
+  { rank:"S", emoji:"🌠", bg:"linear-gradient(135deg,#0a0a2e,#1a1a4e)",
+    title:"Your Name", year:2016, rating:9.0,
+    tags:["romance","drama","fantasy"],
+    desc:"A boy in Tokyo and a girl in the mountains wake up randomly swapping bodies — and slowly realise they're separated by more than distance. Makoto Shinkai's breakout film turned him into Miyazaki's heir apparent almost overnight, marrying gorgeous light-drenched animation to a time-bending romance that earns every tear it draws.",
+    info:"Film", studio:"CoMix Wave Films", img:"https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx21519-SUo3ZQuCbYhJ.png" },
+
+  { rank:"A", emoji:"🏀", bg:"linear-gradient(135deg,#1a0800,#331000)",
+    title:"Slam Dunk", year:1993, rating:8.3,
+    tags:["sports","comedy","drama"],
+    desc:"A delinquent joins his high school basketball team to impress a girl and discovers he might actually love the game. Slam Dunk didn't just define the sports-anime genre — it triggered a real basketball boom in 1990s Japan, and every modern entry in the genre, Haikyuu included, is working in its shadow.",
+    info:"101 Episodes", studio:"Toei Animation", img:"https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx170-cmD8A0vZsp6g.jpg" },
+
+  { rank:"A", emoji:"🚗", bg:"linear-gradient(135deg,#000a1a,#001530)",
+    title:"Initial D", year:1998, rating:7.9,
+    tags:["action","drama","thriller"],
+    desc:"A tofu delivery boy who's spent years drifting mountain passes to keep his father's deliveries on time turns out to be the fastest unknown driver in the prefecture. Initial D fused eurobeat and street racing into a genuinely tense, technically-minded thriller that built a global car culture fandom of its own.",
+    info:"26 Episodes (First Stage)", studio:"Studio Comet", img:"https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/b185-GvXiR8AKTmdn.jpg" },
+
+  { rank:"A", emoji:"🏹", bg:"linear-gradient(135deg,#1a0505,#330a0a)",
+    title:"InuYasha", year:2000, rating:8.0,
+    tags:["fantasy","adventure","romance","action"],
+    desc:"A modern schoolgirl falls through a well into feudal Japan and teams up with a half-demon bound to her by a shattered magical jewel. Rumiko Takahashi's sprawling adventure defined a generation's idea of shonen fantasy-romance — equal parts demon-slaying action and slow-burn will-they-won't-they.",
+    info:"167 Episodes", studio:"Sunrise", img:"https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx249-jVBkyLnBvnRE.png" },
+
+  { rank:"S", emoji:"🌀", bg:"linear-gradient(135deg,#0d0d10,#1f1524)",
+    title:"Paranoia Agent", year:2004, rating:8.4,
+    tags:["psychological","mystery","thriller","drama"],
+    desc:"A string of seemingly unconnected assaults by a roller-blading boy with a golden baseball bat spirals into a city-wide unraveling of denial, shame, and collective delusion. Satoshi Kon's only TV series compresses his feature obsessions — identity, media, and the stories people tell to survive — into thirteen of the strangest episodes anime has produced.",
+    info:"13 Episodes", studio:"Madhouse", img:"https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx323-ZGkUcJOn4ngy.png" },
+
+  { rank:"A", emoji:"🌧️", bg:"linear-gradient(135deg,#0a1420,#0f2438)",
+    title:"Weathering with You", year:2019, rating:8.3,
+    tags:["romance","fantasy","drama"],
+    desc:"A runaway teenager falls for a girl who can pray away the rain in a Tokyo drowning under an endless, uncanny monsoon. Shinkai's follow-up to Your Name trades cosmic scale for something more intimate and morally messier — a love story that chooses two people over the entire city, and dares you to disagree.",
+    info:"Film", studio:"CoMix Wave Films", img:"https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx106286-5COcpd0J9VbL.png" },
+
+  { rank:"S", emoji:"🌌", bg:"linear-gradient(135deg,#000818,#001030)",
+    title:"Legend of the Galactic Heroes", year:1988, rating:8.8,
+    tags:["scifi","drama","historical"],
+    desc:"Two brilliant military commanders on opposite sides of a galactic civil war — one an idealistic democrat, one a ruthless autocrat — wage a decades-long war of strategy, philosophy, and grudging mutual respect. Widely cited as one of the best-written anime ever made: 110 episodes of political and military drama with barely a wasted scene.",
+    info:"110 Episodes", studio:"Artland", img:"https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx820-x5dNLNFeKb8B.png" },
+
+  { rank:"S", emoji:"🌹", bg:"linear-gradient(135deg,#1a0018,#2e0030)",
+    title:"Revolutionary Girl Utena", year:1997, rating:8.5,
+    tags:["fantasy","drama","romance","psychological"],
+    desc:"A girl who once dreamed of becoming a prince is drawn into a surreal, ritualised dueling tournament where the prize is a mysterious \"Rose Bride.\" Utena dismantles fairy-tale gender roles through psychedelic theatrical staging and thick layers of symbolism, and its DNA runs through nearly every ambitious anime that followed it — Madoka Magica included.",
+    info:"39 Episodes", studio:"J.C.Staff", img:"https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/b440-r4l3N5WGgUOZ.jpg" },
+
+  { rank:"A", emoji:"⏳", bg:"linear-gradient(135deg,#001018,#00202e)",
+    title:"Erased", year:2016, rating:8.2,
+    tags:["thriller","mystery","drama"],
+    desc:"A struggling manga artist with the involuntary power to rewind time moments before disaster is thrown eighteen years into the past to stop the murder that shaped his entire life. A-1 Pictures' tightly wound mystery thriller is one of the best-plotted whodunits anime has produced — and one of the hardest to put down mid-episode.",
+    info:"12 Episodes", studio:"A-1 Pictures", img:"https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx21234-XmqW39aQ9o7O.jpg" },
+
+  { rank:"A", emoji:"🎱", bg:"linear-gradient(135deg,#150000,#2a0000)",
+    title:"Death Parade", year:2015, rating:8.1,
+    tags:["psychological","drama","mystery"],
+    desc:"The recently deceased arrive, memories intact, at a bar between life and death — where an inhumanly composed bartender forces them to wager their souls on a game that reveals exactly who they really were. A one-premise anthology that gets more devastating with every episode, and one of the most purely emotional watches on this list.",
+    info:"12 Episodes", studio:"Madhouse", img:"https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/nx20931-bktYqOcxPERi.jpg" },
+
+  { rank:"A", emoji:"🐐", bg:"linear-gradient(135deg,#101a05,#1c2e0a)",
+    title:"Nichijou", year:2011, rating:8.3,
+    tags:["comedy"],
+    desc:"Ordinary school life collides with a robot girl, a talking cat, and a supremely deadpan goat in Kyoto Animation's most purely, gloriously stupid show. Nichijou takes slice-of-life absurdism and animates it with feature-film-level polish — its comic timing is so precise it borders on unreasonable.",
+    info:"26 Episodes", studio:"Kyoto Animation", img:"https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx10165-tw8Cz7K9tfVJ.png" },
+
+  { rank:"A", emoji:"🎸", bg:"linear-gradient(135deg,#1a1005,#301c08)",
+    title:"K-On!", year:2009, rating:7.9,
+    tags:["comedy","music"],
+    desc:"Four high schoolers join their school's light music club purely to save it from disbanding, and gradually become an actual band along the way. K-On! popularised the modern \"cute girls doing a hobby\" template so thoroughly that the entire subgenre is judged against it, and its soundtrack sold in numbers few anime bands ever match.",
+    info:"39 Episodes", studio:"Kyoto Animation", img:"https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx5680-r3AI3Cwfv0Aq.png" },
+
+  { rank:"A", emoji:"🎀", bg:"linear-gradient(135deg,#1a0512,#2e0a20)",
+    title:"Lucky Star", year:2007, rating:7.6,
+    tags:["comedy"],
+    desc:"Four girls talk about nothing in particular — video games, how to eat a choux cream, the correct way to eat a Christmas cake — across a school year with almost no plot at all. Lucky Star's meandering, meta, otaku-culture-fluent conversations helped invent the slice-of-life comedy format an entire industry still leans on.",
+    info:"24 Episodes", studio:"Kyoto Animation", img:"https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx1887-P36Pucd4qKji.png" },
+
+  { rank:"A", emoji:"🏍️", bg:"linear-gradient(135deg,#1a1500,#302800)",
+    title:"Great Teacher Onizuka", year:1999, rating:8.4,
+    tags:["comedy","drama"],
+    desc:"A former biker gang leader with zero teaching qualifications and a heart of gold talks, fights, and bluffs his way into becoming the best homeroom teacher his delinquent-filled class has ever had. GTO balances broad slapstick against genuinely moving episodes about the specific kids everyone else gave up on.",
+    info:"43 Episodes", studio:"Studio Pierrot", img:"https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx245-NcQAyTipUMeO.jpg" },
+
+  { rank:"A", emoji:"✨", bg:"linear-gradient(135deg,#05101a,#0a1c30)",
+    title:"Fairy Tail", year:2009, rating:7.7,
+    tags:["fantasy","adventure","action","comedy"],
+    desc:"A rowdy, family-like guild of wizards-for-hire takes on jobs across a world of magic, monsters, and increasingly apocalyptic dark guilds. Fairy Tail's found-family warmth and shonen power escalation made it one of the best-selling manga and longest-running anime adaptations of its era.",
+    info:"328 Episodes", studio:"A-1 Pictures / Bridge", img:"https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/b6702-KI4qgSMyI8Pm.png" },
+
+  { rank:"A", emoji:"💧", bg:"linear-gradient(135deg,#001515,#002828)",
+    title:"Ranma 1/2", year:1989, rating:7.8,
+    tags:["comedy","romance","action"],
+    desc:"A young martial artist cursed to turn into a girl whenever splashed with cold water is engaged, against his will, to the tomboy daughter of his father's old friend. Rumiko Takahashi's gender-bending farce is one of the foundational texts of anime romantic comedy, still hilarious decades after it aired.",
+    info:"161 Episodes", studio:"Studio Deen", img:"https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx210-qgahLDYT0t9b.png" },
+
+  { rank:"S", emoji:"🀄", bg:"linear-gradient(135deg,#150015,#280028)",
+    title:"The Tatami Galaxy", year:2010, rating:8.4,
+    tags:["comedy","drama","psychological"],
+    desc:"An unnamed college student replays his freshman year again and again in different campus clubs, each time convinced this club will finally give him the \"rose-colored campus life\" he was promised. Masaaki Yuasa's rapid-fire, visually inventive time-loop comedy is one of anime's smartest meditations on regret and self-sabotage.",
+    info:"11 Episodes", studio:"Madhouse", img:"https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx7785-aTjIhsYva8cJ.jpg" },
+
+  { rank:"A", emoji:"🌸", bg:"linear-gradient(135deg,#0a1220,#1a1830)",
+    title:"5 Centimeters per Second", year:2007, rating:8.0,
+    tags:["romance","drama"],
+    desc:"Childhood sweethearts separated by Japan's geography and the slow drift of growing up try, and fail, and try again to stay close across three linked short stories. Shinkai's early masterwork of bittersweet, unresolved romance is gorgeous and genuinely painful in roughly equal measure.",
+    info:"Film", studio:"CoMix Wave Films", img:"https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx1689-rJKhjLEjQHSy.jpg" },
+
+  { rank:"A", emoji:"🔮", bg:"linear-gradient(135deg,#001420,#002638)",
+    title:"To Your Eternity", year:2021, rating:8.3,
+    tags:["fantasy","drama","adventure"],
+    desc:"An immortal, shapeshifting orb is dropped on Earth with no sense of self and slowly learns what it means to be alive by taking the form of everyone it loses. A meditation on grief and growth told across centuries, adapted with real emotional patience by Brain's Base.",
+    info:"20 Episodes (Season 1)", studio:"Brain's Base", img:"https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx114535-y3NnjexcqKG1.jpg" },
+
+  { rank:"S", emoji:"🎤", bg:"linear-gradient(135deg,#001a1a,#150030)",
+    title:"Vivy: Fluorite Eye's Song", year:2021, rating:8.4,
+    tags:["scifi","action","drama","music"],
+    desc:"An android built for one purpose — singing — is recruited by a visitor from a war-torn future to prevent an AI uprising a hundred years before it happens. Wit Studio's original sci-fi thriller is tightly plotted, gorgeously animated, and one of the best non-adapted anime of the decade.",
+    info:"13 Episodes", studio:"Wit Studio", img:"https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx128546-UIwyhuhjxmL0.jpg" },
+
+  { rank:"A", emoji:"🌃", bg:"linear-gradient(135deg,#001015,#001d24)",
+    title:"Durarara!!", year:2010, rating:8.0,
+    tags:["mystery","thriller","fantasy"],
+    desc:"A headless \"Black Rider\" motorcycles through Ikebukuro's neon streets as gangs, information brokers, and a chainsaw-wielding bartender's ordinary night collide into an ensemble urban legend. Durarara!! weaves a dozen unreliable perspectives into one of the most stylish mystery-thrillers anime has produced.",
+    info:"26 Episodes", studio:"Brain's Base", img:"https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx6746-3LTwM95Uqeoa.png" },
 ];
 
-// ===================== GAMES DATA (111 titles, 1993–2025) =====================
+// ===================== GAMES DATA (139 titles, 1992–2025) =====================
 const GAMES = [
   // ── 1993 ──────────────────────────────────────────────────────────────────
   { rank:"S", emoji:"💀", bg:"linear-gradient(135deg,#1a0000,#330000)",
@@ -1384,6 +1529,175 @@ const GAMES = [
     tags:["action","adventure","historical"],
     desc:"A samurai defies the honour of his code to become a ghost — using stealth and guerrilla tactics to repel a Mongol invasion of 13th-century Japan. Sucker Punch's open-world masterpiece is the most cinematically beautiful game ever made, with sword combat that makes every duel feel like the last scene of a samurai film.",
     info:"Open World Action", studio:"Sucker Punch Productions", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/2215430/header.jpg" },
+
+  // ── Additions: conspicuous omissions ─────────────────────────────────────
+  { rank:"S", emoji:"🏜️", bg:"linear-gradient(135deg,#1a1000,#332000)",
+    title:"Journey", year:2019, rating:9.0,
+    tags:["adventure","indie"],
+    desc:"A robed traveller crosses a vast desert toward a distant mountain, meeting other silent players along the way who can help — or simply share the journey. Thatgamecompany's wordless masterpiece remains one of the most awarded games ever made, and one of the only games ever to move a room to genuine tears without a line of dialogue.",
+    info:"Adventure", studio:"thatgamecompany", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/638230/header.jpg" },
+
+  { rank:"S", emoji:"⏱️", bg:"linear-gradient(135deg,#0a1a05,#1c3008)",
+    title:"Braid", year:2009, rating:8.5,
+    tags:["puzzle","platformer","indie"],
+    desc:"A man who can rewind time searches for a princess through puzzles where death and mistakes are never quite permanent. Jonathan Blow's breakout hit proved a single mechanic, taken seriously, could carry both devious puzzle design and real emotional weight — and helped kick off the entire modern indie games movement.",
+    info:"Puzzle Platformer", studio:"Number None", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/26800/header.jpg" },
+
+  { rank:"S", emoji:"🌲", bg:"linear-gradient(135deg,#050505,#141414)",
+    title:"Limbo", year:2011, rating:8.6,
+    tags:["puzzle","platformer","horror","indie"],
+    desc:"A boy wakes at the edge of a monochrome forest and walks deeper into a world of silhouettes, giant spiders, and instant, unexplained deaths. Playdead's black-and-white debut turned minimalism into dread, and its trial-and-error platforming set the template every atmospheric indie puzzler since has borrowed from.",
+    info:"Puzzle Platformer", studio:"Playdead", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/48000/header.jpg" },
+
+  { rank:"S", emoji:"👁️", bg:"linear-gradient(135deg,#0a0a0a,#1a0505)",
+    title:"Inside", year:2016, rating:9.0,
+    tags:["puzzle","platformer","horror","indie"],
+    desc:"A boy flees through a grey, totalitarian landscape of mind-controlled workers and something far worse waiting at the end. Playdead's follow-up to Limbo is even more unsettling and even better constructed — a nearly wordless puzzle-platformer building to one of gaming's most talked-about final ten minutes.",
+    info:"Puzzle Platformer", studio:"Playdead", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/304430/header.jpg", awards:[{cls:'critics', text:'🏆 BAFTA Best Game 2017'}] },
+
+  { rank:"S", emoji:"🚪", bg:"linear-gradient(135deg,#151008,#2a2010)",
+    title:"The Stanley Parable", year:2013, rating:8.8,
+    tags:["adventure","comedy","indie"],
+    desc:"Stanley's job is pressing buttons in an empty office — until one day everyone else simply isn't there, and a narrator starts telling him exactly what he's about to do next. A first-person exploration of choice, obedience, and video-game logic itself, and still one of the funniest, most quotable games ever written.",
+    info:"Narrative Adventure", studio:"Galactic Cafe", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/221910/header.jpg" },
+
+  { rank:"S", emoji:"📋", bg:"linear-gradient(135deg,#0a0a0a,#1a0a0a)",
+    title:"Papers, Please", year:2013, rating:8.9,
+    tags:["simulation","indie","drama","psychological"],
+    desc:"As a border checkpoint inspector for a fictional Soviet-bloc state, you stamp passports, spot forgeries, and decide — over and over — whether to enforce an increasingly inhuman set of rules to keep your family fed. A bureaucratic paperwork simulator that becomes one of gaming's sharpest moral thought experiments.",
+    info:"Dystopian Simulation", studio:"3909 LLC", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/239030/header.jpg", awards:[{cls:'special', text:'🌟 IGF Grand Prize 2014'}] },
+
+  { rank:"A", emoji:"🔥", bg:"linear-gradient(135deg,#1a0a00,#2e1500)",
+    title:"Firewatch", year:2016, rating:8.3,
+    tags:["adventure","mystery","indie","drama"],
+    desc:"A Wyoming fire lookout spends a summer talking, almost entirely by radio, to the supervisor stationed in a tower across the wilderness — until things in the forest start feeling watched rather than watching. Campo Santo's slow-burn mystery is carried almost entirely by two voice performances and a gorgeous, lonely landscape.",
+    info:"Narrative Adventure", studio:"Campo Santo", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/383870/header.jpg" },
+
+  { rank:"S", emoji:"🏚️", bg:"linear-gradient(135deg,#001015,#001c24)",
+    title:"What Remains of Edith Finch", year:2017, rating:8.9,
+    tags:["adventure","drama","indie","mystery"],
+    desc:"The last surviving member of a cursed family walks through her abandoned childhood home, and each relative's bedroom becomes a wildly different, playable vignette of exactly how they died. Giant Sparrow's anthology of grief and imagination reinvents its own rules almost every ten minutes and never once runs out of ideas.",
+    info:"Narrative Adventure", studio:"Giant Sparrow", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/501300/header.jpg", awards:[{cls:'critics', text:'🏆 BAFTA Game of the Year 2018'}] },
+
+  { rank:"S", emoji:"🏠", bg:"linear-gradient(135deg,#001a10,#00301c)",
+    title:"The Sims", year:2000, rating:8.5,
+    tags:["simulation"],
+    desc:"Build a house, control the daily lives of the people in it, and decide whether that pool ladder really needs to stay in the water. Will Wright's life simulator became the best-selling PC game franchise in history by finding drama, comedy, and genuine emotional attachment in the most mundane possible premise.",
+    info:"Life Simulation", studio:"Maxis", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/3314060/header.jpg" },
+
+  { rank:"A", emoji:"🏙️", bg:"linear-gradient(135deg,#0a1420,#182838)",
+    title:"SimCity 2000", year:1993, rating:8.4,
+    tags:["simulation","strategy"],
+    desc:"Zone residential, commercial, and industrial land, lay down roads and power lines, and watch your city either flourish or collapse under its own traffic and taxes. The most beloved entry in Maxis's city-building series, and the game an entire genre of urban-planning sims still measures itself against.",
+    info:"City-Building Sim", studio:"Maxis" },
+
+  { rank:"S", emoji:"🌆", bg:"linear-gradient(135deg,#0a1020,#1a2838)",
+    title:"Cities: Skylines", year:2015, rating:8.7,
+    tags:["simulation","strategy","sandbox"],
+    desc:"A modern, deeply systemic city-builder that lets you obsess over traffic flow, zoning, and public transit at a level of detail SimCity never attempted — then mod almost all of it. Colossal Order's genre-defining sim became the definitive city-builder of its generation almost by default, and stayed there for a decade.",
+    info:"City-Building Sim", studio:"Colossal Order", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/255710/header.jpg" },
+
+  { rank:"S", emoji:"🦉", bg:"linear-gradient(135deg,#001a15,#003328)",
+    title:"Ori and the Blind Forest", year:2015, rating:9.0,
+    tags:["platformer","adventure","indie"],
+    desc:"A guardian spirit restores a dying forest through precision platforming across some of the most painterly, hand-crafted environments ever put in a game. Moon Studios' metroidvania pairs Hollow Knight-tier exploration with a genuinely moving story about loss — and a soundtrack that still gets people crying on YouTube.",
+    info:"Metroidvania", studio:"Moon Studios", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/261570/header.jpg" },
+
+  { rank:"S", emoji:"🕊️", bg:"linear-gradient(135deg,#00151a,#002833)",
+    title:"Ori and the Will of the Wisps", year:2020, rating:9.1,
+    tags:["platformer","adventure","indie"],
+    desc:"Ori's sequel doubles the scale, adds real combat depth, and somehow makes the original's already-stunning art and music even better. A rare sequel that improves on a beloved original in almost every measurable way, and one of the best-reviewed platformers of its generation.",
+    info:"Metroidvania", studio:"Moon Studios", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/1057090/header.jpg" },
+
+  { rank:"S", emoji:"🌃", bg:"linear-gradient(135deg,#1a0020,#000a20)",
+    title:"Yakuza 0", year:2018, rating:9.0,
+    tags:["action","rpg","adventure","drama"],
+    desc:"Two former yakuza retrace how a single disputed plot of land in 1980s Kamurocho spirals into a citywide conspiracy — between beating up street thugs and running a cabaret club or real-estate empire on the side. The best entry point into the entire Like a Dragon series: melodrama, slapstick, and genuinely great brawling combat in one absurd package.",
+    info:"Action RPG", studio:"Ryu Ga Gotoku Studio", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/2988580/header.jpg" },
+
+  { rank:"S", emoji:"👽", bg:"linear-gradient(135deg,#0a1005,#1a2008)",
+    title:"XCOM 2", year:2016, rating:8.7,
+    tags:["strategy","scifi"],
+    desc:"Twenty years after humanity lost the first invasion, a guerrilla resistance runs hit-and-run missions against the alien occupation from a stolen flying base. Firaxis's turn-based tactics sequel is punishingly, gloriously difficult — every mission is a puzzle where one wrong move costs a soldier you've grown to actually care about.",
+    info:"Turn-Based Strategy", studio:"Firaxis Games", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/593380/header.jpg" },
+
+  { rank:"S", emoji:"⚔️", bg:"linear-gradient(135deg,#0a1500,#1a2600)",
+    title:"Dead Cells", year:2018, rating:8.9,
+    tags:["roguelite","platformer","action","indie"],
+    desc:"Die, lose almost everything, and run the castle again with fluid Metroidvania-tier combat and a build that's different every time. Motion Twin's roguelite is frequently cited as the genre's gold standard for how satisfying moment-to-moment movement and combat can carry a run-based structure.",
+    info:"Roguelite", studio:"Motion Twin", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/588650/header.jpg" },
+
+  { rank:"S", emoji:"🔮", bg:"linear-gradient(135deg,#000f1a,#001c30)",
+    title:"Final Fantasy XIV: A Realm Reborn", year:2013, rating:8.9,
+    tags:["rpg","fantasy","adventure"],
+    desc:"After the original Final Fantasy XIV launched to disaster in 2010, Square Enix destroyed the entire game world in-story and rebuilt it from scratch. A Realm Reborn is one of the great redemption arcs in gaming history — now widely regarded as the best story-driven MMO on the market, with expansions that regularly out-write full single-player RPGs.",
+    info:"MMORPG", studio:"Square Enix", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/39210/header.jpg" },
+
+  { rank:"A", emoji:"💀", bg:"linear-gradient(135deg,#0f0000,#200000)",
+    title:"Path of Exile", year:2013, rating:8.6,
+    tags:["rpg","action","fantasy"],
+    desc:"A free-to-play action-RPG with a skill system so dense it has its own passive-skill constellation the size of a galaxy, built for players who found Diablo's build variety too shallow. Grinding Gear Games' loot-driven ARPG earned a reputation as the genre's most respected, most theorycrafted alternative.",
+    info:"Action RPG", studio:"Grinding Gear Games", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/238960/header.jpg" },
+
+  { rank:"A", emoji:"🐉", bg:"linear-gradient(135deg,#0a1500,#182a00)",
+    title:"Guild Wars 2", year:2012, rating:8.4,
+    tags:["rpg","fantasy","adventure"],
+    desc:"An MMO built around no subscription fee, dynamic public events instead of static quest hubs, and a philosophy that everyone fighting the same monster should be on the same team, not competing for kills. ArenaNet's design broke enough MMO conventions to earn a permanently loyal following over a decade later.",
+    info:"MMORPG", studio:"ArenaNet", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/1284210/header.jpg" },
+
+  { rank:"S", emoji:"🖥️", bg:"linear-gradient(135deg,#150000,#280000)",
+    title:"System Shock 2", year:1999, rating:8.9,
+    tags:["scifi","horror","rpg"],
+    desc:"A hacked-together soldier wakes from cryo-sleep aboard a starship overrun by mutants, psychic monks, and a sadistic AI who narrates your death well in advance. The blueprint for the entire immersive-sim genre — BioShock's most direct ancestor, and still one of the most atmospheric horror games ever made on PC.",
+    info:"Immersive Sim", studio:"Looking Glass Studios / Irrational Games", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/866570/header.jpg" },
+
+  { rank:"S", emoji:"🦾", bg:"linear-gradient(135deg,#001015,#00232e)",
+    title:"Into the Breach", year:2018, rating:8.8,
+    tags:["strategy","roguelite","indie","scifi"],
+    desc:"Pilot giant mechs through single-screen tactical puzzles where every enemy's next attack is shown to you in advance — the challenge is finding the one sequence of moves that saves the city. FTL's follow-up compresses tactics-game complexity into tiny, perfectly legible battles that reward pure clear-headed thinking.",
+    info:"Tactics", studio:"Subset Games", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/590380/header.jpg" },
+
+  { rank:"A", emoji:"❄️", bg:"linear-gradient(135deg,#000f1a,#00202e)",
+    title:"Frostpunk", year:2018, rating:8.5,
+    tags:["simulation","survival","strategy"],
+    desc:"The last city on a frozen Earth survives around a single massive generator, and keeping it running means making the kind of laws — child labour, show trials, medical triage — no one wants to sign. 11 bit studios' survival city-builder turns resource management into a genuinely uncomfortable ethics exam.",
+    info:"City Survival", studio:"11 bit studios", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/323190/header.jpg" },
+
+  { rank:"A", emoji:"🔫", bg:"linear-gradient(135deg,#150800,#2a1000)",
+    title:"Wolfenstein 3D", year:1992, rating:7.8,
+    tags:["fps","action"],
+    desc:"Escape a Nazi castle prison one gunned-down guard at a time, in the game that took the first-person shooter from niche curiosity to the format that would define PC gaming for the next three decades. id Software's breakthrough predates Doom and is the reason \"Wolfenstein clone\" was briefly the genre's own name.",
+    info:"FPS", studio:"id Software", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/2270/header.jpg" },
+
+  { rank:"A", emoji:"🎢", bg:"linear-gradient(135deg,#1a0f00,#331e00)",
+    title:"RollerCoaster Tycoon", year:1999, rating:8.3,
+    tags:["simulation","strategy"],
+    desc:"Design and manage a theme park down to the individual coaster track piece, guest happiness meter, and litter bin placement — all hand-coded almost entirely in assembly by a single programmer. Chris Sawyer's tycoon sim remains the genre's most beloved entry, still played and modded a quarter-century later.",
+    info:"Tycoon Sim", studio:"Chris Sawyer Productions", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/285310/header.jpg" },
+
+  { rank:"A", emoji:"🏴‍☠️", bg:"linear-gradient(135deg,#001a15,#003025)",
+    title:"Return to Monkey Island", year:2022, rating:8.4,
+    tags:["adventure","comedy","puzzle"],
+    desc:"Ron Gilbert returns to the pirate-comedy adventure series he created over thirty years earlier to finally answer the question the original games left hanging: what really is the secret of Monkey Island? A stylish, funny, surprisingly emotional love letter to the point-and-click adventure genre it helped invent.",
+    info:"Point-and-Click Adventure", studio:"Terrible Toybox", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/2060130/header.jpg" },
+
+  { rank:"A", emoji:"⛏️", bg:"linear-gradient(135deg,#0a0f1a,#182338)",
+    title:"Shovel Knight", year:2014, rating:8.7,
+    tags:["platformer","action","indie"],
+    desc:"A knight armed with a shovel digs, bounces, and slashes through an 8-bit-styled kingdom in a love letter to NES-era platformers that improves on nearly every game it's inspired by. Yacht Club Games' debut is routinely cited as one of the finest platformers of the entire indie era.",
+    info:"Action Platformer", studio:"Yacht Club Games", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/250760/header.jpg" },
+
+  { rank:"A", emoji:"🎒", bg:"linear-gradient(135deg,#0f1005,#1e2008)",
+    title:"Escape from Tarkov", year:2017, rating:8.2,
+    tags:["fps","survival","thriller"],
+    desc:"Loot a war-torn Russian city for gear you might actually lose forever if you die on the way out, in a punishingly realistic shooter where every raid is a genuine risk-reward decision. Battlestate Games' hardcore extraction shooter essentially created the genre that Escape-from-Tarkov-likes are now named after.",
+    info:"Extraction Shooter", studio:"Battlestate Games", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/3932890/header.jpg" },
+
+  { rank:"A", emoji:"🗡️", bg:"linear-gradient(135deg,#0a0018,#150030)",
+    title:"Warframe", year:2013, rating:8.3,
+    tags:["action","scifi","rpg"],
+    desc:"Space ninjas in bio-mechanical exosuits slice through enemy factions with some of the fastest, most acrobatic melee and gunplay combat on PC, all free-to-play and refined for over a decade of continuous content updates. Digital Extremes' longevity-through-quality approach makes it the rare live-service game praised for treating its players well.",
+    info:"Looter Shooter", studio:"Digital Extremes", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/230410/header.jpg" },
 ];
 
 // ===================== STREAMING & JP DATA =====================
@@ -1443,6 +1757,22 @@ const STREAM_MAP = {
   "A Plague Tale: Requiem":["Steam"], "Deathloop":["Steam"],
   "Hi-Fi Rush":["Steam"], "Dave the Diver":["Steam"], "Sifu":["Steam","Epic"],
   "Vampire Survivors":["Steam"], "Valheim":["Steam"], "Crusader Kings III":["Steam"],
+  // Additions
+  "Grave of the Fireflies":["Netflix"], "JoJo's Bizarre Adventure":["Crunchyroll"],
+  "Your Name":["Crunchyroll"], "InuYasha":["Crunchyroll"], "Weathering with You":["Crunchyroll"],
+  "Erased":["Crunchyroll"], "Death Parade":["Crunchyroll"], "Nichijou":["Crunchyroll"],
+  "Fairy Tail":["Crunchyroll"], "5 Centimeters per Second":["Crunchyroll"],
+  "To Your Eternity":["Crunchyroll"], "Vivy: Fluorite Eye's Song":["Crunchyroll"],
+  "Journey":["Steam","Epic"], "Braid":["Steam"], "Limbo":["Steam"], "Inside":["Steam"],
+  "The Stanley Parable":["Steam"], "Papers, Please":["Steam"], "Firewatch":["Steam"],
+  "What Remains of Edith Finch":["Steam"], "Cities: Skylines":["Steam"],
+  "Ori and the Blind Forest":["Steam"], "Ori and the Will of the Wisps":["Steam","Epic"],
+  "Yakuza 0":["Steam"], "XCOM 2":["Steam"], "Dead Cells":["Steam"],
+  "Final Fantasy XIV: A Realm Reborn":["Steam"], "Path of Exile":["Steam"],
+  "Guild Wars 2":["Steam"], "System Shock 2":["Steam","GOG"], "Into the Breach":["Steam"],
+  "Frostpunk":["Steam","GOG"], "Wolfenstein 3D":["Steam","GOG"],
+  "RollerCoaster Tycoon":["Steam","GOG"], "Return to Monkey Island":["Steam"],
+  "Shovel Knight":["Steam"], "Warframe":["Steam"],
 };
 
 const JP_TITLES = {
@@ -1477,6 +1807,18 @@ const JP_TITLES = {
   "Gurren Lagann":"天元突破グレンラガン",
   "Sword Art Online":"ソードアート・オンライン",
   "Ranking of Kings":"王様ランキング",
+  // Additions
+  "Perfect Blue":"パーフェクトブルー", "Grave of the Fireflies":"火垂るの墓",
+  "JoJo's Bizarre Adventure":"ジョジョの奇妙な冒険", "Your Name":"君の名は。",
+  "Slam Dunk":"SLAM DUNK", "Initial D":"頭文字D", "InuYasha":"犬夜叉",
+  "Paranoia Agent":"妄想代理人", "Weathering with You":"天気の子",
+  "Legend of the Galactic Heroes":"銀河英雄伝説",
+  "Revolutionary Girl Utena":"少女革命ウテナ", "Erased":"僕だけがいない街",
+  "Death Parade":"デス・パレード", "Nichijou":"日常", "K-On!":"けいおん!",
+  "Lucky Star":"らき☆すた", "Great Teacher Onizuka":"GTO",
+  "Fairy Tail":"フェアリーテイル", "Ranma 1/2":"らんま½",
+  "The Tatami Galaxy":"四畳半神話大系", "5 Centimeters per Second":"秒速５センチメートル",
+  "To Your Eternity":"不滅のあなたへ", "Durarara!!":"デュラララ!!",
 };
 
 // ===================== FRANCHISES =====================
@@ -1488,6 +1830,7 @@ const FRANCHISES = {
   'Fate/Zero': 'Fate', 'Fate/Stay Night: Unlimited Blade Works': 'Fate',
   'My Neighbor Totoro': 'Studio Ghibli', 'Princess Mononoke': 'Studio Ghibli',
   'Spirited Away': 'Studio Ghibli', 'Howl\'s Moving Castle': 'Studio Ghibli',
+  'Grave of the Fireflies': 'Studio Ghibli',
   'Lupin III Part I': 'Lupin III',
   'Solo Leveling': 'Solo Leveling', 'Solo Leveling: Arise from the Shadow': 'Solo Leveling',
   'Mobile Suit Gundam': 'Gundam',
@@ -1514,6 +1857,7 @@ const FRANCHISES = {
   'Persona 4 Golden': 'Persona', 'Persona 5 Royal': 'Persona',
   'Monster Hunter: World': 'Monster Hunter', 'Monster Hunter Wilds': 'Monster Hunter',
   'Dragon Age: Origins': 'Dragon Age', 'Dragon Age: The Veilguard': 'Dragon Age',
-  'Like a Dragon: Infinite Wealth': 'Like a Dragon',
+  'Like a Dragon: Infinite Wealth': 'Like a Dragon', 'Yakuza 0': 'Like a Dragon',
   'Civilization VII': 'Civilization',
+  'Ori and the Blind Forest': 'Ori', 'Ori and the Will of the Wisps': 'Ori',
 };

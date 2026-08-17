@@ -39,6 +39,13 @@ test.use({ reducedMotion: 'reduce' });
 test.describe('accessibility', () => {
   for (const [name, path] of PAGES) {
     test(`${name} page has no WCAG A/AA violations`, async ({ page }) => {
+      // The catalogue page's DOM scales with the number of cards (132+ now);
+      // color-contrast is axe's most expensive rule, and scanning that many
+      // cards genuinely exceeds the default 30s under CI-level load — this
+      // isn't the thing under test, so give it real headroom instead of
+      // either flaking or silently skipping the check.
+      if (name === 'catalogue') test.setTimeout(75_000);
+
       await stubThirdParty(page);
       await page.goto(path);
       await page.waitForLoadState('networkidle');
@@ -54,6 +61,7 @@ test.describe('accessibility', () => {
   }
 
   test('the filter drawer stays accessible when open', async ({ page }) => {
+    test.setTimeout(75_000); // same large-DOM scan cost as the catalogue page above
     await stubThirdParty(page);
     await page.goto('/anime/');
     await page.waitForLoadState('networkidle');

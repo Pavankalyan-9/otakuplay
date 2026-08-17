@@ -44,6 +44,13 @@ async function loadCatalogue() {
    here when a search comes back empty rather than loosening the matcher. */
 const SEARCH_ALIASES = {
   'Lupin III Part I': 'Lupin III',
+  // The bare title's top Steam hit is a different, much newer game in the
+  // same franchise — these terms land on the correct product instead.
+  'RollerCoaster Tycoon': 'RollerCoaster Tycoon Deluxe',
+  'Final Fantasy XIV: A Realm Reborn': 'FINAL FANTASY XIV Online',
+  // The original 2000 game isn't sold standalone on Steam; EA's 2024
+  // re-release is the correct (and only) legitimate match.
+  'The Sims': 'The Sims Legacy',
 };
 
 /* Titles with no public art source — Blizzard sells these on Battle.net, so they
@@ -51,6 +58,14 @@ const SEARCH_ALIASES = {
    otherwise the card falls back to its gradient, which is by design. */
 const MANUAL_ART = {
   // 'StarCraft': 'https://…',
+  // AniList's search ranks an unrelated same-year short film above the real
+  // entry for generic terms like "Your Name"; byYear matching would grab it
+  // first regardless of alias. Pinned to the actual highest-popularity match.
+  'Your Name': 'https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx21519-SUo3ZQuCbYhJ.png',
+  // The Steam listing is "FINAL FANTASY XIV Online" — too little word overlap
+  // with our title (which keeps "A Realm Reborn" for the description's sake)
+  // to pass the fuzzy-match confidence check. Confirmed app id via direct search.
+  'Final Fantasy XIV: A Realm Reborn': 'https://cdn.cloudflare.steamstatic.com/steam/apps/39210/header.jpg',
 };
 
 /* What we send to the APIs: drop a disambiguating "(2003)" but keep apostrophes

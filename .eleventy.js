@@ -26,6 +26,19 @@ export default function (eleventyConfig) {
   eleventyConfig.addFilter('absoluteUrl', (path, base) =>
     new URL(path.replace(/^\//, ''), base.endsWith('/') ? base : `${base}/`).href);
 
+  /* Nunjucks's `selectattr(attr, 'equalto', value)` silently returns the whole
+     list unfiltered here rather than throwing — a real trap, not a typo — so
+     every hub lookup runs as plain JS instead of trusting template-side
+     filtering. This was shipping wrong decade/genre/sibling links on every
+     entry and hub page (e.g. a game linking to an anime decade hub) before
+     it was caught. */
+  eleventyConfig.addFilter('findHub', (list, sect, slug) =>
+    (list || []).find(h => h.sect === sect && h.slug === slug) || null);
+  eleventyConfig.addFilter('findFranchiseHub', (list, heading) =>
+    (list || []).find(h => h.heading === heading) || null);
+  eleventyConfig.addFilter('hubSiblings', (list, sect, excludeSlug) =>
+    (list || []).filter(h => h.sect === sect && h.slug !== excludeSlug));
+
   return {
     dir: {
       input: 'src',

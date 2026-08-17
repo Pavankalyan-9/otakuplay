@@ -1,12 +1,12 @@
 # ⚡ OtakuPlay
 
-A ranked, decade-by-decade catalogue of the best anime (1963–2025) and best PC games (1993–2025) — 219 curated titles with genres, studios, ratings, awards and streaming/store availability.
+A ranked, decade-by-decade catalogue of the best anime (1963–2025) and best PC games (1992–2025) — 271 curated titles with genres, studios, ratings, awards and streaming/store availability.
 
 A static, five-page site with no runtime framework and no backend: Eleventy assembles the pages at build time, and the catalogue itself is plain JavaScript. Everything you track (favorites, status, personal ratings, notes) stays in your browser's `localStorage` and can be exported to JSON — there is no account and nothing is sent to a server.
 
 ## Features
 
-- **219 curated entries** — 108 anime, 111 PC games, grouped by decade with era labels, with cover art
+- **271 curated entries** — 132 anime, 139 PC games, grouped by decade with era labels, with cover art
 - **Filter & sort** — genre (multi-select, any/all), year range, studio, minimum rating, watch/play status, favorites, new releases; sort by year, rating, A→Z or tier
 - **Personal library** — mark status (watched / watching / plan / dropped), rate 1–10, keep private notes
 - **Recommendations** — "because you liked X" picks scored from your own ratings, statuses and favorites
@@ -31,7 +31,7 @@ A static, five-page site with no runtime framework and no backend: Eleventy asse
 | `/games/` | The full PC games catalogue with filters |
 | `/insights/` | Your library, recommendations, catalogue stats |
 | `/about/` | How rankings are chosen, data sources, where your data lives |
-| `/anime/<slug>/` | A page per title — 219 of them, generated from `data.js` |
+| `/anime/<slug>/` | A page per title — 271 of them, generated from `data.js` |
 | `/anime/genre/<id>/`, `/anime/decade/<1990s>/` | Ranked hub pages — ~70 total, skipped when fewer than 3 entries qualify |
 | `/franchise/<slug>/` | Every entry in a franchise (`FRANCHISES` in `data.js`), in release order |
 | `/404.html` | Custom not-found page with search and quick links |
