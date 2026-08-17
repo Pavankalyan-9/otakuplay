@@ -308,9 +308,15 @@ function buildCard(item, idx, groupId) {
          style="animation-delay:${Math.min(idx, 12) * 0.04}s">
       <div class="card-banner">
         <div class="card-banner-bg" style="background:${item.bg}" aria-hidden="true">${item.emoji}</div>
-        ${item.img ? `<img class="card-banner-img" src="${escapeHtml(item.img)}" alt=""
-             loading="${eagerBudget-- > 0 ? 'eager' : 'lazy'}" decoding="async"
-             referrerpolicy="no-referrer" onload="this.classList.add('loaded')" onerror="this.remove()">` : ''}
+        ${item.img ? (() => {
+          // Portrait anime covers and landscape Steam headers share one frame:
+          // the art is contained, and a blurred copy of itself fills the gap.
+          const src = escapeHtml(item.img);
+          const loading = eagerBudget-- > 0 ? 'eager' : 'lazy';
+          return `<img class="card-art-blur" src="${src}" alt="" aria-hidden="true" loading="${loading}" decoding="async" referrerpolicy="no-referrer" onerror="this.remove()">
+        <img class="card-banner-img" src="${src}" alt="" loading="${loading}" decoding="async"
+             referrerpolicy="no-referrer" onload="this.classList.add('loaded')" onerror="this.remove()">`;
+        })() : ''}
         <div class="card-banner-overlay"></div>
         <span class="card-rank rank-${item.rank.toLowerCase()}">Tier ${item.rank}</span>
         <span class="card-year-badge">${item.year}</span>
@@ -474,6 +480,7 @@ function applyFilter(sectKey) {
   renderEmptyState(sectKey, grid);
   updateVisibleCount(sectKey);
   updateDecadeJumpBar(sectKey);
+  renderChips(sectKey);
 }
 
 function renderEmptyState(sectKey, grid) {
@@ -508,18 +515,8 @@ function resetFilters(sectKey) {
   s.filters = new Set(); s.minRating = 0; s.search = ''; s.status = 'all';
   s.yearFrom = Math.min(...years); s.yearTo = Math.max(...years);
   s.studio = 'all'; s.genreMode = 'any';
-  syncRefineRow(sectKey);
-  const id = ids(sectKey);
-  const section = document.getElementById(id.section);
 
-  section.querySelectorAll('.filter-btn').forEach(b => setPressed(b, b.dataset.filter === 'all'));
-  document.getElementById(id.statusRow)?.querySelectorAll('.status-btn').forEach(b => setPressed(b, b.dataset.status === 'all'));
-  const input = document.getElementById(id.search);
-  if (input) input.value = '';
-  document.getElementById(id.clear)?.classList.remove('visible');
-  const slider = document.getElementById(id.slider);
-  if (slider) { slider.value = 0; document.getElementById(id.ratingVal).textContent = 'Any'; }
-
+  syncControls(sectKey);
   applyFilter(sectKey);
   pushHash();
 }
@@ -561,16 +558,123 @@ function setupFilters(sectKey) {
 }
 
 function setupSort(sectKey) {
-  const section = document.getElementById(ids(sectKey).section);
-  section.querySelectorAll('.sort-btn').forEach(btn => {
-    btn.setAttribute('aria-pressed', String(btn.classList.contains('active')));
-    btn.addEventListener('click', () => {
-      section.querySelectorAll('.sort-btn').forEach(b => setPressed(b, b === btn));
-      state[sectKey].sort = btn.dataset.sort;
-      renderSection(sectKey);
-      pushHash();
-    });
+  const select = document.getElementById(`${sectKey}-sort`);
+  if (!select) return;
+  select.value = state[sectKey].sort;
+  select.addEventListener('change', () => {
+    state[sectKey].sort = select.value;
+    renderSection(sectKey);
+    pushHash();
   });
+}
+
+// ===================== TOOLBAR: DRAWER, MENU, CHIPS =====================
+function setupToolbar(sectKey) {
+  const section = document.getElementById(ids(sectKey).section);
+  const toggle  = document.getElementById(`${sectKey}-filter-toggle`);
+  const panel   = document.getElementById(`${sectKey}-filter-panel`);
+  const moreBtn = document.getElementById(`${sectKey}-more`);
+  const menu    = document.getElementById(`${sectKey}-more-menu`);
+
+  toggle?.addEventListener('click', () => {
+    const open = toggle.getAttribute('aria-expanded') === 'true';
+    toggle.setAttribute('aria-expanded', String(!open));
+    toggle.classList.toggle('open', !open);
+    panel.hidden = open;
+  });
+
+  const closeMenu = () => { moreBtn.setAttribute('aria-expanded', 'false'); menu.hidden = true; };
+  moreBtn?.addEventListener('click', e => {
+    e.stopPropagation();
+    const open = moreBtn.getAttribute('aria-expanded') === 'true';
+    moreBtn.setAttribute('aria-expanded', String(!open));
+    menu.hidden = open;
+  });
+  menu?.addEventListener('click', closeMenu);
+  document.addEventListener('click', e => { if (!menu.hidden && !menu.contains(e.target)) closeMenu(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !menu.hidden) { closeMenu(); moreBtn.focus(); } });
+
+  section.querySelector('.panel-reset')?.addEventListener('click', () => resetFilters(sectKey));
+}
+
+/* One chip per active constraint, so what's filtering stays visible without
+   opening the drawer. Each chip clears just its own constraint. */
+function renderChips(sectKey) {
+  const wrap = document.getElementById(`${sectKey}-chips`);
+  if (!wrap) return;
+  const s     = state[sectKey];
+  const data  = SECTIONS[sectKey].data;
+  const lo    = Math.min(...data.map(x => x.year));
+  const hi    = Math.max(...data.map(x => x.year));
+  const chips = [];
+
+  s.filters.forEach(f => {
+    const label = f === 'favorites' ? '♥ Favorites' : f === 'new' ? '🆕 New' : f;
+    chips.push({ label, kind: 'filter', value: f });
+  });
+  if (s.filters.size > 1 && s.genreMode === 'all') chips.push({ label: 'match all', kind: 'match' });
+  if (s.minRating > 0) chips.push({ label: `${s.minRating}+ rating`, kind: 'rating' });
+  if (s.yearFrom > lo || s.yearTo < hi) chips.push({ label: `${s.yearFrom}–${s.yearTo}`, kind: 'years' });
+  if (s.studio !== 'all') chips.push({ label: s.studio, kind: 'studio' });
+  if (s.status !== 'all') chips.push({ label: SECTIONS[sectKey].statusLabels[s.status], kind: 'status' });
+  if (s.search) chips.push({ label: `“${s.search}”`, kind: 'search' });
+
+  wrap.hidden = chips.length === 0;
+  wrap.innerHTML = chips.map(c =>
+    `<button class="chip" data-sect="${sectKey}" data-kind="${c.kind}" data-value="${escapeHtml(c.value || '')}">
+       ${escapeHtml(c.label)}<span class="chip-x" aria-hidden="true">✕</span>
+       <span class="sr-only">Remove filter</span>
+     </button>`).join('') +
+    (chips.length > 1 ? `<button class="chip chip-clear" data-sect="${sectKey}" data-kind="all">Clear all</button>` : '');
+
+  const count = document.getElementById(`${sectKey}-filter-count`);
+  if (count) {
+    const n = chips.filter(c => c.kind !== 'search').length;
+    count.textContent = n;
+    count.hidden = n === 0;
+  }
+}
+
+function removeChip(sectKey, kind, value) {
+  const s     = state[sectKey];
+  const data  = SECTIONS[sectKey].data;
+  const years = data.map(x => x.year);
+
+  switch (kind) {
+    case 'all':    return resetFilters(sectKey);
+    case 'filter': s.filters.delete(value); break;
+    case 'match':  s.genreMode = 'any'; break;
+    case 'rating': s.minRating = 0; break;
+    case 'years':  s.yearFrom = Math.min(...years); s.yearTo = Math.max(...years); break;
+    case 'studio': s.studio = 'all'; break;
+    case 'status': s.status = 'all'; break;
+    case 'search': s.search = ''; break;
+  }
+  syncControls(sectKey);
+  applyFilter(sectKey);
+  pushHash();
+}
+
+/* Pushes state back into every control — used after chip removal and hash reads. */
+function syncControls(sectKey) {
+  const id      = ids(sectKey);
+  const s       = state[sectKey];
+  const section = document.getElementById(id.section);
+
+  section.querySelectorAll('.filter-btn').forEach(b =>
+    setPressed(b, b.dataset.filter === 'all' ? s.filters.size === 0 : s.filters.has(b.dataset.filter)));
+  document.getElementById(id.statusRow)?.querySelectorAll('.status-btn').forEach(b =>
+    setPressed(b, b.dataset.status === s.status));
+  section.querySelectorAll('.genre-mode-btn').forEach(b => setPressed(b, b.dataset.mode === s.genreMode));
+
+  const sortSel = document.getElementById(`${sectKey}-sort`);
+  if (sortSel) sortSel.value = s.sort;
+  const input = document.getElementById(id.search);
+  if (input) input.value = s.search;
+  document.getElementById(id.clear)?.classList.toggle('visible', s.search.length > 0);
+  const slider = document.getElementById(id.slider);
+  if (slider) { slider.value = s.minRating; document.getElementById(id.ratingVal).textContent = s.minRating > 0 ? `${s.minRating}+` : 'Any'; }
+  syncRefineRow(sectKey);
 }
 
 function setupSearch(sectKey) {
@@ -631,8 +735,8 @@ function setupStatusFilter(sectKey) {
 
 /* Year range, studio and genre match-mode all live in one "refine" row. */
 function setupRefineRow(sectKey) {
-  const section = document.getElementById(ids(sectKey).section);
-  const row     = section.querySelector('.refine-row');
+  // Scoped to the drawer: years, studio and match mode are separate groups in it.
+  const row  = document.getElementById(`${sectKey}-filter-panel`);
   if (!row) return;
   const s    = state[sectKey];
   const data = SECTIONS[sectKey].data;
@@ -687,8 +791,7 @@ function setupRefineRow(sectKey) {
 }
 
 function syncRefineRow(sectKey) {
-  const section = document.getElementById(ids(sectKey).section);
-  const row = section.querySelector('.refine-row');
+  const row = document.getElementById(`${sectKey}-filter-panel`);
   if (!row) return;
   const s = state[sectKey];
   row.querySelector('.year-from').value = s.yearFrom;
@@ -1068,20 +1171,7 @@ function readHash() {
   if (s.yearFrom > s.yearTo) { s.yearFrom = lo; s.yearTo = hi; }
 
   switchTab(tab, { push: false, scroll: false });
-
-  const section = document.getElementById(id.section);
-  section.querySelectorAll('.sort-btn').forEach(b => setPressed(b, b.dataset.sort === s.sort));
-  section.querySelectorAll('.filter-btn').forEach(b => {
-    setPressed(b, b.dataset.filter === 'all' ? s.filters.size === 0 : s.filters.has(b.dataset.filter));
-  });
-  document.getElementById(id.statusRow)?.querySelectorAll('.status-btn').forEach(b => setPressed(b, b.dataset.status === s.status));
-  syncRefineRow(tab);
-
-  const input = document.getElementById(id.search);
-  if (input) { input.value = s.search; document.getElementById(id.clear)?.classList.toggle('visible', s.search.length > 0); }
-  const slider = document.getElementById(id.slider);
-  if (slider) { slider.value = s.minRating; document.getElementById(id.ratingVal).textContent = s.minRating > 0 ? `${s.minRating}+` : 'Any'; }
-
+  syncControls(tab);
   renderSection(tab);
 
   // Deep link straight to an entry: #tab=anime&entry=Cowboy%20Bebop
@@ -1325,6 +1415,9 @@ function setupDelegation() {
     const reset = e.target.closest('.empty-reset');
     if (reset) { resetFilters(reset.dataset.sect); return; }
 
+    const chip = e.target.closest('.chip');
+    if (chip) { removeChip(chip.dataset.sect, chip.dataset.kind, chip.dataset.value); return; }
+
     if (e.target.closest('.export-btn')) { exportData(); return; }
     if (e.target.closest('.import-btn')) { document.getElementById('import-file').click(); return; }
     if (e.target.closest('.clear-btn'))  { clearUserData(); }
@@ -1365,6 +1458,7 @@ function init() {
     setupRatingFilter(k);
     setupStatusFilter(k);
     setupRefineRow(k);
+    setupToolbar(k);
     setupRandom(k);
   });
 

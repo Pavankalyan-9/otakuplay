@@ -15,6 +15,14 @@ const PIXEL = Buffer.from(
 /* Keep the suite hermetic: cover art and Google Fonts live on third-party CDNs,
    and a page here pulls hundreds of them. Stubbing keeps runs fast, offline-safe
    and free of console noise that would trip the no-errors assertion. */
+/** Genre, rating, year, studio, match-mode and status controls live in the
+ *  filter drawer now — open it before touching them. */
+async function openFilters(page, sect = 'anime') {
+  const toggle = page.locator('#' + sect + '-filter-toggle');
+  if ((await toggle.getAttribute('aria-expanded')) !== 'true') await toggle.click();
+  await expect(page.locator('#' + sect + '-filter-panel')).toBeVisible();
+}
+
 test.beforeEach(async ({ page }) => {
   await page.route('**/*', route => {
     const host = new URL(route.request().url()).hostname;
@@ -65,7 +73,7 @@ test.describe('bugs that shipped once', () => {
   // Tier headers were keyed "tier-S" while cards carried a numeric decade, so the
   // "any visible children?" check hid every header.
   test('tier sort shows its group headers, best tier first', async ({ page }) => {
-    await page.locator('#anime-section .sort-btn[data-sort="tier"]').click();
+    await page.locator('#anime-sort').selectOption('tier');
     const headers = page.locator('#anime-grid .decade-header:not(.hidden)');
     expect(await headers.count()).toBeGreaterThan(0);
     await expect(headers.first()).toContainText('Tier S');
@@ -74,6 +82,7 @@ test.describe('bugs that shipped once', () => {
   // The New filter used year >= 2024 while the badge used a hand-maintained flag,
   // so badged cards vanished when you filtered for New.
   test('New filter shows exactly the cards carrying a New badge', async ({ page }) => {
+    await openFilters(page);
     await page.locator('#anime-section .filter-btn[data-filter="new"]').click();
     const visible = page.locator('#anime-grid .card:not(.hidden)');
     const count = await visible.count();
@@ -109,8 +118,9 @@ test.describe('URL state', () => {
     await page.goto('/index.html#tab=anime&filter=mecha&sort=rating&minRating=8&status=all&from=1979&to=2000');
     await page.waitForFunction(() => document.querySelectorAll('#anime-grid .card').length > 0);
 
+    await openFilters(page);
     await expect(page.locator('#anime-section .filter-btn[data-filter="mecha"]')).toHaveAttribute('aria-pressed', 'true');
-    await expect(page.locator('#anime-section .sort-btn[data-sort="rating"]')).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('#anime-sort')).toHaveValue('rating');
     await expect(page.locator('#anime-rating-val')).toHaveText('8+');
     await expect(page.locator('#anime-section .year-from')).toHaveValue('1979');
 
@@ -139,6 +149,7 @@ test.describe('URL state', () => {
 
 test.describe('filters', () => {
   test('genre match mode switches between any and all', async ({ page }) => {
+    await openFilters(page);
     await page.locator('#anime-section .filter-btn[data-filter="action"]').click();
     await page.locator('#anime-section .filter-btn[data-filter="drama"]').click();
     const anyCount = await page.locator('#anime-grid .card:not(.hidden)').count();
@@ -153,6 +164,7 @@ test.describe('filters', () => {
   });
 
   test('studio filter narrows to one studio', async ({ page }) => {
+    await openFilters(page);
     await page.locator('#anime-section .studio-select').selectOption('Studio Ghibli');
     const cards = page.locator('#anime-grid .card:not(.hidden)');
     expect(await cards.count()).toBeGreaterThan(0);
@@ -169,6 +181,49 @@ test.describe('filters', () => {
   });
 });
 
+test.describe('toolbar and filter drawer', () => {
+  // The controls used to be a 293px, 7-row sticky panel that the cards scrolled
+  // under. The bar must stay compact and the drawer must start closed.
+  test('controls stay compact and the drawer starts closed', async ({ page }) => {
+    await expect(page.locator('#anime-filter-panel')).toBeHidden();
+    await expect(page.locator('#anime-chips')).toBeHidden();
+
+    const height = await page.locator('#anime-section .controls-row').evaluate(el => el.getBoundingClientRect().height);
+    expect(height).toBeLessThan(110);
+
+    await openFilters(page);
+    await expect(page.locator('#anime-filters .filter-btn').first()).toBeVisible();
+    await expect(page.locator('#anime-filter-toggle')).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  test('active filters show as chips that clear individually', async ({ page }) => {
+    await openFilters(page);
+    await page.locator('#anime-section .filter-btn[data-filter="mecha"]').click();
+    await page.locator('#anime-section .studio-select').selectOption('Sunrise');
+
+    const chips = page.locator('#anime-chips .chip:not(.chip-clear)');
+    await expect(chips).toHaveCount(2);
+    await expect(page.locator('#anime-filter-count')).toHaveText('2');
+
+    const narrowed = await page.locator('#anime-grid .card:not(.hidden)').count();
+    await page.locator('#anime-chips .chip[data-kind="studio"]').click();
+
+    await expect(chips).toHaveCount(1);
+    await expect(page.locator('#anime-section .studio-select')).toHaveValue('all');
+    expect(await page.locator('#anime-grid .card:not(.hidden)').count()).toBeGreaterThan(narrowed);
+  });
+
+  test('overflow menu holds the data actions', async ({ page }) => {
+    await expect(page.locator('#anime-more-menu')).toBeHidden();
+    await page.locator('#anime-more').click();
+    await expect(page.locator('#anime-more-menu')).toBeVisible();
+    await expect(page.locator('#anime-more-menu .export-btn')).toBeVisible();
+
+    await page.keyboard.press('Escape');
+    await expect(page.locator('#anime-more-menu')).toBeHidden();
+  });
+});
+
 test.describe('personal library', () => {
   test('status survives a reload and drives the status filter', async ({ page }) => {
     await page.locator('#anime-grid .card-open-btn').first().click();
@@ -178,6 +233,7 @@ test.describe('personal library', () => {
 
     await page.reload();
     await page.waitForFunction(() => document.querySelectorAll('#anime-grid .card').length > 0);
+    await openFilters(page);
     await page.locator('#anime-status-row .status-btn[data-status="watched"]').click();
 
     const cards = page.locator('#anime-grid .card:not(.hidden)');

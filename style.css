@@ -233,15 +233,115 @@ body {
 .section-desc { font-size: 0.97rem; color: var(--text-muted); max-width: 540px; margin: 0 auto; line-height: 1.7; }
 
 /* ===================== CONTROLS ROW (STICKY) ===================== */
+/* One sticky line. Everything else lives in the drawer below it, so the
+   catalogue — not the controls — owns the viewport. */
 .controls-row {
   position: sticky; top: var(--header-h); z-index: 100;
   background: rgba(7,7,14,0.94);
   backdrop-filter: blur(28px) saturate(160%);
   -webkit-backdrop-filter: blur(28px) saturate(160%);
   border-bottom: 1px solid var(--border);
-  margin: 0 -2.5rem 2.5rem;
-  padding: 0.9rem 2.5rem;
-  display: flex; flex-direction: column; gap: 0.55rem;
+  margin: 0 -2.5rem 2rem;
+  padding: 0.65rem 2.5rem;
+  display: flex; flex-direction: column; gap: 0.5rem;
+}
+.toolbar { display: flex; align-items: center; gap: 0.5rem; }
+.toolbar .search-wrap { flex: 1; max-width: 420px; }
+.toolbar .search-input { font-size: 0.85rem; padding: 0.5rem 0.5rem 0.5rem 0; }
+
+.filter-toggle {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  padding: 0.5rem 0.85rem; border-radius: var(--radius-sm);
+  background: rgba(255,255,255,0.04); border: 1px solid var(--border-mid);
+  color: var(--text-muted); font-family: inherit; font-size: 0.8rem;
+  font-weight: 600; cursor: pointer; white-space: nowrap; transition: all 0.18s;
+}
+.filter-toggle:hover { border-color: rgba(139,92,246,0.4); color: var(--text); }
+.filter-toggle.open { background: rgba(139,92,246,0.14); border-color: rgba(139,92,246,0.45); color: var(--purple-light); }
+.filter-count {
+  min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px;
+  background: var(--purple); color: #fff; font-size: 0.65rem; font-weight: 800;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+
+.sort-wrap { display: inline-flex; }
+.sort-select, .more-btn, .toolbar .btn-random {
+  background: rgba(255,255,255,0.04); border: 1px solid var(--border-mid);
+  color: var(--text-muted); border-radius: var(--radius-sm);
+  padding: 0.5rem 0.7rem; font-family: inherit; font-size: 0.8rem;
+  font-weight: 600; cursor: pointer; transition: all 0.18s;
+}
+.sort-select:hover, .more-btn:hover, .toolbar .btn-random:hover {
+  border-color: rgba(139,92,246,0.4); color: var(--text);
+}
+.sort-select option { background: var(--bg-elevated); color: var(--text); }
+.menu-wrap { position: relative; }
+.more-menu {
+  position: absolute; right: 0; top: calc(100% + 6px); z-index: 120;
+  background: var(--bg-elevated); border: 1px solid var(--border-mid);
+  border-radius: var(--radius-sm); box-shadow: var(--shadow-lg);
+  padding: 0.3rem; min-width: 180px; display: flex; flex-direction: column;
+}
+.more-menu[hidden] { display: none; }
+.more-item {
+  background: transparent; border: none; color: var(--text-muted);
+  font-family: inherit; font-size: 0.78rem; font-weight: 600;
+  text-align: left; padding: 0.5rem 0.6rem; border-radius: 6px; cursor: pointer;
+}
+.more-item:hover { background: rgba(139,92,246,0.1); color: var(--text); }
+
+/* ===================== ACTIVE FILTER CHIPS ===================== */
+.active-chips { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.active-chips[hidden] { display: none; }
+.chip {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  padding: 0.22rem 0.5rem 0.22rem 0.65rem; border-radius: 50px;
+  background: rgba(139,92,246,0.13); border: 1px solid rgba(139,92,246,0.32);
+  color: var(--purple-light); font-family: inherit; font-size: 0.7rem;
+  font-weight: 600; cursor: pointer; transition: all 0.16s;
+}
+.chip:hover { background: rgba(139,92,246,0.24); }
+.chip-x { opacity: 0.65; font-size: 0.62rem; }
+.chip-clear {
+  background: transparent; border-color: var(--border); color: var(--text-dim);
+  padding: 0.22rem 0.65rem;
+}
+.chip-clear:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+
+/* ===================== FILTER DRAWER ===================== */
+.filter-panel {
+  display: flex; flex-direction: column; gap: 0.9rem;
+  padding: 0.9rem 0 0.3rem;
+  border-top: 1px solid var(--border);
+  animation: panelIn 0.18s ease both;
+}
+.filter-panel[hidden] { display: none; }
+@keyframes panelIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+.panel-group { display: flex; flex-direction: column; gap: 0.4rem; min-width: 0; }
+.panel-row { display: flex; flex-wrap: wrap; gap: 1.5rem; align-items: flex-start; }
+.panel-label {
+  font-size: 0.65rem; font-weight: 800; text-transform: uppercase;
+  letter-spacing: 0.7px; color: var(--text-dim);
+}
+.panel-label.inline { margin-right: 0.2rem; }
+.genre-mode { display: flex; align-items: center; gap: 0.3rem; }
+.year-inputs { display: flex; align-items: center; gap: 0.35rem; }
+.panel-row .rating-slider { width: 200px; flex: none; }
+.panel-footer { display: flex; justify-content: flex-end; }
+.panel-reset {
+  background: transparent; border: 1px solid var(--border);
+  color: var(--text-muted); border-radius: var(--radius-sm);
+  padding: 0.4rem 0.9rem; font-family: inherit; font-size: 0.75rem;
+  font-weight: 600; cursor: pointer;
+}
+.panel-reset:hover { border-color: rgba(239,68,68,0.4); color: #fca5a5; }
+
+/* The genre list wraps inside the drawer instead of scrolling sideways. */
+.filter-panel .filter-bar { flex-wrap: wrap; overflow: visible; }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
 }
 
 /* ===================== SEARCH BAR ===================== */
@@ -295,16 +395,6 @@ body {
 .sort-bar {
   display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;
 }
-.sort-label { font-size: 0.72rem; color: var(--text-dim); font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; margin-right: 0.15rem; }
-.sort-btn {
-  padding: 0.3rem 0.75rem; border-radius: 6px; flex-shrink: 0;
-  border: 1px solid var(--border); background: transparent;
-  color: var(--text-muted); font-size: 0.75rem; font-weight: 700;
-  cursor: pointer; transition: all 0.18s; font-family: inherit;
-}
-.sort-btn:hover { border-color: rgba(139,92,246,0.4); color: var(--text); }
-.sort-btn.active { background: rgba(139,92,246,0.14); border-color: rgba(139,92,246,0.4); color: var(--purple-light); }
-.sort-divider { display: inline-block; width: 1px; height: 1rem; background: var(--border); margin: 0 0.2rem; flex-shrink: 0; }
 .btn-random {
   background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.2);
   color: var(--gold); border-radius: 6px; padding: 0.3rem 0.8rem;
@@ -315,8 +405,6 @@ body {
 
 /* ===================== RATING SLIDER ===================== */
 .rating-filter-row { display: flex; align-items: center; gap: 1rem; }
-.rating-filter-label { font-size: 0.78rem; color: var(--text-muted); white-space: nowrap; flex-shrink: 0; }
-.rating-filter-label span { color: var(--gold); font-weight: 700; }
 .rating-slider { flex: 1; accent-color: var(--purple); cursor: pointer; height: 4px; border-radius: 2px; outline: none; }
 
 /* ===================== STATUS FILTER ROW ===================== */
@@ -334,14 +422,6 @@ body {
 
 /* ===================== DATA ACTIONS ROW ===================== */
 .data-actions-row { display: flex; align-items: center; gap: 0.45rem; padding: 0.1rem 0; }
-.data-action-btn {
-  display: inline-flex; align-items: center; gap: 0.3rem;
-  padding: 0.28rem 0.7rem; border-radius: 6px;
-  border: 1px solid var(--border); background: transparent;
-  color: var(--text-muted); font-size: 0.72rem; font-weight: 600;
-  cursor: pointer; font-family: inherit; transition: all 0.18s;
-}
-.data-action-btn:hover { border-color: rgba(139,92,246,0.4); color: var(--text); background: rgba(139,92,246,0.07); }
 
 /* ===================== DECADE JUMP BAR ===================== */
 .decade-jump-bar {
@@ -386,7 +466,7 @@ body {
 /* ===================== CARDS GRID ===================== */
 .cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
   gap: 1.1rem;
 }
 
@@ -404,7 +484,7 @@ body {
 }
 .card.hidden { display: none; }
 
-.card-banner { position: relative; height: 185px; overflow: hidden; flex-shrink: 0; }
+.card-banner { position: relative; aspect-ratio: 16 / 10; overflow: hidden; flex-shrink: 0; background: #05050a; }
 .card-banner-bg {
   width: 100%; height: 100%;
   display: flex; align-items: center; justify-content: center;
@@ -468,42 +548,42 @@ body {
 .card-info { font-size: 0.7rem; color: var(--text-dim); font-weight: 500; }
 
 /* ---- Tag Colors ---- */
-.tag-action      { background: rgba(239,68,68,0.12);    color: #fc8181; border: 1px solid rgba(239,68,68,0.18); }
-.tag-thriller    { background: rgba(234,179,8,0.1);     color: #fcd34d; border: 1px solid rgba(234,179,8,0.18); }
-.tag-fantasy     { background: rgba(139,92,246,0.13);   color: #c4b5fd; border: 1px solid rgba(139,92,246,0.22); }
-.tag-scifi       { background: rgba(6,182,212,0.1);     color: #67e8f9; border: 1px solid rgba(6,182,212,0.18); }
-.tag-drama       { background: rgba(236,72,153,0.1);    color: #f9a8d4; border: 1px solid rgba(236,72,153,0.18); }
-.tag-horror      { background: rgba(127,29,29,0.25);    color: #fca5a5; border: 1px solid rgba(239,68,68,0.14); }
-.tag-comedy      { background: rgba(245,158,11,0.1);    color: #fcd34d; border: 1px solid rgba(245,158,11,0.18); }
-.tag-romance     { background: rgba(244,114,182,0.1);   color: #fbcfe8; border: 1px solid rgba(244,114,182,0.18); }
-.tag-sports      { background: rgba(16,185,129,0.1);    color: #6ee7b7; border: 1px solid rgba(16,185,129,0.18); }
-.tag-mecha       { background: rgba(100,116,139,0.13);  color: #cbd5e1; border: 1px solid rgba(100,116,139,0.22); }
-.tag-psychological { background: rgba(167,139,250,0.11); color: #ddd6fe; border: 1px solid rgba(167,139,250,0.18); }
-.tag-mystery     { background: rgba(109,40,217,0.12);   color: #c4b5fd; border: 1px solid rgba(109,40,217,0.22); }
-.tag-historical  { background: rgba(161,120,85,0.12);   color: #d4b483; border: 1px solid rgba(161,120,85,0.18); }
-.tag-adventure   { background: rgba(20,184,166,0.1);    color: #5eead4; border: 1px solid rgba(20,184,166,0.18); }
-.tag-rpg         { background: rgba(139,92,246,0.13);   color: #c4b5fd; border: 1px solid rgba(139,92,246,0.22); }
-.tag-strategy    { background: rgba(59,130,246,0.1);    color: #93c5fd; border: 1px solid rgba(59,130,246,0.18); }
-.tag-indie       { background: rgba(245,158,11,0.1);    color: #fcd34d; border: 1px solid rgba(245,158,11,0.18); }
-.tag-shooter     { background: rgba(239,68,68,0.12);    color: #fca5a5; border: 1px solid rgba(239,68,68,0.18); }
-.tag-survival    { background: rgba(16,185,129,0.09);   color: #a7f3d0; border: 1px solid rgba(16,185,129,0.14); }
-.tag-openworld   { background: rgba(6,182,212,0.1);     color: #a5f3fc; border: 1px solid rgba(6,182,212,0.18); }
-.tag-sandbox     { background: rgba(251,191,36,0.09);   color: #fde68a; border: 1px solid rgba(251,191,36,0.14); }
-.tag-puzzle      { background: rgba(167,139,250,0.1);   color: #ddd6fe; border: 1px solid rgba(167,139,250,0.18); }
-.tag-soulslike   { background: rgba(127,29,29,0.2);     color: #fca5a5; border: 1px solid rgba(239,68,68,0.18); }
-.tag-fps         { background: rgba(239,68,68,0.1);     color: #fca5a5; border: 1px solid rgba(239,68,68,0.16); }
-.tag-simulation  { background: rgba(20,184,166,0.09);   color: #5eead4; border: 1px solid rgba(20,184,166,0.16); }
-.tag-moba        { background: rgba(234,179,8,0.09);    color: #fde68a; border: 1px solid rgba(234,179,8,0.16); }
-.tag-platformer  { background: rgba(251,146,60,0.1);    color: #fed7aa; border: 1px solid rgba(251,146,60,0.18); }
-.tag-roguelite   { background: rgba(217,70,239,0.1);    color: #f0abfc; border: 1px solid rgba(217,70,239,0.18); }
-.tag-rts         { background: rgba(59,130,246,0.11);   color: #93c5fd; border: 1px solid rgba(59,130,246,0.18); }
-.tag-film        { background: rgba(251,146,60,0.11);   color: #fdba74; border: 1px solid rgba(251,146,60,0.18); }
-.tag-music       { background: rgba(217,70,239,0.09);   color: #f0abfc; border: 1px solid rgba(217,70,239,0.16); }
-.tag-slice-of-life { background: rgba(16,185,129,0.09); color: #a7f3d0; border: 1px solid rgba(16,185,129,0.16); }
-.tag-isekai      { background: rgba(139,92,246,0.11);   color: #c4b5fd; border: 1px solid rgba(139,92,246,0.2); }
-.tag-mmo         { background: rgba(59,130,246,0.09);   color: #93c5fd; border: 1px solid rgba(59,130,246,0.16); }
-.tag-crpg        { background: rgba(161,120,85,0.12);   color: #d4b483; border: 1px solid rgba(161,120,85,0.2); }
-.tag-stealth     { background: rgba(100,116,139,0.13);  color: #cbd5e1; border: 1px solid rgba(100,116,139,0.2); }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /* ===================== AWARDS ===================== */
 .award-badge {
@@ -941,7 +1021,8 @@ body {
 
 /* ===================== TOUCH TARGETS ===================== */
 @media (pointer: coarse) {
-  .filter-btn, .sort-btn, .status-btn, .data-action-btn, .decade-jump-btn, .modal-status-opt, .tab-btn {
+  .filter-btn, .status-btn, .decade-jump-btn, .modal-status-opt, .tab-btn,
+  .filter-toggle, .sort-select, .more-btn, .more-item, .chip {
     min-height: 40px;
   }
   .modal-pr-star { width: 40px; height: 40px; font-size: 0.85rem; }
@@ -1044,3 +1125,52 @@ body {
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .rec-empty .stat-empty { margin-top: 0.3rem; line-height: 1.6; }
+
+/* ===================== CARD ART FRAMING ===================== */
+/* One frame for two aspect ratios: the cover is contained so nothing important
+   is cropped, and a blurred copy of the same image fills the leftover space. */
+.card-art-blur {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; filter: blur(22px) saturate(1.3);
+  transform: scale(1.15); opacity: 0.5;
+}
+.card-banner-img {
+  object-fit: contain; object-position: center;
+  filter: drop-shadow(0 6px 18px rgba(0,0,0,0.55));
+}
+.modal-banner-img { object-fit: cover; object-position: center 20%; }
+
+/* ===================== TAGS (single muted style) ===================== */
+.tag {
+  background: rgba(255,255,255,0.045);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+.card:hover .tag { border-color: var(--border-mid); }
+/* Favorites and New keep their accent — they're state, not taxonomy. */
+.card-new-badge { z-index: 2; }
+
+/* ===================== DENSER CARD BODY ===================== */
+.card-body { padding: 0.85rem 0.9rem 0.75rem; gap: 0.35rem; }
+.card-title { font-size: 0.95rem; }
+.card-desc {
+  font-size: 0.76rem; line-height: 1.55;
+  -webkit-line-clamp: 2; line-clamp: 2;
+}
+.card-tags { gap: 0.25rem; }
+.card-tags .tag { font-size: 0.6rem; padding: 0.1rem 0.4rem; }
+
+/* ===================== TOOLBAR: NARROW SCREENS ===================== */
+@media (max-width: 700px) {
+  /* One row can't hold search + filters + sort + random + menu at phone widths;
+     it overflowed the document and pushed the header controls off-screen. */
+  .toolbar { flex-wrap: wrap; row-gap: 0.45rem; }
+  .toolbar .search-wrap { flex: 1 1 100%; max-width: none; order: -1; }
+  .filter-toggle { flex: 1 1 auto; justify-content: center; }
+  .sort-select { flex: 1 1 auto; min-width: 0; }
+  .toolbar .btn-random, .more-btn { flex: 0 0 auto; }
+  .panel-row { flex-direction: column; gap: 0.9rem; }
+  .panel-row .rating-slider { width: 100%; }
+  .refine-select, .studio-select { max-width: none; width: 100%; }
+  .year-inputs .refine-select { width: auto; flex: 1; }
+}
