@@ -18,3 +18,10 @@ node_modules/
 # Local exports and scratch files
 otakuplay-data*.json
 *.tmp.js
+scripts/.data.tmp.mjs
+
+# Playwright
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/

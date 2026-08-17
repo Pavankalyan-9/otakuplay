@@ -959,3 +959,88 @@ body {
   }
   .card { animation: none; opacity: 1; }
 }
+
+/* ===================== COVER ART ===================== */
+/* The gradient + emoji stays underneath as the placeholder and the permanent
+   fallback for entries with no art (and for any image that fails to load —
+   the <img> removes itself on error). */
+.card-banner-img, .modal-banner-img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover; object-position: center 22%;
+  opacity: 0; transition: opacity 0.4s ease;
+}
+.card-banner-img.loaded, .modal-banner-img.loaded { opacity: 1; }
+.card:hover .card-banner-img { transform: scale(1.04); }
+.card-banner-img { transition: opacity 0.4s ease, transform 0.5s ease; }
+.card-banner-overlay, .modal-banner-overlay { z-index: 1; }
+.card-rank, .card-year-badge, .card-new-badge { z-index: 2; }
+.modal-banner-emoji { opacity: 0.9; }
+
+/* Deliberately NOT using `content-visibility: auto` here. It saves little on a
+   grid this size and, where the intersection machinery misbehaves, cards paint
+   as empty boxes — a far worse failure than the perf it buys. */
+
+/* ===================== REFINE ROW (year / studio / match mode) ===================== */
+.refine-row {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 0.4rem;
+  margin-top: 0.7rem;
+}
+.refine-label {
+  font-size: 0.68rem; font-weight: 800; text-transform: uppercase;
+  letter-spacing: 0.7px; color: var(--text-dim);
+}
+.refine-dash { color: var(--text-dim); font-size: 0.75rem; }
+.refine-sep { width: 1px; height: 18px; background: var(--border); margin: 0 0.45rem; }
+.refine-select {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  color: var(--text); border-radius: var(--radius-sm);
+  padding: 0.3rem 0.5rem; font-family: inherit; font-size: 0.75rem;
+  font-weight: 600; cursor: pointer; max-width: 190px;
+}
+.refine-select:hover { border-color: rgba(139,92,246,0.4); }
+.refine-select option { background: var(--bg-elevated); color: var(--text); }
+.studio-select { max-width: 230px; text-overflow: ellipsis; }
+.genre-mode-btn {
+  padding: 0.28rem 0.7rem; border-radius: 50px;
+  border: 1px solid var(--border); background: transparent;
+  color: var(--text-muted); font-size: 0.7rem; font-weight: 700;
+  font-family: inherit; cursor: pointer; transition: all 0.18s;
+}
+.genre-mode-btn:hover { border-color: rgba(139,92,246,0.4); color: var(--text); }
+.genre-mode-btn.active {
+  background: rgba(139,92,246,0.14); border-color: rgba(139,92,246,0.45); color: var(--purple-light);
+}
+@media (max-width: 640px) {
+  .refine-sep { display: none; }
+  .refine-row { gap: 0.35rem; }
+  .studio-select, .refine-select { max-width: 45%; }
+}
+@media (pointer: coarse) {
+  .refine-select, .genre-mode-btn { min-height: 40px; }
+}
+
+/* ===================== RECOMMENDATIONS ===================== */
+.rec-list { display: flex; flex-direction: column; gap: 0.4rem; }
+.rec-card {
+  display: flex; align-items: center; gap: 0.7rem; width: 100%;
+  background: transparent; border: 1px solid transparent; border-radius: var(--radius-sm);
+  padding: 0.45rem 0.5rem; cursor: pointer; font-family: inherit; text-align: left;
+  transition: background 0.18s, border-color 0.18s;
+}
+.rec-card:hover { background: rgba(139,92,246,0.07); border-color: var(--border); }
+.rec-art {
+  position: relative; flex-shrink: 0; width: 46px; height: 62px;
+  border-radius: 6px; overflow: hidden;
+  display: flex; align-items: center; justify-content: center; font-size: 1.3rem;
+}
+.rec-art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.rec-info { display: flex; flex-direction: column; min-width: 0; gap: 0.1rem; }
+.rec-title { font-size: 0.82rem; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rec-sub   { font-size: 0.66rem; color: var(--text-dim); }
+.rec-because {
+  font-size: 0.63rem; color: var(--purple-light); opacity: 0.85;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.rec-empty .stat-empty { margin-top: 0.3rem; line-height: 1.6; }

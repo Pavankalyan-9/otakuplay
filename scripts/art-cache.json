@@ -1,0 +1,981 @@
+{
+  "Astro Boy": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/2747.jpg",
+    "matched": "Astro Boy",
+    "year": 1963
+  },
+  "Space Battleship Yamato": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/nx1650-v2eMjvOfnLCc.jpg",
+    "matched": "Star Blazers: The Quest for Iscandar",
+    "year": 1974
+  },
+  "Mobile Suit Gundam": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx80-pdYJ12vSTmad.jpg",
+    "matched": "Mobile Suit Gundam",
+    "year": 1979
+  },
+  "Fist of the North Star": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/n967-84jNBaInec98.png",
+    "matched": "Fist of the North Star",
+    "year": 1984
+  },
+  "Dragon Ball": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx223-scE5uJfXqqj8.png",
+    "matched": "Dragon Ball",
+    "year": 1986
+  },
+  "Saint Seiya": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/1254.jpg",
+    "matched": "Saint Seiya: Knights of the Zodiac",
+    "year": 1986
+  },
+  "Akira": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx47-4CR68arv452h.jpg",
+    "matched": "Akira",
+    "year": 1988
+  },
+  "Dragon Ball Z": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx813-ZhnFNOeCU5dQ.png",
+    "matched": "Dragon Ball Z",
+    "year": 1989
+  },
+  "Sailor Moon": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx530-O8q6KpJ244Qk.jpg",
+    "matched": "Sailor Moon",
+    "year": 1992
+  },
+  "Yu Yu Hakusho": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx392-z90299zIvYmx.png",
+    "matched": "Yu Yu Hakusho: Ghostfiles",
+    "year": 1992
+  },
+  "Ghost in the Shell": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx43-Y6EjeEMM14dj.png",
+    "matched": "Ghost in the Shell",
+    "year": 1995
+  },
+  "Neon Genesis Evangelion": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx30-AI1zr74Dh4ye.jpg",
+    "matched": "Neon Genesis Evangelion",
+    "year": 1995
+  },
+  "Rurouni Kenshin": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx45-DEFgZRCxiGmF.png",
+    "matched": "Rurouni Kenshin",
+    "year": 1996
+  },
+  "Berserk": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx33-PSwfE5B0gejI.jpg",
+    "matched": "Berserk",
+    "year": 1997
+  },
+  "Cowboy Bebop": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx1-GCsPm7waJ4kS.png",
+    "matched": "Cowboy Bebop",
+    "year": 1998
+  },
+  "Trigun": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx6-wd4saT1JzStH.jpg",
+    "matched": "Trigun",
+    "year": 1998
+  },
+  "Serial Experiments Lain": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx339-xF2wp1NQuQ4r.png",
+    "matched": "Serial Experiments Lain",
+    "year": 1998
+  },
+  "Cardcaptor Sakura": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx232-ERyKCNNPJJeh.png",
+    "matched": "Cardcaptor Sakura",
+    "year": 1998
+  },
+  "One Piece": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx21-ELSYx3yMPcKM.jpg",
+    "matched": "ONE PIECE",
+    "year": 1999
+  },
+  "Hajime no Ippo": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx263-ivVyn9xAgwSZ.png",
+    "matched": "Hajime no Ippo: The Fighting!",
+    "year": 2000
+  },
+  "Fruits Basket": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx120-Z5i1sw1xboQP.jpg",
+    "matched": "Fruits Basket",
+    "year": 2001
+  },
+  "Naruto": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx20-dE6UHbFFg1A5.jpg",
+    "matched": "Naruto",
+    "year": 2002
+  },
+  "Planetes": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx329-4xwXdazRA7Ph.png",
+    "matched": "Planetes",
+    "year": 2003
+  },
+  "Bleach": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx269-d2GmRkJbMopq.png",
+    "matched": "Bleach",
+    "year": 2004
+  },
+  "Monster": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx19-gtMC64182sm4.jpg",
+    "matched": "Monster",
+    "year": 2004
+  },
+  "Samurai Champloo": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx205-7tHVFu6dPBm9.png",
+    "matched": "Samurai Champloo",
+    "year": 2004
+  },
+  "Elfen Lied": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx226-MibyRKhIrnTe.png",
+    "matched": "Elfen Lied",
+    "year": 2004
+  },
+  "Death Note": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx1535-kUgkcrfOrkUM.jpg",
+    "matched": "Death Note",
+    "year": 2006
+  },
+  "Code Geass": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/b126169-H7bkp7C91o9X.jpg",
+    "matched": "Code Geass: Hangyaku no Lelouch DVD Magazine",
+    "year": 2007
+  },
+  "Gurren Lagann": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx2001-XwRnjzGeFWRQ.png",
+    "matched": "Gurren Lagann",
+    "year": 2007
+  },
+  "Clannad": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx2167-pSDBcyc0vjej.jpg",
+    "matched": "Clannad",
+    "year": 2007
+  },
+  "Claymore": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx1818-KieLJv0qo3mO.jpg",
+    "matched": "Claymore",
+    "year": 2007
+  },
+  "Toradora": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx4224-PXVMBLNwy2aF.jpg",
+    "matched": "Toradora!",
+    "year": 2008
+  },
+  "Soul Eater": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx3588-fSMggQoFSbUI.png",
+    "matched": "Soul Eater",
+    "year": 2008
+  },
+  "Fullmetal Alchemist: Brotherhood": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx5114-nSWCgQlmOMtj.jpg",
+    "matched": "Fullmetal Alchemist: Brotherhood",
+    "year": 2009
+  },
+  "Steins;Gate": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx9253-tIUXF2gfU8Sg.jpg",
+    "matched": "Steins;Gate",
+    "year": 2011
+  },
+  "Hunter x Hunter (2011)": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx11061-y5gsT1hoHuHw.png",
+    "matched": "Hunter x Hunter (2011)",
+    "year": 2011
+  },
+  "Puella Magi Madoka Magica": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx9756-QnUGwlwwnsuN.jpg",
+    "matched": "Puella Magi Madoka Magica",
+    "year": 2011
+  },
+  "Sword Art Online": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx11757-SxYDUzdr9rh2.jpg",
+    "matched": "Sword Art Online",
+    "year": 2012
+  },
+  "Psycho-Pass": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx13601-i42VFuHpqEOJ.jpg",
+    "matched": "PSYCHO-PASS",
+    "year": 2012
+  },
+  "Attack on Titan": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx16498-buvcRTBx4NSm.jpg",
+    "matched": "Attack on Titan",
+    "year": 2013
+  },
+  "Kill la Kill": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/b18679-lbkq7iYESoFW.png",
+    "matched": "Kill la Kill",
+    "year": 2013
+  },
+  "Parasyte: The Maxim": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx20623-dUARfggnNDOe.jpg",
+    "matched": "Parasyte -the maxim-",
+    "year": 2014
+  },
+  "Haikyuu!!": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx20464-ooZUyBe4ptp9.png",
+    "matched": "HAIKYU!!",
+    "year": 2014
+  },
+  "Ping Pong the Animation": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx20607-fIOxVISIl0HY.jpg",
+    "matched": "Ping Pong the Animation",
+    "year": 2014
+  },
+  "One Punch Man": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx21087-B5DHjqZ3kW4b.jpg",
+    "matched": "One-Punch Man",
+    "year": 2015
+  },
+  "Overlord": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx20832-vUNm5zrYWifc.jpg",
+    "matched": "Overlord",
+    "year": 2015
+  },
+  "Re:Zero": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx21355-wRVUrGxpvIQQ.jpg",
+    "matched": "Re:ZERO -Starting Life in Another World-",
+    "year": 2016
+  },
+  "Mob Psycho 100": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx21507-6YUSbh2m0N1p.jpg",
+    "matched": "Mob Psycho 100",
+    "year": 2016
+  },
+  "My Hero Academia": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx21459-nYh85uj2Fuwr.jpg",
+    "matched": "My Hero Academia",
+    "year": 2016
+  },
+  "Konosuba": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx21202-mPOr80AEjUcZ.png",
+    "matched": "KONOSUBA -God's blessing on this wonderful world!",
+    "year": 2016
+  },
+  "Made in Abyss": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx97986-TQ7dCgbS3y5s.jpg",
+    "matched": "Made in Abyss",
+    "year": 2017
+  },
+  "Violet Evergarden": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx21827-ubzq619ZA2E9.png",
+    "matched": "Violet Evergarden",
+    "year": 2018
+  },
+  "Vinland Saga": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx101348-2fhDFPCuMNiz.jpg",
+    "matched": "Vinland Saga",
+    "year": 2019
+  },
+  "Demon Slayer": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx112151-1qlQwPB1RrJe.png",
+    "matched": "Demon Slayer -Kimetsu no Yaiba- The Movie: Mugen Train",
+    "year": 2020
+  },
+  "Dr. Stone": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx105333-GybuoSoOZfpH.jpg",
+    "matched": "Dr. STONE",
+    "year": 2019
+  },
+  "The Promised Neverland": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx101759-8UR7r9MNVpz2.jpg",
+    "matched": "The Promised Neverland",
+    "year": 2019
+  },
+  "Jujutsu Kaisen": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx113415-LHBAeoZDIsnF.jpg",
+    "matched": "JUJUTSU KAISEN",
+    "year": 2020
+  },
+  "Odd Taxi": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx128547-nNekWTKqmvEi.jpg",
+    "matched": "ODDTAXI",
+    "year": 2021
+  },
+  "Mushoku Tensei": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx108465-1ANspF1EWyFx.jpg",
+    "matched": "Mushoku Tensei: Jobless Reincarnation",
+    "year": 2021
+  },
+  "Chainsaw Man": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx127230-DdP4vAdssLoz.png",
+    "matched": "Chainsaw Man",
+    "year": 2022
+  },
+  "Spy x Family": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx140960-Kb6R5nYQfjmP.jpg",
+    "matched": "SPY x FAMILY",
+    "year": 2022
+  },
+  "Cyberpunk: Edgerunners": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx120377-ayZPoxiWt4Li.jpg",
+    "matched": "Cyberpunk: Edgerunners",
+    "year": 2022
+  },
+  "Blue Lock": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx137822-U8naszP96vzC.png",
+    "matched": "BLUE LOCK",
+    "year": 2022
+  },
+  "Oshi no Ko": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx150672-WqmmwZ4nMzAy.png",
+    "matched": "OSHI NO KO",
+    "year": 2023
+  },
+  "Frieren: Beyond Journey's End": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx170068-ijY3tCP8KoWP.jpg",
+    "matched": "Sousou no Frieren: ●● no Mahou",
+    "year": 2023
+  },
+  "Delicious in Dungeon": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx153518-IVXPDY5ph3kO.jpg",
+    "matched": "Delicious in Dungeon",
+    "year": 2024
+  },
+  "Solo Leveling": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx151807-it355ZgzquUd.png",
+    "matched": "Solo Leveling",
+    "year": 2024
+  },
+  "Kaiju No. 8": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx153288-25FBfFJzEQ5O.jpg",
+    "matched": "Kaiju No. 8",
+    "year": 2024
+  },
+  "The Apothecary Diaries": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx161645-QLbzHXiYRgV2.jpg",
+    "matched": "The Apothecary Diaries",
+    "year": 2023
+  },
+  "Dandadan": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx171018-60q1B6GK2Ghb.jpg",
+    "matched": "DAN DA DAN",
+    "year": 2024
+  },
+  "Wind Breaker": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx163270-wboZJp0ybwVK.jpg",
+    "matched": "WIND BREAKER",
+    "year": 2024
+  },
+  "Ranma ½ (2024)": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx178533-b88OLxm50jcH.jpg",
+    "matched": "Ranma1/2 (2024)",
+    "year": 2024
+  },
+  "Medalist": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx165171-an9pyRXwVxJS.jpg",
+    "matched": "Medalist",
+    "year": 2025
+  },
+  "Zenshu": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx176273-raxxcgkslf4Q.jpg",
+    "matched": "ZENSHU",
+    "year": 2025
+  },
+  "Lazarus": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx167336-KpGIIBie71OX.png",
+    "matched": "LAZARUS",
+    "year": 2025
+  },
+  "Solo Leveling: Arise from the Shadow": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx176496-9BDMjAZGEbq4.png",
+    "matched": "Solo Leveling Season 2 -Arise from the Shadow-",
+    "year": 2025
+  },
+  "My Neighbor Totoro": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx523-fErBvxOHP7IX.jpg",
+    "matched": "My Neighbor Totoro",
+    "year": 1988
+  },
+  "Princess Mononoke": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx164-ySuGzCWVw2cL.jpg",
+    "matched": "Princess Mononoke",
+    "year": 1997
+  },
+  "Spirited Away": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx199-sWefXJvXkDOb.jpg",
+    "matched": "Spirited Away",
+    "year": 2001
+  },
+  "Howl's Moving Castle": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx431-o8Lj3XkjHm2k.jpg",
+    "matched": "Howl‘s Moving Castle",
+    "year": 2004
+  },
+  "Black Lagoon": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx889-4S7N2ciq2cwA.png",
+    "matched": "Black Lagoon",
+    "year": 2006
+  },
+  "Hellsing Ultimate": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx777-F6547pSAR2Zd.jpg",
+    "matched": "Hellsing Ultimate",
+    "year": 2006
+  },
+  "Baccano!": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx2251-tTQoWxVy4472.jpg",
+    "matched": "Baccano!",
+    "year": 2007
+  },
+  "Naruto: Shippuden": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx1735-kGfVm0YqCPcu.png",
+    "matched": "Naruto: Shippuden",
+    "year": 2007
+  },
+  "Spice and Wolf": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx2966-AEULMyYA9WKb.png",
+    "matched": "Spice and Wolf",
+    "year": 2008
+  },
+  "Bakemonogatari": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx5081-9GocceQ5Z865.jpg",
+    "matched": "Bakemonogatari",
+    "year": 2009
+  },
+  "Fate/Zero": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx10087-M4Hd9qrHGrXk.png",
+    "matched": "Fate/Zero",
+    "year": 2011
+  },
+  "Anohana: The Flower We Saw That Day": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx9989-hImMg6kCMm6I.jpg",
+    "matched": "Anohana: The Flower We Saw That Day",
+    "year": 2011
+  },
+  "Your Lie in April": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx20665-TLgkL8T8IRFd.png",
+    "matched": "Your lie in April",
+    "year": 2014
+  },
+  "Fate/Stay Night: Unlimited Blade Works": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx19603-ycT0pyEgDVQu.jpg",
+    "matched": "Fate/stay night: Unlimited Blade Works",
+    "year": 2014
+  },
+  "Tokyo Ghoul": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/b20605-k665mVkSug8D.jpg",
+    "matched": "Tokyo Ghoul",
+    "year": 2014
+  },
+  "No Game No Life": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/b19815-sEOQ9yQaPKlk.jpg",
+    "matched": "No Game, No Life",
+    "year": 2014
+  },
+  "Assassination Classroom": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx20755-dWrhs569YGUO.jpg",
+    "matched": "Assassination Classroom",
+    "year": 2015
+  },
+  "A Silent Voice": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx20954-sYRfE5jQRtSB.jpg",
+    "matched": "A Silent Voice",
+    "year": 2016
+  },
+  "Black Clover": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx97940-fyh8o7gNbha0.png",
+    "matched": "Black Clover",
+    "year": 2017
+  },
+  "Devilman Crybaby": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx98460-bLtH2c3jd6sV.png",
+    "matched": "Devilman Crybaby",
+    "year": 2018
+  },
+  "A Place Further Than the Universe": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx99426-ti5BL69Ip3kZ.png",
+    "matched": "A Place Further Than the Universe",
+    "year": 2018
+  },
+  "Rascal Does Not Dream of Bunny Girl Senpai": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx101291-wfEdgPqtfU0l.jpg",
+    "matched": "Rascal Does Not Dream of Bunny Girl Senpai",
+    "year": 2018
+  },
+  "Golden Kamuy": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx99699-mBCjpoWpAVGX.jpg",
+    "matched": "Golden Kamuy",
+    "year": 2018
+  },
+  "That Time I Got Reincarnated as a Slime": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx101280-tDxCVJm714nt.jpg",
+    "matched": "That Time I Got Reincarnated as a Slime",
+    "year": 2018
+  },
+  "Dororo": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx101347-TGaDwEYqLfm1.jpg",
+    "matched": "Dororo",
+    "year": 2019
+  },
+  "Kaguya-sama: Love is War": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx101921-ufrjLzhSz7L1.jpg",
+    "matched": "Kaguya-sama: Love is War",
+    "year": 2019
+  },
+  "86 — Eighty Six": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx116589-KawXHB6sApFt.jpg",
+    "matched": "86 EIGHTY-SIX",
+    "year": 2021
+  },
+  "Ranking of Kings": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx113717-9sNnN8WRgK15.jpg",
+    "matched": "Ranking of Kings",
+    "year": 2021
+  },
+  "Bocchi the Rock!": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx130003-HTDmeL4RGeJ4.png",
+    "matched": "BOCCHI THE ROCK!",
+    "year": 2022
+  },
+  "DOOM": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/379720/header.jpg",
+    "matched": "DOOM"
+  },
+  "Command & Conquer": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/24790/header.jpg",
+    "matched": "Command & Conquer 3 Tiberium Wars™"
+  },
+  "Diablo": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/2344520/header.jpg",
+    "matched": "Diablo® IV"
+  },
+  "Quake": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/2310/header.jpg",
+    "matched": "Quake"
+  },
+  "Age of Empires": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/813780/header.jpg",
+    "matched": "Age of Empires II: Definitive Edition"
+  },
+  "Half-Life": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/70/header.jpg",
+    "matched": "Half-Life"
+  },
+  "Baldur's Gate": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/385970/header.jpg",
+    "matched": "Baldur's Gate: Siege of Dragonspear"
+  },
+  "Planescape: Torment": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/466300/header.jpg",
+    "matched": "Planescape: Torment: Enhanced Edition"
+  },
+  "Age of Empires II": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/813780/header.jpg",
+    "matched": "Age of Empires II: Definitive Edition"
+  },
+  "Counter-Strike": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/10/header.jpg",
+    "matched": "Counter-Strike"
+  },
+  "Diablo II": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/2536520/header.jpg",
+    "matched": "Diablo II: Resurrected – Infernal Edition"
+  },
+  "Deus Ex": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/337000/header.jpg",
+    "matched": "Deus Ex: Mankind Divided"
+  },
+  "Baldur's Gate II": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/467620/header.jpg",
+    "matched": "Baldur's Gate II: Enhanced Edition Official Soundtrack"
+  },
+  "Max Payne": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/204100/header.jpg",
+    "matched": "Max Payne 3"
+  },
+  "The Elder Scrolls III: Morrowind": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/22320/header.jpg",
+    "matched": "The Elder Scrolls III: Morrowind® Game of the Year Edition"
+  },
+  "Star Wars: Knights of the Old Republic": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/32370/header.jpg",
+    "matched": "STAR WARS™ Knights of the Old Republic™"
+  },
+  "Half-Life 2": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/220/header.jpg",
+    "matched": "Half-Life 2"
+  },
+  "Rome: Total War": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/4770/header.jpg",
+    "matched": "Rome: Total War™ - Alexander"
+  },
+  "The Elder Scrolls IV: Oblivion": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/2623190/header.jpg",
+    "matched": "The Elder Scrolls IV: Oblivion Remastered"
+  },
+  "BioShock": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/8870/header.jpg",
+    "matched": "BioShock Infinite"
+  },
+  "Portal": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/400/header.jpg",
+    "matched": "Portal"
+  },
+  "Team Fortress 2": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/440/header.jpg",
+    "matched": "Team Fortress 2"
+  },
+  "Fallout 3": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/22300/header.jpg",
+    "matched": "Fallout 3"
+  },
+  "Left 4 Dead": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/500/header.jpg",
+    "matched": "Left 4 Dead"
+  },
+  "Dragon Age: Origins": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/47810/header.jpg",
+    "matched": "Dragon Age: Origins - Ultimate Edition"
+  },
+  "Batman: Arkham Asylum": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/35140/header.jpg",
+    "matched": "Batman: Arkham Asylum Game of the Year Edition"
+  },
+  "Mass Effect 2": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/2362420/header.jpg",
+    "matched": "Mass Effect 2 (2010) Edition"
+  },
+  "Fallout: New Vegas": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/22380/header.jpg",
+    "matched": "Fallout: New Vegas"
+  },
+  "Minecraft": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/1672970/header.jpg",
+    "matched": "Minecraft Dungeons"
+  },
+  "The Elder Scrolls V: Skyrim": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/489830/header.jpg",
+    "matched": "The Elder Scrolls V: Skyrim Special Edition"
+  },
+  "Dark Souls": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/374320/header.jpg",
+    "matched": "DARK SOULS™ III"
+  },
+  "Portal 2": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/620/header.jpg",
+    "matched": "Portal 2"
+  },
+  "The Witcher 2": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/20920/header.jpg",
+    "matched": "The Witcher 2: Assassins of Kings Enhanced Edition"
+  },
+  "Dishonored": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/205100/header.jpg",
+    "matched": "Dishonored"
+  },
+  "XCOM: Enemy Unknown": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/200510/header.jpg",
+    "matched": "XCOM: Enemy Unknown"
+  },
+  "BioShock Infinite": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/8870/header.jpg",
+    "matched": "BioShock Infinite"
+  },
+  "Grand Theft Auto V": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/3240220/header.jpg",
+    "matched": "Grand Theft Auto V Enhanced"
+  },
+  "Don't Starve": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/322330/header.jpg",
+    "matched": "Don't Starve Together"
+  },
+  "Dark Souls II": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/355700/header.jpg",
+    "matched": "Dark Souls II Upgrade to DX11 (no content)"
+  },
+  "The Witcher 3: Wild Hunt": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/292030/header.jpg",
+    "matched": "The Witcher 3: Wild Hunt"
+  },
+  "Undertale": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/391540/header.jpg",
+    "matched": "Undertale"
+  },
+  "Fallout 4": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/377160/header.jpg",
+    "matched": "Fallout 4"
+  },
+  "Dark Souls III": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/94174/header.jpg",
+    "matched": "DARK SOULS III Deluxe Edition"
+  },
+  "DOOM (2016)": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/379720/header.jpg",
+    "matched": "DOOM"
+  },
+  "Titanfall 2": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/1237970/header.jpg",
+    "matched": "Titanfall® 2"
+  },
+  "Stardew Valley": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/413150/header.jpg",
+    "matched": "Stardew Valley"
+  },
+  "Hollow Knight": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/367520/header.jpg",
+    "matched": "Hollow Knight"
+  },
+  "Divinity: Original Sin 2": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/435150/header.jpg",
+    "matched": "Divinity: Original Sin 2 - Definitive Edition"
+  },
+  "Cuphead": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/268910/header.jpg",
+    "matched": "Cuphead"
+  },
+  "God of War (2018)": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/1593500/header.jpg",
+    "matched": "God of War"
+  },
+  "Red Dead Redemption 2": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/1174180/header.jpg",
+    "matched": "Red Dead Redemption 2"
+  },
+  "Monster Hunter: World": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/582010/header.jpg",
+    "matched": "Monster Hunter: World"
+  },
+  "Sekiro: Shadows Die Twice": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/814380/header.jpg",
+    "matched": "Sekiro™: Shadows Die Twice - GOTY Edition"
+  },
+  "Disco Elysium": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/632470/header.jpg",
+    "matched": "Disco Elysium - The Final Cut"
+  },
+  "Death Stranding": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/3280350/header.jpg",
+    "matched": "DEATH STRANDING 2: ON THE BEACH"
+  },
+  "Hades": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/1145360/header.jpg",
+    "matched": "Hades"
+  },
+  "Half-Life: Alyx": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/546560/header.jpg",
+    "matched": "Half-Life: Alyx"
+  },
+  "Cyberpunk 2077": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/1091500/header.jpg",
+    "matched": "Cyberpunk 2077"
+  },
+  "Valheim": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/892970/header.jpg",
+    "matched": "Valheim"
+  },
+  "It Takes Two": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/1426210/header.jpg",
+    "matched": "It Takes Two"
+  },
+  "Elden Ring": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/1245620/header.jpg",
+    "matched": "ELDEN RING"
+  },
+  "God of War: Ragnarök": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/2322010/header.jpg",
+    "matched": "God of War Ragnarök"
+  },
+  "Stray": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/1332010/header.jpg",
+    "matched": "Stray"
+  },
+  "Alan Wake 2": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/3274290/header.jpg",
+    "matched": "Beat Saber - Monstercat Mixtape 2 - Alan Walker - \"Wake Up\""
+  },
+  "Hogwarts Legacy": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/990080/header.jpg",
+    "matched": "Hogwarts Legacy"
+  },
+  "Balatro": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/2379780/header.jpg",
+    "matched": "Balatro"
+  },
+  "Black Myth: Wukong": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/2358720/header.jpg",
+    "matched": "Black Myth: Wukong"
+  },
+  "Hades II": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/1145350/header.jpg",
+    "matched": "Hades II"
+  },
+  "Like a Dragon: Infinite Wealth": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/2072450/header.jpg",
+    "matched": "Like a Dragon: Infinite Wealth"
+  },
+  "Metaphor: ReFantazio": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/2679460/header.jpg",
+    "matched": "Metaphor: ReFantazio"
+  },
+  "Indiana Jones and the Great Circle": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/2677660/header.jpg",
+    "matched": "Indiana Jones and the Great Circle"
+  },
+  "STALKER 2: Heart of Chornobyl": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/1643320/header.jpg",
+    "matched": "S.T.A.L.K.E.R. 2: Heart of Chornobyl"
+  },
+  "Dragon Age: The Veilguard": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/1845910/header.jpg",
+    "matched": "Dragon Age™: The Veilguard"
+  },
+  "Monster Hunter Wilds": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/2246340/header.jpg",
+    "matched": "Monster Hunter Wilds"
+  },
+  "Kingdom Come: Deliverance II": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/1771300/header.jpg",
+    "matched": "Kingdom Come: Deliverance II"
+  },
+  "Avowed": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/2457220/header.jpg",
+    "matched": "Avowed"
+  },
+  "Split Fiction": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/2001120/header.jpg",
+    "matched": "Split Fiction"
+  },
+  "Civilization VII": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/1295660/header.jpg",
+    "matched": "Sid Meier's Civilization VII"
+  },
+  "Doom: The Dark Ages": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/3017860/header.jpg",
+    "matched": "DOOM: The Dark Ages"
+  },
+  "NieR: Automata": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/524220/header.jpg",
+    "matched": "NieR:Automata™"
+  },
+  "Prey": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/480490/header.jpg",
+    "matched": "Prey"
+  },
+  "Celeste": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/504230/header.jpg",
+    "matched": "Celeste"
+  },
+  "Return of the Obra Dinn": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/653530/header.jpg",
+    "matched": "Return of the Obra Dinn"
+  },
+  "Resident Evil 2": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/883710/header.jpg",
+    "matched": "Resident Evil 2"
+  },
+  "Outer Wilds": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/753640/header.jpg",
+    "matched": "Outer Wilds"
+  },
+  "Slay the Spire": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/646570/header.jpg",
+    "matched": "Slay the Spire"
+  },
+  "Control": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/3669870/header.jpg",
+    "matched": "CONTROL Resonant"
+  },
+  "A Plague Tale: Innocence": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/752590/header.jpg",
+    "matched": "A Plague Tale: Innocence"
+  },
+  "Persona 4 Golden": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/1113000/header.jpg",
+    "matched": "Persona 4 Golden"
+  },
+  "Doom Eternal": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/782330/header.jpg",
+    "matched": "DOOM Eternal"
+  },
+  "Crusader Kings III": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/1158310/header.jpg",
+    "matched": "Crusader Kings III"
+  },
+  "Factorio": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/427520/header.jpg",
+    "matched": "Factorio"
+  },
+  "Inscryption": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/1092790/header.jpg",
+    "matched": "Inscryption"
+  },
+  "Resident Evil Village": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/1196590/header.jpg",
+    "matched": "Resident Evil Village"
+  },
+  "Deathloop": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/1252330/header.jpg",
+    "matched": "DEATHLOOP"
+  },
+  "Persona 5 Royal": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/1687950/header.jpg",
+    "matched": "Persona 5 Royal"
+  },
+  "Sifu": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/2138710/header.jpg",
+    "matched": "Sifu"
+  },
+  "Vampire Survivors": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/1794680/header.jpg",
+    "matched": "Vampire Survivors"
+  },
+  "A Plague Tale: Requiem": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/1182900/header.jpg",
+    "matched": "A Plague Tale: Requiem"
+  },
+  "Hi-Fi Rush": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/1817230/header.jpg",
+    "matched": "Hi-Fi RUSH"
+  },
+  "Armored Core VI: Fires of Rubicon": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/1888160/header.jpg",
+    "matched": "ARMORED CORE™ VI FIRES OF RUBICON™"
+  },
+  "Lies of P": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/1627720/header.jpg",
+    "matched": "Lies of P"
+  },
+  "Dave the Diver": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/1868140/header.jpg",
+    "matched": "DAVE THE DIVER"
+  },
+  "Helldivers 2": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/553850/header.jpg",
+    "matched": "HELLDIVERS™ 2"
+  },
+  "Ghost of Tsushima": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/2215430/header.jpg",
+    "matched": "Ghost of Tsushima DIRECTOR'S CUT"
+  },
+  "Fullmetal Alchemist (2003)": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx121-zjmixZ428Mwv.png",
+    "matched": "Fullmetal Alchemist",
+    "year": 2003
+  },
+  "Baldur's Gate 3": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/1086940/header.jpg",
+    "matched": "Baldur's Gate 3"
+  },
+  "Lupin III Part I": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/nx1412-70kA9bzDoleV.jpg",
+    "matched": "Lupin the 3rd",
+    "year": 1971
+  },
+  "Warcraft: Orcs & Humans": {
+    "url": null
+  },
+  "StarCraft": {
+    "url": null
+  },
+  "Warcraft III": {
+    "url": null
+  },
+  "World of Warcraft": {
+    "url": null
+  },
+  "StarCraft II": {
+    "url": null
+  }
+}
