@@ -3,7 +3,7 @@
    The old version was pure cache-first with a fixed cache name, so a deployed update
    could never reach a returning visitor. */
 
-const VERSION = 'v4';
+const VERSION = 'v5';
 const CACHE   = `otakuplay-${VERSION}`;
 const ASSETS  = [
   './',
@@ -46,6 +46,13 @@ function isCacheable(request, response) {
   return response && response.ok && response.type === 'basic' && request.method === 'GET';
 }
 
+/* Pages are network-first, so serving these from cache could pair fresh HTML
+   with stale code — which is exactly how a dead modal shipped. Markup and the
+   code that drives it must move together, so they share one policy. Images and
+   icons keep stale-while-revalidate; they can lag a deploy harmlessly. */
+const CORE = ['/app.js', '/data.js', '/style.css'];
+const isCore = url => CORE.some(path => url.pathname.endsWith(path));
+
 /* Defensive: a 304 answers conditional headers the HTTP cache attached to the
    request. It carries no body, so handing one to respondWith() would render a
    blank page — the cached copy it refers to is what the page actually wants.
@@ -76,6 +83,21 @@ async function handleNavigation(request) {
   }
 }
 
+// Core code: fresh when the network allows, cached copy when it doesn't.
+async function handleCore(request) {
+  try {
+    const response = await fetch(request);
+    if (response.status === 304) return notModified(response, request);
+    if (isCacheable(request, response)) {
+      const copy = response.clone();
+      caches.open(CACHE).then(c => c.put(request, copy));
+    }
+    return response;
+  } catch {
+    return (await caches.match(request)) || Response.error();
+  }
+}
+
 // Assets: serve from cache instantly, refresh the entry in the background.
 async function handleAsset(request) {
   const cached = await caches.match(request);
@@ -99,5 +121,8 @@ self.addEventListener('fetch', event => {
   // Never intercept the worker itself or one-off cache-busted URLs.
   if (url.pathname.endsWith('/sw.js') || url.search) return;
 
-  event.respondWith(request.mode === 'navigate' ? handleNavigation(request) : handleAsset(request));
+  event.respondWith(
+    request.mode === 'navigate' ? handleNavigation(request)
+      : isCore(url) ? handleCore(request)
+        : handleAsset(request));
 });

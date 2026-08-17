@@ -249,6 +249,58 @@ test.describe('toolbar and filter drawer', () => {
   });
 });
 
+test.describe('modal interaction', () => {
+  /* These use real mouse clicks on purpose. An `inert` modal shipped once: it
+     opened, but every click fell through to the page behind it. Escape and
+     scripted .click() both bypass hit-testing, so the old tests passed while the
+     modal was completely dead to a user. */
+  test('the close button actually closes it', async ({ page }) => {
+    await page.locator('#anime-grid .card').first().click();
+    await expect(page.locator('#detail-modal')).toHaveClass(/open/);
+
+    // Would fail if anything intercepted pointer events over the button.
+    await page.locator('#modal-close').click();
+    await expect(page.locator('#detail-modal')).not.toHaveClass(/open/);
+  });
+
+  test('the modal receives clicks rather than the page behind it', async ({ page }) => {
+    await page.locator('#anime-grid .card').first().click();
+    const modal = page.locator('#detail-modal');
+    await expect(modal).toHaveClass(/open/);
+    await expect(modal).not.toHaveAttribute('inert', /.*/);
+
+    // Whatever sits under the close button must be inside the dialog.
+    const owner = await page.evaluate(() => {
+      const r = document.getElementById('modal-close').getBoundingClientRect();
+      const el = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+      return document.getElementById('detail-modal').contains(el);
+    });
+    expect(owner).toBe(true);
+  });
+
+  test('buttons inside the modal work', async ({ page }) => {
+    await page.locator('#anime-grid .card').first().click();
+
+    const fav = page.locator('.modal-fav-btn');
+    await expect(fav).toContainText('Add to Favorites');
+    await fav.click();
+    await expect(fav).toContainText('Favorited');
+
+    await page.locator('.modal-status-opt[data-status="watching"]').click();
+    await expect(page.locator('.modal-status-opt[data-status="watching"]')).toHaveAttribute('aria-pressed', 'true');
+
+    await expect(page.locator('.modal-trailer-btn')).toHaveAttribute('href', /youtube\.com/);
+    await expect(page.locator('.modal-page-btn')).toHaveAttribute('href', /\/anime\/[a-z0-9-]+\/$/);
+  });
+
+  test('a closed modal is inert so it never swallows clicks', async ({ page }) => {
+    await expect(page.locator('#detail-modal')).toHaveAttribute('inert', /.*/);
+    // The card underneath must still be clickable.
+    await page.locator('#anime-grid .card').first().click();
+    await expect(page.locator('#detail-modal')).toHaveClass(/open/);
+  });
+});
+
 test.describe('entry pages', () => {
   test('an entry has its own page with correct metadata', async ({ page }) => {
     await page.goto('/anime/cowboy-bebop/');

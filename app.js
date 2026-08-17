@@ -1022,6 +1022,9 @@ const FOCUSABLE = 'a[href], button:not([disabled]), textarea, input, select, [ta
 
 function setupModal() {
   const overlay = document.getElementById('detail-modal');
+  // Applied here rather than in the markup: whatever happens to this script, a
+  // closed modal is inert and an open one never is.
+  overlay.setAttribute('inert', '');
   document.getElementById('modal-close').addEventListener('click', closeModal);
   overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
 
