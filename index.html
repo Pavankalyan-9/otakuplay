@@ -130,57 +130,102 @@
     <div class="decade-jump-bar" id="anime-jump-bar" aria-label="Jump to decade"></div>
 
     <div class="controls-row">
-      <div class="search-wrap">
-        <span class="search-icon" aria-hidden="true">🔍</span>
-        <input type="search" class="search-input" id="anime-search" placeholder="Search titles, studios, genres…" autocomplete="off" aria-label="Search anime" />
-        <button class="search-clear" id="anime-search-clear" aria-label="Clear search">✕</button>
+      <div class="toolbar">
+        <div class="search-wrap">
+          <span class="search-icon" aria-hidden="true">🔍</span>
+          <input type="search" class="search-input" id="anime-search" placeholder="Search titles, studios, genres…" autocomplete="off" aria-label="Search anime" />
+          <button class="search-clear" id="anime-search-clear" aria-label="Clear search">✕</button>
+        </div>
+        <button class="filter-toggle" id="anime-filter-toggle" aria-expanded="false" aria-controls="anime-filter-panel">
+          <span aria-hidden="true">☰</span> Filters
+          <span class="filter-count" id="anime-filter-count" hidden>0</span>
+        </button>
+        <label class="sort-wrap">
+          <span class="sr-only">Sort by</span>
+          <select class="sort-select" id="anime-sort">
+            <option value="year-asc">Year ↑</option>
+            <option value="year-desc">Year ↓</option>
+            <option value="rating">Rating</option>
+            <option value="alpha">A → Z</option>
+            <option value="tier">Tier</option>
+          </select>
+        </label>
+        <button class="btn-random" id="anime-random" title="Jump to a random pick" aria-label="Random pick">🎲</button>
+        <div class="menu-wrap">
+          <button class="more-btn" id="anime-more" aria-haspopup="true" aria-expanded="false" aria-label="More actions">⋯</button>
+          <div class="more-menu" id="anime-more-menu" role="menu" hidden>
+            <button class="more-item export-btn" role="menuitem">⬇ Export library</button>
+            <button class="more-item import-btn" role="menuitem">⬆ Import library</button>
+            <button class="more-item clear-btn" role="menuitem">🗑 Clear my data</button>
+          </div>
+        </div>
       </div>
-      <div class="rating-filter-row">
-        <label class="rating-filter-label" for="anime-rating-slider">Min Rating: <span id="anime-rating-val">Any</span></label>
-        <input type="range" class="rating-slider" id="anime-rating-slider" min="0" max="10" step="0.5" value="0" aria-valuetext="Any rating" />
-      </div>
-      <div class="filter-bar" id="anime-filters" role="group" aria-label="Filter anime by genre">
-        <button class="filter-btn active" data-filter="all">All Genres</button>
-        <button class="filter-btn" data-filter="action">Action</button>
-        <button class="filter-btn" data-filter="adventure">Adventure</button>
-        <button class="filter-btn" data-filter="fantasy">Fantasy</button>
-        <button class="filter-btn" data-filter="scifi">Sci-Fi</button>
-        <button class="filter-btn" data-filter="mecha">Mecha</button>
-        <button class="filter-btn" data-filter="drama">Drama</button>
-        <button class="filter-btn" data-filter="thriller">Thriller</button>
-        <button class="filter-btn" data-filter="psychological">Psychological</button>
-        <button class="filter-btn" data-filter="mystery">Mystery</button>
-        <button class="filter-btn" data-filter="horror">Horror</button>
-        <button class="filter-btn" data-filter="comedy">Comedy</button>
-        <button class="filter-btn" data-filter="romance">Romance</button>
-        <button class="filter-btn" data-filter="sports">Sports</button>
-        <button class="filter-btn" data-filter="music">Music</button>
-        <button class="filter-btn" data-filter="historical">Historical</button>
-        <button class="filter-btn" data-filter="new">🆕 New</button>
-        <button class="filter-btn fav-filter-btn" data-filter="favorites">♥ Favorites</button>
-      </div>
-      <div class="sort-bar" role="group" aria-label="Sort anime">
-        <span class="sort-label">Sort:</span>
-        <button class="sort-btn active" data-sort="year-asc">Year ↑</button>
-        <button class="sort-btn" data-sort="year-desc">Year ↓</button>
-        <button class="sort-btn" data-sort="rating">Rating</button>
-        <button class="sort-btn" data-sort="alpha">A→Z</button>
-        <button class="sort-btn" data-sort="tier">Tier</button>
-        <span class="sort-divider"></span>
-        <button class="btn-random" id="anime-random">🎲 Random</button>
-      </div>
-      <div class="status-filter-row" id="anime-status-row" role="group" aria-label="Filter anime by your status">
-        <span class="status-filter-label">Status:</span>
-        <button class="status-btn active" data-status="all">All</button>
-        <button class="status-btn" data-status="watched">Watched</button>
-        <button class="status-btn" data-status="watching">Watching</button>
-        <button class="status-btn" data-status="plan">Plan to Watch</button>
-        <button class="status-btn" data-status="dropped">Dropped</button>
-      </div>
-      <div class="data-actions-row">
-        <button class="data-action-btn export-btn">⬇ Export</button>
-        <button class="data-action-btn import-btn">⬆ Import</button>
-        <button class="data-action-btn clear-btn">🗑 Clear my data</button>
+
+      <div class="active-chips" id="anime-chips" hidden></div>
+
+      <div class="filter-panel" id="anime-filter-panel" hidden>
+        <div class="panel-group">
+          <span class="panel-label">Genres</span>
+          <div class="filter-bar" id="anime-filters" role="group" aria-label="Filter by genre">
+            <button class="filter-btn active" data-filter="all">All Genres</button>
+            <button class="filter-btn" data-filter="action">Action</button>
+            <button class="filter-btn" data-filter="adventure">Adventure</button>
+            <button class="filter-btn" data-filter="fantasy">Fantasy</button>
+            <button class="filter-btn" data-filter="scifi">Sci-Fi</button>
+            <button class="filter-btn" data-filter="mecha">Mecha</button>
+            <button class="filter-btn" data-filter="drama">Drama</button>
+            <button class="filter-btn" data-filter="thriller">Thriller</button>
+            <button class="filter-btn" data-filter="psychological">Psychological</button>
+            <button class="filter-btn" data-filter="mystery">Mystery</button>
+            <button class="filter-btn" data-filter="horror">Horror</button>
+            <button class="filter-btn" data-filter="comedy">Comedy</button>
+            <button class="filter-btn" data-filter="romance">Romance</button>
+            <button class="filter-btn" data-filter="sports">Sports</button>
+            <button class="filter-btn" data-filter="music">Music</button>
+            <button class="filter-btn" data-filter="historical">Historical</button>
+            <button class="filter-btn" data-filter="new">🆕 New</button>
+            <button class="filter-btn fav-filter-btn" data-filter="favorites">♥ Favorites</button>
+          </div>
+          <div class="genre-mode">
+            <span class="panel-label inline">Match</span>
+            <button class="genre-mode-btn active" data-mode="any">Any</button>
+            <button class="genre-mode-btn" data-mode="all">All</button>
+          </div>
+        </div>
+
+        <div class="panel-row">
+          <div class="panel-group">
+            <label class="panel-label" for="anime-rating-slider">Min rating: <span id="anime-rating-val">Any</span></label>
+            <input type="range" class="rating-slider" id="anime-rating-slider" min="0" max="10" step="0.5" value="0" aria-valuetext="Any rating" />
+          </div>
+          <div class="panel-group refine-row">
+            <span class="panel-label">Years</span>
+            <div class="year-inputs">
+              <select class="refine-select year-from" aria-label="From year"></select>
+              <span class="refine-dash">→</span>
+              <select class="refine-select year-to" aria-label="To year"></select>
+            </div>
+          </div>
+          <div class="panel-group">
+            <span class="panel-label">Studio</span>
+            <select class="refine-select studio-select" aria-label="Filter by studio"></select>
+          </div>
+        </div>
+
+        <div class="panel-group">
+          <span class="panel-label">Your status</span>
+          <div class="status-filter-row" id="anime-status-row" role="group" aria-label="Filter by your status">
+            <button class="status-btn active" data-status="all">All</button>
+            <button class="status-btn" data-status="watched">Watched</button>
+            <button class="status-btn" data-status="watching">Watching</button>
+            <button class="status-btn" data-status="plan">Plan to Watch</button>
+            <button class="status-btn" data-status="dropped">Dropped</button>
+          </div>
+        </div>
+
+        <div class="panel-footer">
+          <button class="panel-reset" data-sect="anime">Clear all filters</button>
+        </div>
       </div>
     </div>
 
@@ -198,66 +243,111 @@
     <div class="decade-jump-bar" id="games-jump-bar" aria-label="Jump to decade"></div>
 
     <div class="controls-row">
-      <div class="search-wrap">
-        <span class="search-icon" aria-hidden="true">🔍</span>
-        <input type="search" class="search-input" id="games-search" placeholder="Search titles, studios, genres…" autocomplete="off" aria-label="Search PC games" />
-        <button class="search-clear" id="games-search-clear" aria-label="Clear search">✕</button>
+      <div class="toolbar">
+        <div class="search-wrap">
+          <span class="search-icon" aria-hidden="true">🔍</span>
+          <input type="search" class="search-input" id="games-search" placeholder="Search titles, studios, genres…" autocomplete="off" aria-label="Search PC games" />
+          <button class="search-clear" id="games-search-clear" aria-label="Clear search">✕</button>
+        </div>
+        <button class="filter-toggle" id="games-filter-toggle" aria-expanded="false" aria-controls="games-filter-panel">
+          <span aria-hidden="true">☰</span> Filters
+          <span class="filter-count" id="games-filter-count" hidden>0</span>
+        </button>
+        <label class="sort-wrap">
+          <span class="sr-only">Sort by</span>
+          <select class="sort-select" id="games-sort">
+            <option value="year-asc">Year ↑</option>
+            <option value="year-desc">Year ↓</option>
+            <option value="rating">Rating</option>
+            <option value="alpha">A → Z</option>
+            <option value="tier">Tier</option>
+          </select>
+        </label>
+        <button class="btn-random" id="games-random" title="Jump to a random pick" aria-label="Random pick">🎲</button>
+        <div class="menu-wrap">
+          <button class="more-btn" id="games-more" aria-haspopup="true" aria-expanded="false" aria-label="More actions">⋯</button>
+          <div class="more-menu" id="games-more-menu" role="menu" hidden>
+            <button class="more-item export-btn" role="menuitem">⬇ Export library</button>
+            <button class="more-item import-btn" role="menuitem">⬆ Import library</button>
+            <button class="more-item clear-btn" role="menuitem">🗑 Clear my data</button>
+          </div>
+        </div>
       </div>
-      <div class="rating-filter-row">
-        <label class="rating-filter-label" for="games-rating-slider">Min Rating: <span id="games-rating-val">Any</span></label>
-        <input type="range" class="rating-slider" id="games-rating-slider" min="0" max="10" step="0.5" value="0" aria-valuetext="Any rating" />
-      </div>
-      <div class="filter-bar" id="games-filters" role="group" aria-label="Filter games by genre">
-        <button class="filter-btn active" data-filter="all">All Genres</button>
-        <button class="filter-btn" data-filter="rpg">RPG</button>
-        <button class="filter-btn" data-filter="action">Action</button>
-        <button class="filter-btn" data-filter="adventure">Adventure</button>
-        <button class="filter-btn" data-filter="openworld">Open World</button>
-        <button class="filter-btn" data-filter="fps">FPS</button>
-        <button class="filter-btn" data-filter="soulslike">Souls-like</button>
-        <button class="filter-btn" data-filter="strategy">Strategy</button>
-        <button class="filter-btn" data-filter="rts">RTS</button>
-        <button class="filter-btn" data-filter="simulation">Simulation</button>
-        <button class="filter-btn" data-filter="sandbox">Sandbox</button>
-        <button class="filter-btn" data-filter="survival">Survival</button>
-        <button class="filter-btn" data-filter="roguelite">Roguelite</button>
-        <button class="filter-btn" data-filter="platformer">Platformer</button>
-        <button class="filter-btn" data-filter="puzzle">Puzzle</button>
-        <button class="filter-btn" data-filter="indie">Indie</button>
-        <button class="filter-btn" data-filter="horror">Horror</button>
-        <button class="filter-btn" data-filter="thriller">Thriller</button>
-        <button class="filter-btn" data-filter="mystery">Mystery</button>
-        <button class="filter-btn" data-filter="psychological">Psychological</button>
-        <button class="filter-btn" data-filter="scifi">Sci-Fi</button>
-        <button class="filter-btn" data-filter="fantasy">Fantasy</button>
-        <button class="filter-btn" data-filter="historical">Historical</button>
-        <button class="filter-btn" data-filter="drama">Drama</button>
-        <button class="filter-btn" data-filter="comedy">Comedy</button>
-        <button class="filter-btn" data-filter="new">🆕 New</button>
-        <button class="filter-btn fav-filter-btn" data-filter="favorites">♥ Favorites</button>
-      </div>
-      <div class="sort-bar" role="group" aria-label="Sort games">
-        <span class="sort-label">Sort:</span>
-        <button class="sort-btn active" data-sort="year-asc">Year ↑</button>
-        <button class="sort-btn" data-sort="year-desc">Year ↓</button>
-        <button class="sort-btn" data-sort="rating">Rating</button>
-        <button class="sort-btn" data-sort="alpha">A→Z</button>
-        <button class="sort-btn" data-sort="tier">Tier</button>
-        <span class="sort-divider"></span>
-        <button class="btn-random" id="games-random">🎲 Random</button>
-      </div>
-      <div class="status-filter-row" id="games-status-row" role="group" aria-label="Filter games by your status">
-        <span class="status-filter-label">Status:</span>
-        <button class="status-btn active" data-status="all">All</button>
-        <button class="status-btn" data-status="watched">Played</button>
-        <button class="status-btn" data-status="watching">Playing</button>
-        <button class="status-btn" data-status="plan">Plan to Play</button>
-        <button class="status-btn" data-status="dropped">Dropped</button>
-      </div>
-      <div class="data-actions-row">
-        <button class="data-action-btn export-btn">⬇ Export</button>
-        <button class="data-action-btn import-btn">⬆ Import</button>
-        <button class="data-action-btn clear-btn">🗑 Clear my data</button>
+
+      <div class="active-chips" id="games-chips" hidden></div>
+
+      <div class="filter-panel" id="games-filter-panel" hidden>
+        <div class="panel-group">
+          <span class="panel-label">Genres</span>
+          <div class="filter-bar" id="games-filters" role="group" aria-label="Filter by genre">
+            <button class="filter-btn active" data-filter="all">All Genres</button>
+            <button class="filter-btn" data-filter="rpg">RPG</button>
+            <button class="filter-btn" data-filter="action">Action</button>
+            <button class="filter-btn" data-filter="adventure">Adventure</button>
+            <button class="filter-btn" data-filter="openworld">Open World</button>
+            <button class="filter-btn" data-filter="fps">FPS</button>
+            <button class="filter-btn" data-filter="soulslike">Souls-like</button>
+            <button class="filter-btn" data-filter="strategy">Strategy</button>
+            <button class="filter-btn" data-filter="rts">RTS</button>
+            <button class="filter-btn" data-filter="simulation">Simulation</button>
+            <button class="filter-btn" data-filter="sandbox">Sandbox</button>
+            <button class="filter-btn" data-filter="survival">Survival</button>
+            <button class="filter-btn" data-filter="roguelite">Roguelite</button>
+            <button class="filter-btn" data-filter="platformer">Platformer</button>
+            <button class="filter-btn" data-filter="puzzle">Puzzle</button>
+            <button class="filter-btn" data-filter="indie">Indie</button>
+            <button class="filter-btn" data-filter="horror">Horror</button>
+            <button class="filter-btn" data-filter="thriller">Thriller</button>
+            <button class="filter-btn" data-filter="mystery">Mystery</button>
+            <button class="filter-btn" data-filter="psychological">Psychological</button>
+            <button class="filter-btn" data-filter="scifi">Sci-Fi</button>
+            <button class="filter-btn" data-filter="fantasy">Fantasy</button>
+            <button class="filter-btn" data-filter="historical">Historical</button>
+            <button class="filter-btn" data-filter="drama">Drama</button>
+            <button class="filter-btn" data-filter="comedy">Comedy</button>
+            <button class="filter-btn" data-filter="new">🆕 New</button>
+            <button class="filter-btn fav-filter-btn" data-filter="favorites">♥ Favorites</button>
+          </div>
+          <div class="genre-mode">
+            <span class="panel-label inline">Match</span>
+            <button class="genre-mode-btn active" data-mode="any">Any</button>
+            <button class="genre-mode-btn" data-mode="all">All</button>
+          </div>
+        </div>
+
+        <div class="panel-row">
+          <div class="panel-group">
+            <label class="panel-label" for="games-rating-slider">Min rating: <span id="games-rating-val">Any</span></label>
+            <input type="range" class="rating-slider" id="games-rating-slider" min="0" max="10" step="0.5" value="0" aria-valuetext="Any rating" />
+          </div>
+          <div class="panel-group refine-row">
+            <span class="panel-label">Years</span>
+            <div class="year-inputs">
+              <select class="refine-select year-from" aria-label="From year"></select>
+              <span class="refine-dash">→</span>
+              <select class="refine-select year-to" aria-label="To year"></select>
+            </div>
+          </div>
+          <div class="panel-group">
+            <span class="panel-label">Studio</span>
+            <select class="refine-select studio-select" aria-label="Filter by studio"></select>
+          </div>
+        </div>
+
+        <div class="panel-group">
+          <span class="panel-label">Your status</span>
+          <div class="status-filter-row" id="games-status-row" role="group" aria-label="Filter by your status">
+            <button class="status-btn active" data-status="all">All</button>
+            <button class="status-btn" data-status="watched">Played</button>
+            <button class="status-btn" data-status="watching">Playing</button>
+            <button class="status-btn" data-status="plan">Plan to Play</button>
+            <button class="status-btn" data-status="dropped">Dropped</button>
+          </div>
+        </div>
+
+        <div class="panel-footer">
+          <button class="panel-reset" data-sect="games">Clear all filters</button>
+        </div>
       </div>
     </div>
 

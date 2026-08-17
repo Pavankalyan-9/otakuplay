@@ -6,9 +6,10 @@ It's a dependency-free static site: no build step, no framework, no backend. Eve
 
 ## Features
 
-- **219 curated entries** — 108 anime, 111 PC games, grouped by decade with era labels
-- **Filter & sort** — genre (multi-select), minimum rating, watch/play status, favorites, new releases; sort by year, rating, A→Z or tier
+- **219 curated entries** — 108 anime, 111 PC games, grouped by decade with era labels, with cover art
+- **Filter & sort** — genre (multi-select, any/all), year range, studio, minimum rating, watch/play status, favorites, new releases; sort by year, rating, A→Z or tier
 - **Personal library** — mark status (watched / watching / plan / dropped), rate 1–10, keep private notes
+- **Recommendations** — "because you liked X" picks scored from your own ratings, statuses and favorites
 - **Insights tab** — your library stats plus catalogue breakdowns by decade, genre and studio
 - **Shareable URLs** — filters, sort, search and individual entries are all encoded in the hash
 - **Japanese titles** — toggle native titles with the 🇯🇵 button
@@ -18,13 +19,23 @@ It's a dependency-free static site: no build step, no framework, no backend. Eve
 
 ## Running it locally
 
-Any static file server works. The service worker and JSON import need `http://`, not `file://`:
+Any static file server works — there is no build step. The service worker and JSON import need `http://`, not `file://`:
 
 ```bash
-python -m http.server 5173
+npm run serve
 ```
 
 Then open <http://localhost:5173>.
+
+## Tests
+
+Playwright covers the bugs that have actually shipped here — empty Insights tab, hidden tier headers, the New filter disagreeing with its badge, corrupt `localStorage`, off-screen mobile header — plus URL round-tripping, filters, the personal library, keyboard access and offline rendering. They run on desktop and mobile viewports, and CI blocks the deploy if any fail.
+
+```bash
+npm test
+```
+
+Cross-origin requests (cover art, fonts) are stubbed so runs stay fast and hermetic.
 
 ## Project layout
 
@@ -37,6 +48,8 @@ Then open <http://localhost:5173>.
 | `sw.js` | Service worker (stale-while-revalidate, network-first navigations) |
 | `manifest.json` | PWA metadata and icons |
 | `icons/` | Favicon, PWA icons, Open Graph image |
+| `scripts/fetch-art.mjs` | One-off cover-art fetcher (AniList + Steam) |
+| `tests/` | Playwright regression suite |
 
 ## Adding a title
 
@@ -57,6 +70,16 @@ Notes:
 - `tags` must match a `data-filter` value in the genre bar in `index.html`, otherwise the title can't be filtered to.
 - The 🆕 New badge and filter are derived from `year >= NEW_SINCE` (`app.js`) — there's no per-entry flag to keep in sync.
 - Optional extras: add the title as a key in `STREAM_MAP` (platform badges), `JP_TITLES` (Japanese title) or `FRANCHISES` (franchise badge).
+
+Then pull its cover art:
+
+```bash
+npm run art
+```
+
+This queries AniList for anime and the Steam store for games, verifies each hit against the release year we already store, and writes an `img` URL back into `data.js`. Results are cached in `scripts/art-cache.json`, so re-runs only fetch what's missing. Titles it can't match (Blizzard games aren't on Steam, for instance) keep their gradient — add a `SEARCH_ALIASES` or `MANUAL_ART` entry in the script if you want to force one.
+
+Art is referenced from the official CDNs rather than committed here, so the repo stays small and no publisher artwork is redistributed. The trade-off is that covers need a network connection — offline, cards fall back to their gradients.
 
 ## Deploying
 
