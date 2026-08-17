@@ -3,11 +3,15 @@
    The old version was pure cache-first with a fixed cache name, so a deployed update
    could never reach a returning visitor. */
 
-const VERSION = 'v3';
+const VERSION = 'v4';
 const CACHE   = `otakuplay-${VERSION}`;
 const ASSETS  = [
   './',
   './index.html',
+  './anime/',
+  './games/',
+  './insights/',
+  './about/',
   './style.css',
   './data.js',
   './app.js',
@@ -52,18 +56,23 @@ async function notModified(response, cacheKey) {
   return fetch(new Request(typeof cacheKey === 'string' ? cacheKey : cacheKey.url, { cache: 'reload' }));
 }
 
-// Navigations: network first, so a new build is picked up immediately.
+/* Navigations: network first, so a new build is picked up immediately. Each page
+   is cached under its own URL — with five pages, caching them all as index.html
+   would serve the landing page for /anime/ once offline. */
 async function handleNavigation(request) {
   try {
     const response = await fetch(request);
-    if (response.status === 304) return notModified(response, './index.html');
+    if (response.status === 304) return notModified(response, request);
     if (isCacheable(request, response)) {
       const copy = response.clone();
-      caches.open(CACHE).then(c => c.put('./index.html', copy));
+      caches.open(CACHE).then(c => c.put(request, copy));
     }
     return response;
   } catch {
-    return (await caches.match('./index.html')) || (await caches.match('./')) || Response.error();
+    return (await caches.match(request))
+        || (await caches.match('./index.html'))
+        || (await caches.match('./'))
+        || Response.error();
   }
 }
 

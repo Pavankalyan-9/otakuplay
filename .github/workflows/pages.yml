@@ -37,6 +37,7 @@ jobs:
           python3 -c "import json; json.load(open('manifest.json'))"
 
       - run: npm ci
+      - run: npm run build
       - run: npx playwright install --with-deps chromium
       - run: npx playwright test
 
@@ -58,11 +59,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+      - run: npm run build
+
       - uses: actions/configure-pages@v5
 
+      # Publish the built site, not the repo — src/, tests/ and node_modules
+      # have no business being served.
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: '.'
+          path: '_site'
 
       - id: deployment
         uses: actions/deploy-pages@v4

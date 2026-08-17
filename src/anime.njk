@@ -1,0 +1,16 @@
+---
+layout: layouts/base.njk
+permalink: /anime/
+pageKey: anime
+title: Best Anime of All Time (1963–2025) — OtakuPlay
+description: 108 of the greatest anime ever made, ranked and grouped by decade — from Astro Boy and Gundam to Frieren and Dandadan, with studios, genres, ratings and streaming platforms.
+---
+
+{% set sect = 'anime' %}
+{% set sectionTag = '🏆 1963 — 2025' %}
+{% set heading = 'Best Anime of All Time' %}
+{% set blurb = "From Osamu Tezuka's first masterpiece to today's seasonal gems — every era's greatest works, ranked and organized by year." %}
+{% set searchLabel = 'anime' %}
+{% set genreList = genres.anime %}
+{% set statusList = genres.statusLabels.anime %}
+{% include "partials/catalogue.njk" %}

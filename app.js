@@ -40,7 +40,7 @@ const ids = k => ({
   statusRow: `${k}-status-row`,
   jumpBar:   `${k}-jump-bar`,
   random:    `${k}-random`,
-  tabCount:  `tab-${k}-count`,
+  count:     `${k}-count`,
 });
 
 // title → { item, sect } for O(1) lookups
@@ -501,12 +501,12 @@ function renderEmptyState(sectKey, grid) {
 }
 
 function updateVisibleCount(sectKey) {
-  const grid  = document.getElementById(ids(sectKey).grid);
-  const el    = document.getElementById(ids(sectKey).tabCount);
+  const grid = document.getElementById(ids(sectKey).grid);
+  const el   = document.getElementById(ids(sectKey).count);
   if (!grid || !el) return;
   const visible = grid.querySelectorAll('.card:not(.hidden)').length;
   const total   = SECTIONS[sectKey].data.length;
-  el.textContent = visible === total ? total : `${visible}/${total}`;
+  el.textContent = visible === total ? `${total} titles` : `${visible} of ${total}`;
 }
 
 function resetFilters(sectKey) {
@@ -660,6 +660,7 @@ function syncControls(sectKey) {
   const id      = ids(sectKey);
   const s       = state[sectKey];
   const section = document.getElementById(id.section);
+  if (!section) return;                    // this page doesn't render that catalogue
 
   section.querySelectorAll('.filter-btn').forEach(b =>
     setPressed(b, b.dataset.filter === 'all' ? s.filters.size === 0 : s.filters.has(b.dataset.filter)));
@@ -1018,8 +1019,10 @@ function setupModal() {
 
 function shareEntry(title, btn) {
   const sect   = sectionOf(title);
-  const params = new URLSearchParams({ tab: sect, entry: title });
-  const url    = `${location.origin}${location.pathname}#${params.toString()}`;
+  const params = new URLSearchParams({ entry: title });
+  // Always link to the section's own page, wherever the modal was opened from.
+  const base   = new URL(`${window.OTAKU_ROOT || ''}${sect}/`, location.href).href;
+  const url    = `${base}#${params.toString()}`;
   const item   = lookup(title)?.item;
 
   // On touch devices the native share sheet beats a clipboard copy.
@@ -1060,75 +1063,28 @@ function fallbackCopy(text, done) {
   ok ? done() : toast(`Copy failed — link: ${text}`);
 }
 
-// ===================== TABS =====================
-function currentTab() {
-  const open = [...document.querySelectorAll('.content-section')].find(s => s.style.display !== 'none');
-  return open ? open.id.replace('-section', '') : 'anime';
-}
-
-function switchTab(tab, { push = true, scroll = true } = {}) {
-  const target = `${tab}-section`;
-  document.querySelectorAll('.content-section').forEach(s => {
-    const on = s.id === target;
-    s.style.display = on ? 'block' : 'none';
-    s.toggleAttribute('hidden', !on);
-  });
-  document.querySelectorAll('.tab-btn').forEach(btn => {
-    const on = btn.dataset.target === target;
-    btn.classList.toggle('active', on);
-    btn.setAttribute('aria-selected', String(on));
-    btn.tabIndex = on ? 0 : -1;
-  });
-  document.querySelectorAll('.nav-link').forEach(l => {
-    const on = l.dataset.tab === tab;
-    l.classList.toggle('active', on);
-    if (on) l.setAttribute('aria-current', 'page'); else l.removeAttribute('aria-current');
-  });
-
-  if (tab === 'stats') renderStats();
-  if (scroll) document.getElementById('top-tabs').scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'start' });
-  if (push) pushHash();
-}
-
-function setupTabs() {
-  const tabButtons = [...document.querySelectorAll('.tab-btn')];
-  tabButtons.forEach((btn, i) => {
-    btn.addEventListener('click', () => switchTab(btn.dataset.target.replace('-section', '')));
-    // Arrow-key navigation across the tablist.
-    btn.addEventListener('keydown', e => {
-      const dir = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
-      if (!dir) return;
-      e.preventDefault();
-      const next = tabButtons[(i + dir + tabButtons.length) % tabButtons.length];
-      next.focus();
-      switchTab(next.dataset.target.replace('-section', ''), { scroll: false });
-    });
-  });
-
-  document.querySelectorAll('.nav-link, [data-tab-link]').forEach(link => {
-    link.addEventListener('click', e => { e.preventDefault(); switchTab(link.dataset.tab); });
-  });
-}
+/* Which page are we on? Each page renders exactly one section (or none, on the
+   landing and about pages), so this replaces the old tab switching. */
+const PAGE = document.body.dataset.page || 'home';
+const activeSection = () => (SECTIONS[PAGE] ? PAGE : null);
 
 // ===================== URL STATE =====================
 function pushHash() {
-  const sect   = currentTab();
+  const sect = activeSection();
+  if (!sect) return;                       // landing / about have no filter state
   const params = new URLSearchParams();
-  if (sect !== 'anime') params.set('tab', sect);
 
-  if (sect !== 'stats') {
-    const s = state[sect];
-    if (s.filters.size)        params.set('filter', [...s.filters].join(','));
-    if (s.sort !== 'year-asc') params.set('sort', s.sort);
-    if (s.search)              params.set('q', s.search);
-    if (s.minRating > 0)       params.set('minRating', s.minRating);
-    if (s.status !== 'all')    params.set('status', s.status);
-    if (s.studio !== 'all')    params.set('studio', s.studio);
-    if (s.genreMode !== 'any') params.set('match', s.genreMode);
-    const years = SECTIONS[sect].data.map(x => x.year);
-    if (s.yearFrom > Math.min(...years)) params.set('from', s.yearFrom);
-    if (s.yearTo   < Math.max(...years)) params.set('to', s.yearTo);
-  }
+  const s = state[sect];
+  if (s.filters.size)        params.set('filter', [...s.filters].join(','));
+  if (s.sort !== 'year-asc') params.set('sort', s.sort);
+  if (s.search)              params.set('q', s.search);
+  if (s.minRating > 0)       params.set('minRating', s.minRating);
+  if (s.status !== 'all')    params.set('status', s.status);
+  if (s.studio !== 'all')    params.set('studio', s.studio);
+  if (s.genreMode !== 'any') params.set('match', s.genreMode);
+  const years = SECTIONS[sect].data.map(x => x.year);
+  if (s.yearFrom > Math.min(...years)) params.set('from', s.yearFrom);
+  if (s.yearTo   < Math.max(...years)) params.set('to', s.yearTo);
 
   const str = params.toString();
   suppressHashRead = true;
@@ -1141,17 +1097,19 @@ function readHash() {
   if (!hash) return;
   const params = new URLSearchParams(hash);
 
-  // Plain anchors (#top-tabs, #games-section) are navigation, not app state — ignore them.
-  const STATE_KEYS = ['tab', 'sort', 'q', 'filter', 'minRating', 'status', 'entry', 'from', 'to', 'studio', 'match'];
+  // Plain anchors (#main, #highlights) are navigation, not app state — ignore them.
+  const STATE_KEYS = ['sort', 'q', 'filter', 'minRating', 'status', 'entry', 'from', 'to', 'studio', 'match'];
   if (!STATE_KEYS.some(k => params.has(k))) return;
 
-  const tab = params.get('tab') || 'anime';
+  // An `entry` link works on any page, including the landing page.
+  const entryParam = params.get('entry');
+  const tab = activeSection();
+  if (!tab) {
+    if (entryParam) { const found = lookup(entryParam); if (found) openModal(found.item); }
+    return;
+  }
 
-  if (tab === 'stats') { switchTab('stats', { push: false, scroll: false }); return; }
-  if (!SECTIONS[tab]) return;
-
-  const s  = state[tab];
-  const id = ids(tab);
+  const s = state[tab];
   s.sort      = params.get('sort') || 'year-asc';
   s.search    = params.get('q') || '';
   s.filters   = params.get('filter') ? new Set(params.get('filter').split(',')) : new Set();
@@ -1170,14 +1128,12 @@ function readHash() {
   s.yearTo   = clamp(params.get('to'), hi);
   if (s.yearFrom > s.yearTo) { s.yearFrom = lo; s.yearTo = hi; }
 
-  switchTab(tab, { push: false, scroll: false });
   syncControls(tab);
   renderSection(tab);
 
-  // Deep link straight to an entry: #tab=anime&entry=Cowboy%20Bebop
-  const entry = params.get('entry');
-  if (entry) {
-    const found = lookup(entry);
+  // Deep link straight to an entry: /anime/#entry=Cowboy%20Bebop
+  if (entryParam) {
+    const found = lookup(entryParam);
     if (found) openModal(found.item);
   }
 }
@@ -1387,12 +1343,13 @@ function setupKeyboardShortcuts() {
     const tag = e.target.tagName;
     if (tag === 'INPUT' || tag === 'TEXTAREA' || e.target.isContentEditable) return;
 
-    const sect = currentTab();
+    const sect = activeSection();
+    if (!sect) return;                       // no catalogue on this page
     if (e.key === '/') {
       e.preventDefault();
-      if (sect !== 'stats') document.getElementById(ids(sect).search)?.focus();
+      document.getElementById(ids(sect).search)?.focus();
     } else if (e.key === 'r' || e.key === 'R') {
-      if (sect !== 'stats') randomPick(sect);
+      randomPick(sect);
     }
   });
 }
@@ -1403,7 +1360,7 @@ function setupDelegation() {
     const fav = e.target.closest('.card-fav-btn');
     if (fav) { e.stopPropagation(); toggleFavorite(fav.dataset.title); return; }
 
-    const openBtn = e.target.closest('.card-open-btn, .stat-top-item, .rec-card');
+    const openBtn = e.target.closest('.card-open-btn, .stat-top-item, .rec-card, .highlight-item');
     if (openBtn) { const found = lookup(openBtn.dataset.title); if (found) openModal(found.item); return; }
 
     const card = e.target.closest('.card');
@@ -1427,7 +1384,10 @@ function setupDelegation() {
 // ===================== SERVICE WORKER =====================
 function registerServiceWorker() {
   if (!('serviceWorker' in navigator) || location.protocol === 'file:') return;
-  navigator.serviceWorker.register('sw.js').then(reg => {
+  // Pages live at different depths (/, /anime/, …), so resolve against the site
+  // root or a nested page would ask for /anime/sw.js and scope itself to /anime/.
+  const root = window.OTAKU_ROOT || '';
+  navigator.serviceWorker.register(`${root}sw.js`, { scope: root || './' }).then(reg => {
     reg.addEventListener('updatefound', () => {
       const sw = reg.installing;
       if (!sw) return;
@@ -1444,27 +1404,73 @@ function registerServiceWorker() {
   }).catch(err => console.warn('OtakuPlay: service worker registration failed —', err.message));
 }
 
+// ===================== LANDING PAGE =====================
+function renderHighlights() {
+  const build = (sectKey, mountId) => {
+    const mount = document.getElementById(mountId);
+    if (!mount) return;
+    const top = [...SECTIONS[sectKey].data].sort((a, b) => b.rating - a.rating).slice(0, 5);
+    mount.innerHTML = top.map((item, i) => `
+      <button class="highlight-item" data-title="${escapeHtml(item.title)}">
+        <span class="highlight-rank">${i + 1}</span>
+        <span class="highlight-art" style="background:${item.bg}">
+          ${item.img
+            ? `<img src="${escapeHtml(item.img)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.remove()">`
+            : `<span aria-hidden="true">${item.emoji}</span>`}
+        </span>
+        <span class="highlight-info">
+          <span class="highlight-title">${escapeHtml(item.title)}</span>
+          <span class="highlight-sub">${item.year} · ${escapeHtml(item.studio)}</span>
+        </span>
+        <span class="highlight-rating">${item.rating}</span>
+      </button>`).join('');
+  };
+  build('anime', 'highlight-anime');
+  build('games', 'highlight-games');
+
+  const eras = document.getElementById('era-grid');
+  if (!eras) return;
+  const all = [...ANIME, ...GAMES];
+  const decades = [...new Set(all.map(x => Math.floor(x.year / 10) * 10))].sort((a, b) => a - b);
+  const root = window.OTAKU_ROOT || '';
+  eras.innerHTML = decades.map(d => {
+    const count = all.filter(x => Math.floor(x.year / 10) * 10 === d).length;
+    const label = ERA_LABELS[d] || GAME_ERA_LABELS[d] || '';
+    return `<a class="era-card" href="${root}anime/#from=${d}&to=${d + 9}">
+        <span class="era-decade">${d}s</span>
+        <span class="era-label">${escapeHtml(label)}</span>
+        <span class="era-count">${count} titles</span>
+      </a>`;
+  }).join('');
+}
+
 // ===================== INIT =====================
 function init() {
-  document.getElementById('stat-anime').textContent  = ANIME.length;
-  document.getElementById('stat-games').textContent  = GAMES.length;
-  document.getElementById('stat-years').textContent  = `${new Date().getFullYear() - Math.min(...[...ANIME, ...GAMES].map(x => x.year))}+`;
+  // The landing page shows counters; section pages don't have them.
+  const setText = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
+  setText('stat-anime', ANIME.length);
+  setText('stat-games', GAMES.length);
+  setText('stat-years', `${new Date().getFullYear() - Math.min(...[...ANIME, ...GAMES].map(x => x.year))}+`);
 
-  SECTION_KEYS.forEach(k => {
-    renderSection(k);
-    setupFilters(k);
-    setupSort(k);
-    setupSearch(k);
-    setupRatingFilter(k);
-    setupStatusFilter(k);
-    setupRefineRow(k);
-    setupToolbar(k);
-    setupRandom(k);
-  });
+  // Only the section this page actually renders.
+  const sect = activeSection();
+  if (sect) {
+    renderSection(sect);
+    setupFilters(sect);
+    setupSort(sect);
+    setupSearch(sect);
+    setupRatingFilter(sect);
+    setupStatusFilter(sect);
+    setupRefineRow(sect);
+    setupToolbar(sect);
+    setupRandom(sect);
+    setupJpToggle();
+  }
+
+  if (PAGE === 'insights') renderStats();
+  if (PAGE === 'home') renderHighlights();
 
   setupModal();
-  setupTabs();
-  setupJpToggle();
   setupScrollTop();
   setupKeyboardShortcuts();
   setupDelegation();

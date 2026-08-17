@@ -1,0 +1,88 @@
+---
+layout: layouts/base.njk
+pageKey: home
+title: OtakuPlay — Best Anime & PC Games, Ranked by Era
+description: A ranked, decade-by-decade collection of the best anime (1963–2025) and best PC games (1993–2025) — 219 curated titles with genres, studios, ratings and personal tracking.
+---
+
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-tag">Classics to Modern · All Eras · Ranked</div>
+    <h1 class="hero-title">
+      Every Era.<br />
+      <span class="gradient-text">Every Legend.</span><br />
+      One List.
+    </h1>
+    <p class="hero-subtitle">
+      The most comprehensive ranked collection of best-ever anime and PC games — from 1960s pioneers to 2025 masterpieces, organized decade by decade.
+    </p>
+    <div class="hero-stats">
+      <div class="stat"><span class="stat-num" id="stat-anime">108</span><span class="stat-label">Anime</span></div>
+      <div class="stat-divider"></div>
+      <div class="stat"><span class="stat-num" id="stat-games">111</span><span class="stat-label">Games</span></div>
+      <div class="stat-divider"></div>
+      <div class="stat"><span class="stat-num" id="stat-years">63+</span><span class="stat-label">Years Covered</span></div>
+    </div>
+    <div class="hero-cta">
+      <a class="btn-primary" href="{{ root }}anime/">Browse Anime</a>
+      <a class="btn-secondary" href="{{ root }}games/">Browse PC Games</a>
+    </div>
+  </div>
+  <div class="hero-visual" aria-hidden="true">
+    <div class="floating-cards">
+      <div class="float-card card-a">🎌<span>Cowboy Bebop '98</span></div>
+      <div class="float-card card-b">🎮<span>Half-Life 2 '04</span></div>
+      <div class="float-card card-c">⚔️<span>Berserk '97</span></div>
+      <div class="float-card card-d">🔥<span>Elden Ring '22</span></div>
+      <div class="float-card card-e">🌟<span>Frieren '23</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="landing-section" id="highlights">
+  <div class="section-header">
+    <div class="section-tag">⭐ The Peak</div>
+    <h2 class="section-title">Highest Rated</h2>
+    <p class="section-desc">The top of each list — click any title for the full entry, or dive into the complete catalogue.</p>
+  </div>
+  <div class="highlight-columns">
+    <div class="highlight-col">
+      <div class="highlight-head">
+        <h3>🎌 Anime</h3>
+        <a class="highlight-link" href="{{ root }}anime/">All 108 →</a>
+      </div>
+      <div class="highlight-list" id="highlight-anime"></div>
+    </div>
+    <div class="highlight-col">
+      <div class="highlight-head">
+        <h3>🎮 PC Games</h3>
+        <a class="highlight-link" href="{{ root }}games/">All 111 →</a>
+      </div>
+      <div class="highlight-list" id="highlight-games"></div>
+    </div>
+  </div>
+</section>
+
+<section class="landing-section" id="eras">
+  <div class="section-header">
+    <div class="section-tag">🕰️ Decade by Decade</div>
+    <h2 class="section-title">Every Era Covered</h2>
+    <p class="section-desc">From Tezuka's first television anime to last year's releases — jump straight into a decade.</p>
+  </div>
+  <div class="era-grid" id="era-grid"></div>
+</section>
+
+<section class="landing-section landing-cta">
+  <div class="cta-card">
+    <h2 class="cta-title">Track what you watch and play</h2>
+    <p class="cta-text">
+      Mark titles as watched, playing or planned, rate them out of 10, and keep private notes.
+      Everything stays in your browser — no account, no sign-up, nothing sent to a server.
+      Export it to JSON any time.
+    </p>
+    <div class="cta-actions">
+      <a class="btn-primary" href="{{ root }}insights/">See your Insights</a>
+      <a class="btn-secondary" href="{{ root }}about/">How rankings work</a>
+    </div>
+  </div>
+</section>

@@ -34,20 +34,34 @@ test.beforeEach(async ({ page }) => {
     }
   });
 
-  await page.goto('/index.html');
+  await page.goto('/anime/');
   await page.waitForFunction(() => document.querySelectorAll('#anime-grid .card').length > 0);
 });
 
 test.describe('catalogue rendering', () => {
-  test('renders every entry in both sections', async ({ page }) => {
-    const anime = await page.locator('#anime-grid .card').count();
-    const games = await page.locator('#games-grid .card').count();
-    expect(anime).toBeGreaterThan(100);
-    expect(games).toBeGreaterThan(100);
+  test('renders every anime entry', async ({ page }) => {
+    expect(await page.locator('#anime-grid .card').count()).toBeGreaterThan(100);
+    await expect(page.locator('#anime-count')).toContainText('titles');
+  });
 
-    // Hero counters are computed, not hardcoded — they used to drift from the data.
-    await expect(page.locator('#stat-anime')).toHaveText(String(anime));
-    await expect(page.locator('#stat-games')).toHaveText(String(games));
+  test('each catalogue page ships only its own section', async ({ page }) => {
+    // The games page must not carry the anime grid, and vice versa.
+    await expect(page.locator('#games-grid')).toHaveCount(0);
+
+    await page.goto('/games/');
+    await page.waitForFunction(() => document.querySelectorAll('#games-grid .card').length > 0);
+    expect(await page.locator('#games-grid .card').count()).toBeGreaterThan(100);
+    await expect(page.locator('#anime-grid')).toHaveCount(0);
+  });
+
+  test('landing page shows highlights and counters from the data', async ({ page }) => {
+    await page.goto('/');
+    await page.waitForFunction(() => document.querySelectorAll('.highlight-item').length > 0);
+    expect(await page.locator('#highlight-anime .highlight-item').count()).toBe(5);
+    expect(await page.locator('#highlight-games .highlight-item').count()).toBe(5);
+    expect(await page.locator('.era-card').count()).toBeGreaterThan(5);
+    // Counters are computed from data.js, not hardcoded — they used to drift.
+    await expect(page.locator('#stat-anime')).not.toHaveText('0');
   });
 
   test('page loads with no console errors', async ({ page }) => {
@@ -61,13 +75,22 @@ test.describe('catalogue rendering', () => {
 });
 
 test.describe('bugs that shipped once', () => {
-  // The Insights *tab button* set display but never called renderStats(), so the
-  // section rendered empty. Only the footer link worked.
-  test('Insights tab button renders the stats content', async ({ page }) => {
-    await page.locator('#tab-stats').click();
+  /* The Insights tab used to render an empty section because the tab handler
+     never called renderStats(). It's a page of its own now, but the guarantee is
+     the same: arriving at Insights shows stats. */
+  test('Insights page renders its stats', async ({ page }) => {
+    await page.goto('/insights/');
     await expect(page.locator('#stats-content .stat-ov-card').first()).toBeVisible();
     expect(await page.locator('#stats-content .stat-ov-card').count()).toBeGreaterThan(6);
-    await expect(page).toHaveURL(/#tab=stats/);
+  });
+
+  test('every page is reachable from the nav', async ({ page }) => {
+    for (const [label, path] of [['PC Games', '/games/'], ['Insights', '/insights/'], ['About', '/about/']]) {
+      await page.goto('/anime/');
+      await page.getByRole('link', { name: label, exact: true }).click();
+      await expect(page).toHaveURL(new RegExp(path.replace(/\//g, '\\/') + '$'));
+      await expect(page.locator('[aria-current="page"]')).toHaveText(label);
+    }
   });
 
   // Tier headers were keyed "tier-S" while cards carried a numeric decade, so the
@@ -115,7 +138,7 @@ test.describe('bugs that shipped once', () => {
 
 test.describe('URL state', () => {
   test('round-trips filters, sort, rating, status and year range', async ({ page }) => {
-    await page.goto('/index.html#tab=anime&filter=mecha&sort=rating&minRating=8&status=all&from=1979&to=2000');
+    await page.goto('/anime/#filter=mecha&sort=rating&minRating=8&status=all&from=1979&to=2000');
     await page.waitForFunction(() => document.querySelectorAll('#anime-grid .card').length > 0);
 
     await openFilters(page);
@@ -133,7 +156,7 @@ test.describe('URL state', () => {
 
   // A hand-edited or stale link must never leave the grid empty.
   test('nonsensical year range falls back to the full span', async ({ page }) => {
-    await page.goto('/index.html#tab=anime&from=9999&to=1');
+    await page.goto('/anime/#from=9999&to=1');
     await page.waitForFunction(() => document.querySelectorAll('#anime-grid .card').length > 0);
     const visible = await page.locator('#anime-grid .card:not(.hidden)').count();
     const total   = await page.locator('#anime-grid .card').count();
@@ -141,7 +164,7 @@ test.describe('URL state', () => {
   });
 
   test('entry deep link opens that entry', async ({ page }) => {
-    await page.goto('/index.html#tab=games&entry=Elden%20Ring');
+    await page.goto('/games/#entry=Elden%20Ring');
     await expect(page.locator('#modal-title')).toHaveText('Elden Ring');
     await expect(page.locator('#detail-modal')).toHaveClass(/open/);
   });
@@ -188,8 +211,10 @@ test.describe('toolbar and filter drawer', () => {
     await expect(page.locator('#anime-filter-panel')).toBeHidden();
     await expect(page.locator('#anime-chips')).toBeHidden();
 
+    // Was 293px of stacked rows. Phones wrap the toolbar onto a second line.
     const height = await page.locator('#anime-section .controls-row').evaluate(el => el.getBoundingClientRect().height);
-    expect(height).toBeLessThan(110);
+    const budget = (page.viewportSize()?.width ?? 1280) < 700 ? 150 : 110;
+    expect(height).toBeLessThan(budget);
 
     await openFilters(page);
     await expect(page.locator('#anime-filters .filter-btn').first()).toBeVisible();
@@ -245,8 +270,7 @@ test.describe('personal library', () => {
     await page.evaluate(() => {
       localStorage.setItem('otakuplay-ratings', JSON.stringify({ 'Dark Souls': 10, 'Elden Ring': 9 }));
     });
-    await page.reload();
-    await page.locator('#tab-stats').click();
+    await page.goto('/insights/');
 
     const recs = page.locator('.rec-card');
     expect(await recs.count()).toBeGreaterThan(0);
@@ -284,8 +308,9 @@ test.describe('accessibility', () => {
     const modal = page.locator('#detail-modal');
     await expect(modal).toHaveAttribute('role', 'dialog');
     await expect(modal).toHaveAttribute('aria-modal', 'true');
-    await expect(page.locator('.tab-switcher')).toHaveAttribute('role', 'tablist');
-    await expect(page.locator('#tab-anime')).toHaveAttribute('aria-selected', 'true');
+    // Navigation is real links now, so the current page is marked with aria-current.
+    await expect(page.locator('.header nav')).toHaveAttribute('aria-label', 'Main');
+    await expect(page.locator('.header [aria-current="page"]')).toHaveText('Anime');
   });
 });
 

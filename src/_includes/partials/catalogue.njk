@@ -1,0 +1,105 @@
+{# The catalogue UI for one section. `sect` is "anime" or "games". #}
+<section class="content-section active" id="{{ sect }}-section">
+  <div class="section-header">
+    <div class="section-tag">{{ sectionTag }}</div>
+    <h1 class="section-title">{{ heading }}</h1>
+    <p class="section-desc">{{ blurb }}</p>
+  </div>
+
+  <div class="decade-jump-bar" id="{{ sect }}-jump-bar" aria-label="Jump to decade"></div>
+
+  <div class="controls-row">
+    <div class="toolbar">
+      <div class="search-wrap">
+        <span class="search-icon" aria-hidden="true">🔍</span>
+        <input type="search" class="search-input" id="{{ sect }}-search" placeholder="Search titles, studios, genres…" autocomplete="off" aria-label="Search {{ searchLabel }}" />
+        <button class="search-clear" id="{{ sect }}-search-clear" aria-label="Clear search">✕</button>
+      </div>
+      <button class="filter-toggle" id="{{ sect }}-filter-toggle" aria-expanded="false" aria-controls="{{ sect }}-filter-panel">
+        <span aria-hidden="true">☰</span> Filters
+        <span class="filter-count" id="{{ sect }}-filter-count" hidden>0</span>
+      </button>
+      <label class="sort-wrap">
+        <span class="sr-only">Sort by</span>
+        <select class="sort-select" id="{{ sect }}-sort">
+          <option value="year-asc">Year ↑</option>
+          <option value="year-desc">Year ↓</option>
+          <option value="rating">Rating</option>
+          <option value="alpha">A → Z</option>
+          <option value="tier">Tier</option>
+        </select>
+      </label>
+      <button class="btn-random" id="{{ sect }}-random" title="Jump to a random pick" aria-label="Random pick">🎲</button>
+      <div class="menu-wrap">
+        <button class="more-btn" id="{{ sect }}-more" aria-haspopup="true" aria-expanded="false" aria-label="More actions">⋯</button>
+        <div class="more-menu" id="{{ sect }}-more-menu" role="menu" hidden>
+          <button class="more-item export-btn" role="menuitem">⬇ Export library</button>
+          <button class="more-item import-btn" role="menuitem">⬆ Import library</button>
+          <button class="more-item clear-btn" role="menuitem">🗑 Clear my data</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="chips-row">
+      <span class="result-count" id="{{ sect }}-count" aria-live="polite"></span>
+      <div class="active-chips" id="{{ sect }}-chips" hidden></div>
+    </div>
+
+    <div class="filter-panel" id="{{ sect }}-filter-panel" hidden>
+      <div class="panel-group">
+        <span class="panel-label">Genres</span>
+        <div class="filter-bar" id="{{ sect }}-filters" role="group" aria-label="Filter by genre">
+          <button class="filter-btn active" data-filter="all">All Genres</button>
+          {% for genre in genreList %}
+            <button class="filter-btn" data-filter="{{ genre.id }}">{{ genre.label }}</button>
+          {% endfor %}
+          <button class="filter-btn" data-filter="new">🆕 New</button>
+          <button class="filter-btn fav-filter-btn" data-filter="favorites">♥ Favorites</button>
+        </div>
+        <div class="genre-mode">
+          <span class="panel-label inline">Match</span>
+          <button class="genre-mode-btn active" data-mode="any">Any</button>
+          <button class="genre-mode-btn" data-mode="all">All</button>
+        </div>
+      </div>
+
+      <div class="panel-row">
+        <div class="panel-group">
+          <label class="panel-label" for="{{ sect }}-rating-slider">Min rating: <span id="{{ sect }}-rating-val">Any</span></label>
+          <input type="range" class="rating-slider" id="{{ sect }}-rating-slider" min="0" max="10" step="0.5" value="0" aria-valuetext="Any rating" />
+        </div>
+        <div class="panel-group refine-row">
+          <span class="panel-label">Years</span>
+          <div class="year-inputs">
+            <select class="refine-select year-from" aria-label="From year"></select>
+            <span class="refine-dash">→</span>
+            <select class="refine-select year-to" aria-label="To year"></select>
+          </div>
+        </div>
+        <div class="panel-group">
+          <span class="panel-label">Studio</span>
+          <select class="refine-select studio-select" aria-label="Filter by studio"></select>
+        </div>
+      </div>
+
+      <div class="panel-group">
+        <span class="panel-label">Your status</span>
+        <div class="status-filter-row" id="{{ sect }}-status-row" role="group" aria-label="Filter by your status">
+          {% for status in statusList %}
+            <button class="status-btn{% if status.id == 'all' %} active{% endif %}" data-status="{{ status.id }}">{{ status.label }}</button>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="panel-footer">
+        <button class="panel-reset" data-sect="{{ sect }}">Clear all filters</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="cards-grid" id="{{ sect }}-grid" role="list"></div>
+</section>
+
+<noscript>
+  <p class="noscript-note">OtakuPlay needs JavaScript to browse, filter and rank the catalogue. Please enable it and reload.</p>
+</noscript>

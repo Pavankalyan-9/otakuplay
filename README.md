@@ -2,7 +2,7 @@
 
 A ranked, decade-by-decade catalogue of the best anime (1963–2025) and best PC games (1993–2025) — 219 curated titles with genres, studios, ratings, awards and streaming/store availability.
 
-It's a dependency-free static site: no build step, no framework, no backend. Everything you track (favorites, status, personal ratings, notes) stays in your browser's `localStorage` and can be exported to JSON.
+A static, five-page site with no runtime framework and no backend: Eleventy assembles the pages at build time, and the catalogue itself is plain JavaScript. Everything you track (favorites, status, personal ratings, notes) stays in your browser's `localStorage` and can be exported to JSON — there is no account and nothing is sent to a server.
 
 ## Features
 
@@ -10,22 +10,35 @@ It's a dependency-free static site: no build step, no framework, no backend. Eve
 - **Filter & sort** — genre (multi-select, any/all), year range, studio, minimum rating, watch/play status, favorites, new releases; sort by year, rating, A→Z or tier
 - **Personal library** — mark status (watched / watching / plan / dropped), rate 1–10, keep private notes
 - **Recommendations** — "because you liked X" picks scored from your own ratings, statuses and favorites
-- **Insights tab** — your library stats plus catalogue breakdowns by decade, genre and studio
+- **Insights page** — your library stats plus catalogue breakdowns by decade, genre and studio
 - **Shareable URLs** — filters, sort, search and individual entries are all encoded in the hash
 - **Japanese titles** — toggle native titles with the 🇯🇵 button
-- **Keyboard** — `/` focuses search, `R` picks a random visible title, `Esc` closes the modal, full tab navigation
+- **Keyboard** — `/` focuses search, `R` picks a random visible title, `Esc` closes the modal
 - **Installable PWA** — works offline after the first visit
 - **Import / export** — take your library with you as JSON
 
+## Pages
+
+| URL | What's there |
+| --- | --- |
+| `/` | Landing — highest rated picks, decades, what the site is |
+| `/anime/` | The full anime catalogue with filters |
+| `/games/` | The full PC games catalogue with filters |
+| `/insights/` | Your library, recommendations, catalogue stats |
+| `/about/` | How rankings are chosen, data sources, where your data lives |
+
+Each page has its own title, description, canonical URL and social image.
+
 ## Running it locally
 
-Any static file server works — there is no build step. The service worker and JSON import need `http://`, not `file://`:
-
 ```bash
-npm run serve
+npm install
+npm run dev
 ```
 
-Then open <http://localhost:5173>.
+Then open <http://localhost:5173>. `npm run dev` rebuilds and live-reloads as you edit.
+`npm run build` writes the site to `_site/`, and `npm run serve` serves that build — useful
+for testing the service worker against real static files.
 
 ## Tests
 
@@ -41,7 +54,8 @@ Cross-origin requests (cover art, fonts) are stubbed so runs stay fast and herme
 
 | File | What's in it |
 | --- | --- |
-| `index.html` | Page structure, controls, modal shell |
+| `src/` | Page templates plus the shared layout and partials |
+| `.eleventy.js` | Build config — passthrough assets, depth-aware relative paths |
 | `data.js` | The catalogue: `ANIME`, `GAMES`, `STREAM_MAP`, `JP_TITLES`, `FRANCHISES` |
 | `app.js` | All UI logic — rendering, filtering, routing, stats, persistence |
 | `style.css` | Design system, components, responsive + reduced-motion rules |
@@ -67,7 +81,7 @@ Append an object to `ANIME` or `GAMES` in `data.js`:
 Notes:
 
 - `rank` is the tier badge (`S`, `A`, …) and drives the Tier sort.
-- `tags` must match a `data-filter` value in the genre bar in `index.html`, otherwise the title can't be filtered to.
+- `tags` must match an id in `src/_data/genres.js`, otherwise the title can't be filtered to. A test asserts this in both directions.
 - The 🆕 New badge and filter are derived from `year >= NEW_SINCE` (`app.js`) — there's no per-entry flag to keep in sync.
 - Optional extras: add the title as a key in `STREAM_MAP` (platform badges), `JP_TITLES` (Japanese title) or `FRANCHISES` (franchise badge).
 
