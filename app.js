@@ -1002,6 +1002,7 @@ function openModal(item) {
 
   overlay.classList.add('open');
   overlay.removeAttribute('aria-hidden');
+  overlay.removeAttribute('inert');
   document.body.style.overflow = 'hidden';
   document.getElementById('modal-close')?.focus();
 }
@@ -1011,6 +1012,7 @@ function closeModal() {
   if (!overlay.classList.contains('open')) return;
   overlay.classList.remove('open');
   overlay.setAttribute('aria-hidden', 'true');
+  overlay.setAttribute('inert', '');
   document.body.style.overflow = '';
   if (lastFocused && document.contains(lastFocused)) lastFocused.focus();
   lastFocused = null;

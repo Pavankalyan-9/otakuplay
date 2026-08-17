@@ -1,4 +1,6 @@
-<div class="modal-overlay" id="detail-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-hidden="true">
+{# `inert` as well as aria-hidden: the close button inside stays focusable
+   otherwise, which is an aria-hidden-focus violation while the modal is shut. #}
+<div class="modal-overlay" id="detail-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-hidden="true" inert>
   <div class="modal-box">
     <button class="modal-close" id="modal-close" aria-label="Close">✕</button>
     <div class="modal-banner" id="modal-banner"></div>

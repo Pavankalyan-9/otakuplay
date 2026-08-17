@@ -41,15 +41,37 @@ Then open <http://localhost:5173>. `npm run dev` rebuilds and live-reloads as yo
 `npm run build` writes the site to `_site/`, and `npm run serve` serves that build — useful
 for testing the service worker against real static files.
 
-## Tests
-
-Playwright covers the bugs that have actually shipped here — empty Insights tab, hidden tier headers, the New filter disagreeing with its badge, corrupt `localStorage`, off-screen mobile header — plus URL round-tripping, filters, the personal library, keyboard access and offline rendering. They run on desktop and mobile viewports, and CI blocks the deploy if any fail.
+## Tests and quality gates
 
 ```bash
 npm test
 ```
 
+Two Playwright suites run against the built site, on desktop and mobile viewports.
+CI blocks the deploy if either fails.
+
+- **`tests/regressions.spec.js`** — every bug that has actually shipped here (empty
+  Insights section, hidden tier headers, the New filter disagreeing with its badge,
+  corrupt `localStorage`, an off-screen mobile header, an unreachable filter drawer),
+  plus URL round-tripping, filters, the personal library, entry pages and offline rendering.
+- **`tests/quality.spec.js`** — axe accessibility checks (WCAG 2.1 A/AA) across all six
+  page types including the open filter drawer, and a layout-shift budget.
+
 Cross-origin requests (cover art, fonts) are stubbed so runs stay fast and hermetic.
+
+## Analytics
+
+Off by default: with no site code configured, no script is emitted and nothing is
+tracked — which is what `/about/` promises visitors.
+
+To enable cookieless page counts, register the domain at
+[GoatCounter](https://www.goatcounter.com) and set the code in `src/_data/site.js`:
+
+```js
+analytics: { code: 'your-site-code', endpoint: 'https://gc.zgo.at/count.js' }
+```
+
+It sets no cookies, collects no personal data and needs no consent banner.
 
 ## Project layout
 

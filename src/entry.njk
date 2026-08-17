@@ -9,6 +9,7 @@ eleventyComputed:
   pageKey: "{{ entry.sect }}"
   title: "{{ entry.title }} ({{ entry.year }}) — {{ 'Best Anime' if entry.sect == 'anime' else 'Best PC Games' }} | OtakuPlay"
   description: "{{ entry.desc | truncate(155) }}"
+  ogImage: "{{ entry.img }}"
 ---
 
 <article class="entry" data-entry="{{ entry.title }}">
@@ -59,10 +60,19 @@ eleventyComputed:
   <div class="entry-body">
     <p class="entry-desc">{{ entry.desc }}</p>
 
+    {# Genres link to their hub page where one exists, otherwise back to the
+       filtered catalogue. #}
     <div class="entry-tags">
       {% for tag in entry.tags %}
-        <a class="tag" href="{{ root }}{{ entry.sect }}/#filter={{ tag }}">{{ tag }}</a>
+        {% set hub = hubs.genre | selectattr('sect', 'equalto', entry.sect) | selectattr('slug', 'equalto', tag) | first %}
+        <a class="tag" href="{{ root }}{% if hub %}{{ hub.url }}{% else %}{{ entry.sect }}/#filter={{ tag }}{% endif %}">{{ tag }}</a>
       {% endfor %}
+      {% set decadeHub = hubs.decade | selectattr('sect', 'equalto', entry.sect) | selectattr('slug', 'equalto', (entry.year // 10 * 10) ~ 's') | first %}
+      {% if decadeHub %}<a class="tag" href="{{ root }}{{ decadeHub.url }}">{{ decadeHub.slug }}</a>{% endif %}
+      {% if entry.franchise %}
+        {% set fHub = hubs.franchise | selectattr('heading', 'equalto', 'The ' ~ entry.franchise ~ ' Series') | first %}
+        {% if fHub %}<a class="tag" href="{{ root }}{{ fHub.url }}">{{ entry.franchise }}</a>{% endif %}
+      {% endif %}
     </div>
 
     <div class="entry-actions">

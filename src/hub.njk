@@ -1,0 +1,96 @@
+---
+layout: layouts/base.njk
+pagination:
+  data: hubs.all
+  size: 1
+  alias: hub
+permalink: "/{{ hub.url }}"
+eleventyComputed:
+  pageKey: "{{ hub.sect }}"
+  title: "{{ hub.title }}"
+  description: "{{ hub.description }}"
+---
+
+<section class="content-section hub">
+  <nav class="entry-crumbs" aria-label="Breadcrumb">
+    <a href="{{ root }}{{ hub.sect }}/">{{ 'Best Anime' if hub.sect == 'anime' else 'Best PC Games' }}</a>
+    <span aria-hidden="true">›</span>
+    <span>{{ hub.heading }}</span>
+  </nav>
+
+  <div class="section-header">
+    <div class="section-tag">
+      {%- if hub.kind == 'genre' %}🏷️ Genre{% elif hub.kind == 'decade' %}🕰️ Decade{% else %}🎬 Franchise{% endif -%}
+    </div>
+    <h1 class="section-title">{{ hub.heading }}</h1>
+    <p class="section-desc">{{ hub.intro }}</p>
+  </div>
+
+  <ol class="hub-list">
+    {% for item in hub.entries %}
+      <li class="hub-item">
+        <a class="hub-link" href="{{ root }}{{ item.url }}">
+          <span class="hub-rank">{{ loop.index }}</span>
+          <span class="hub-art" style="background:{{ item.bg }}">
+            {% if item.img %}
+              <img src="{{ item.img }}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.remove()">
+            {% else %}
+              <span aria-hidden="true">{{ item.emoji }}</span>
+            {% endif %}
+          </span>
+          <span class="hub-info">
+            <span class="hub-title">{{ item.title }}</span>
+            <span class="hub-sub">{{ item.year }} · {{ item.studio }}</span>
+            <span class="hub-desc">{{ item.desc | truncate(140) }}</span>
+          </span>
+          <span class="hub-score">
+            <span class="hub-rating">{{ item.rating }}</span>
+            <span class="card-rank rank-{{ item.rank | lower }} hub-tier">Tier {{ item.rank }}</span>
+          </span>
+        </a>
+      </li>
+    {% endfor %}
+  </ol>
+
+  <div class="hub-footer">
+    <a class="btn-secondary" href="{{ root }}{{ hub.sect }}/{% if hub.kind == 'genre' %}#filter={{ hub.slug }}{% endif %}">
+      Browse all {{ 'anime' if hub.sect == 'anime' else 'PC games' }} →
+    </a>
+  </div>
+
+  {% set siblings = hubs[hub.kind] | selectattr('sect', 'equalto', hub.sect) %}
+  {% if siblings | length > 1 %}
+    <nav class="hub-siblings" aria-label="Other {{ hub.kind }} pages">
+      <span class="panel-label">More {{ hub.kind }} pages</span>
+      <div class="hub-sibling-links">
+        {% for other in siblings %}
+          {% if other.slug != hub.slug %}
+            <a href="{{ root }}{{ other.url }}">{{ other.heading }}</a>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </nav>
+  {% endif %}
+</section>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": {{ hub.heading | dump | safe }},
+  "description": {{ hub.description | dump | safe }},
+  "url": {{ (hub.url | absoluteUrl(site.url)) | dump | safe }},
+  "numberOfItems": {{ hub.entries | length }},
+  "itemListOrder": "https://schema.org/ItemListOrderDescending",
+  "itemListElement": [
+    {%- for item in hub.entries %}
+    {
+      "@type": "ListItem",
+      "position": {{ loop.index }},
+      "url": {{ (item.url | absoluteUrl(site.url)) | dump | safe }},
+      "name": {{ item.title | dump | safe }}
+    }{% if not loop.last %},{% endif %}
+    {%- endfor %}
+  ]
+}
+</script>

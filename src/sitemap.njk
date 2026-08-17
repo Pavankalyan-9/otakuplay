@@ -14,6 +14,13 @@ eleventyExcludeFromCollections: true
     <priority>{{ '1.0' if path == '' else '0.8' }}</priority>
   </url>
 {%- endfor %}
+{%- for hub in hubs.all %}
+  <url>
+    <loc>{{ hub.url | absoluteUrl(site.url) }}</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+{%- endfor %}
 {%- for entry in catalogue.entries %}
   <url>
     <loc>{{ entry.url | absoluteUrl(site.url) }}</loc>

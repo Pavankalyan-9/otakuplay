@@ -11,8 +11,8 @@
   --border-mid:  rgba(255,255,255,0.1);
   --border-hover: rgba(139,92,246,0.45);
   --text:        #e8e8f4;
-  --text-muted:  #6a6a98;
-  --text-dim:    #3d3d60;
+  --text-muted:  #9a9ac4;   /* 7.0:1 on card bg — WCAG AA */
+  --text-dim:    #8484b0;   /* 5.4:1 on card bg — WCAG AA */
   --purple:      #8b5cf6;
   --purple-light:#a78bfa;
   --purple-dim:  rgba(139,92,246,0.12);
@@ -1355,3 +1355,71 @@ main { position: relative; z-index: 1; }
   .entry { padding: calc(var(--header-h) + 1rem) 1.25rem 3rem; }
   .entry-banner { height: 200px; }
 }
+
+/* ===================== HUB PAGES ===================== */
+.hub { max-width: 900px; margin: 0 auto; }
+.hub .entry-crumbs { margin-bottom: 1.25rem; }
+.hub-list { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; margin: 0; padding: 0; }
+.hub-link {
+  display: flex; align-items: center; gap: 1rem; text-decoration: none;
+  padding: 0.85rem; border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--bg-card); transition: all 0.2s;
+}
+.hub-link:hover {
+  border-color: rgba(139,92,246,0.4); transform: translateX(3px);
+  box-shadow: 0 10px 34px rgba(0,0,0,0.45);
+}
+.hub-rank {
+  flex-shrink: 0; width: 28px; text-align: center;
+  font-family: 'Orbitron', sans-serif; font-size: 1rem; font-weight: 900; color: var(--text-dim);
+}
+.hub-art {
+  position: relative; flex-shrink: 0; width: 62px; height: 84px;
+  border-radius: 6px; overflow: hidden;
+  display: flex; align-items: center; justify-content: center; font-size: 1.6rem;
+}
+.hub-art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.hub-info { display: flex; flex-direction: column; gap: 0.15rem; min-width: 0; flex: 1; }
+.hub-title { font-size: 1rem; font-weight: 800; color: var(--text); }
+.hub-sub { font-size: 0.7rem; color: var(--text-dim); }
+.hub-desc {
+  font-size: 0.78rem; color: var(--text-muted); line-height: 1.55; margin-top: 0.25rem;
+  display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.hub-score { display: flex; flex-direction: column; align-items: flex-end; gap: 0.35rem; flex-shrink: 0; }
+.hub-rating { font-size: 1.3rem; font-weight: 900; color: var(--gold); line-height: 1; }
+.hub-tier { position: static; font-size: 0.58rem; }
+.hub-footer { display: flex; justify-content: center; margin: 2.5rem 0 1rem; }
+.hub-footer .btn-secondary { text-decoration: none; display: inline-flex; align-items: center; }
+.hub-siblings { border-top: 1px solid var(--border); padding-top: 1.5rem; margin-top: 1.5rem; }
+.hub-sibling-links { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.6rem; }
+.hub-sibling-links a {
+  font-size: 0.75rem; color: var(--text-muted); text-decoration: none;
+  padding: 0.3rem 0.7rem; border: 1px solid var(--border); border-radius: 50px;
+  transition: all 0.18s;
+}
+.hub-sibling-links a:hover { border-color: rgba(139,92,246,0.4); color: var(--purple-light); }
+
+/* ===================== BROWSE-BY (catalogue → hubs) ===================== */
+.browse-by {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem;
+  border-top: 1px solid var(--border); margin-top: 4rem; padding-top: 2rem;
+}
+.browse-group { display: flex; flex-direction: column; gap: 0.6rem; }
+.browse-links { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.browse-links a {
+  font-size: 0.75rem; color: var(--text-muted); text-decoration: none;
+  padding: 0.32rem 0.7rem; border: 1px solid var(--border); border-radius: 50px;
+  transition: all 0.18s;
+}
+.browse-links a:hover { border-color: rgba(139,92,246,0.4); color: var(--purple-light); background: rgba(139,92,246,0.06); }
+
+@media (max-width: 640px) {
+  .hub-desc { display: none; }
+  .hub-art { width: 48px; height: 66px; }
+  .hub-link { gap: 0.7rem; padding: 0.7rem; }
+}
+
+/* Reserve the grid's space so static content below it (the browse-by links)
+   isn't shoved down when the ~110 cards render — that alone was 0.27 CLS. */
+.cards-grid { min-height: 100vh; }

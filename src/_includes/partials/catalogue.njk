@@ -98,6 +98,27 @@
   </div>
 
   <div class="cards-grid" id="{{ sect }}-grid" role="list"></div>
+
+  {# Crawlable routes into the hub pages — the filter drawer is JavaScript, so
+     without these the genre and decade pages have no inbound links. #}
+  <nav class="browse-by" aria-label="Browse by genre or decade">
+    <div class="browse-group">
+      <span class="panel-label">Browse by genre</span>
+      <div class="browse-links">
+        {% for hub in hubs.genre %}
+          {% if hub.sect == sect %}<a href="{{ root }}{{ hub.url }}">{{ hub.heading }}</a>{% endif %}
+        {% endfor %}
+      </div>
+    </div>
+    <div class="browse-group">
+      <span class="panel-label">Browse by decade</span>
+      <div class="browse-links">
+        {% for hub in hubs.decade %}
+          {% if hub.sect == sect %}<a href="{{ root }}{{ hub.url }}">{{ hub.heading }}</a>{% endif %}
+        {% endfor %}
+      </div>
+    </div>
+  </nav>
 </section>
 
 <noscript>
