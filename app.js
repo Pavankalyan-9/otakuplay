@@ -61,10 +61,12 @@ SECTION_KEYS.forEach(k => SECTIONS[k].data.forEach(item => {
   SLUG_COUNTS.set(base, (SLUG_COUNTS.get(base) || 0) + 1);
 }));
 
-function entryUrl(item) {
+function slugOf(item) {
   const base = slugify(item.title);
-  const slug = SLUG_COUNTS.get(base) > 1 ? `${base}-${item.year}` : base;
-  return `${window.OTAKU_ROOT || ''}${sectionOf(item.title)}/${slug}/`;
+  return SLUG_COUNTS.get(base) > 1 ? `${base}-${item.year}` : base;
+}
+function entryUrl(item) {
+  return `${window.OTAKU_ROOT || ''}${sectionOf(item.title)}/${slugOf(item)}/`;
 }
 const sectionOf   = title => (TITLE_INDEX.get(title)?.sect) || 'anime';
 const isNewEntry  = item => item.year >= NEW_SINCE;
@@ -156,6 +158,67 @@ function toast(message, action) {
   if (!action) _toastTimer = setTimeout(() => el.classList.remove('visible'), 3200);
 }
 
+// ===================== MILESTONES =====================
+/* "Badge" was already taken — the franchise/status pills on cards
+   (refreshCardBadges, badgeRowHtml) are a different concept, so this uses
+   "milestone" throughout to avoid the collision. Purely derived from state
+   that already exists — no separate progress counters to keep in sync.
+   milestonesSeen only records which ones have already triggered their
+   one-time unlock toast; renderMilestones() always recomputes from scratch,
+   so earned/locked state can never drift from the library it describes. */
+const MILESTONES = [
+  { id: 'first-rating', emoji: '⭐', name: 'First Rating', desc: 'Rate your first title.',
+    check: () => Object.keys(userRatings).length >= 1 },
+  { id: 'critic', emoji: '🎯', name: 'Critic', desc: 'Rate 10 titles.',
+    check: () => Object.keys(userRatings).length >= 10 },
+  { id: 'completionist', emoji: '🏆', name: 'Completionist', desc: 'Rate 50 titles.',
+    check: () => Object.keys(userRatings).length >= 50 },
+  { id: 'both-worlds', emoji: '🌐', name: 'Both Worlds', desc: 'Finish an anime and a PC game.',
+    check: () => {
+      const finished = Object.entries(userStatus).filter(([, s]) => s === 'watched').map(([t]) => t);
+      return finished.some(t => sectionOf(t) === 'anime') && finished.some(t => sectionOf(t) === 'games');
+    } },
+  { id: 'favorite-fan', emoji: '❤️', name: 'Favorite Fan', desc: 'Favorite 5 titles.',
+    check: () => favorites.size >= 5 },
+  { id: 'list-maker', emoji: '🗂️', name: 'List Maker', desc: 'Create a custom list.',
+    check: () => Object.keys(userLists).length >= 1 },
+  { id: 'franchise-finisher', emoji: '🎬', name: 'Franchise Finisher', desc: 'Finish every entry in a franchise.',
+    check: () => {
+      const groups = {};
+      Object.keys(FRANCHISES).forEach(t => { (groups[FRANCHISES[t]] ||= []).push(t); });
+      return Object.values(groups).some(titles => titles.length >= 2 && titles.every(t => userStatus[t] === 'watched'));
+    } },
+  { id: 's-tier-seeker', emoji: '💎', name: 'S-Tier Seeker', desc: 'Finish 5 Tier-S titles.',
+    check: () => Object.keys(userStatus).filter(t => userStatus[t] === 'watched' && lookup(t)?.item.rank === 'S').length >= 5 },
+];
+
+let milestonesSeen = new Set(loadStore('otakuplay-milestones-seen', []));
+const saveMilestonesSeen = () => saveStore('otakuplay-milestones-seen', [...milestonesSeen]);
+
+function checkMilestones() {
+  MILESTONES.forEach(m => {
+    if (milestonesSeen.has(m.id) || !m.check()) return;
+    milestonesSeen.add(m.id);
+    saveMilestonesSeen();
+    toast(`🏅 Milestone unlocked: ${m.name}`);
+  });
+  if (document.getElementById('milestones-content')) renderMilestones();
+}
+
+function renderMilestones() {
+  const mount = document.getElementById('milestones-content');
+  if (!mount) return;
+  mount.innerHTML = `<div class="milestones-grid">${MILESTONES.map(m => {
+    const earned = m.check();
+    return `
+      <div class="milestone-card${earned ? ' earned' : ''}">
+        <span class="milestone-emoji" aria-hidden="true">${earned ? m.emoji : '🔒'}</span>
+        <span class="milestone-name">${escapeHtml(m.name)}</span>
+        <span class="milestone-desc">${escapeHtml(m.desc)}</span>
+      </div>`;
+  }).join('')}</div>`;
+}
+
 // ===================== USER DATA MUTATIONS =====================
 function setUserStatus(title, status) {
   const prevStatus = userStatus[title] || '';
@@ -194,6 +257,7 @@ function setUserStatus(title, status) {
       label: 'Undo', onClick: () => setUserStatus(title, prevStatus),
     });
   }
+  checkMilestones();
 }
 
 function setUserRating(title, rating) {
@@ -220,6 +284,7 @@ function setUserRating(title, rating) {
     if (state[sect].sort === 'myrating') renderSection(sect);
     else if (state[sect].filters.has('rated')) applyFilter(sect);
   }
+  checkMilestones();
 }
 
 let _noteTimer = null;
@@ -244,6 +309,7 @@ function toggleFavorite(title) {
     btn.setAttribute('aria-label', on ? `Remove ${title} from favorites` : `Add ${title} to favorites`);
   });
   SECTION_KEYS.forEach(k => { if (state[k].filters.has('favorites')) applyFilter(k); });
+  checkMilestones();
 }
 
 // ===================== IMPORT / EXPORT =====================
@@ -1539,6 +1605,7 @@ function createList(name) {
   const id = `list-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
   userLists[id] = { name: trimmed, titles: [] };
   saveUserLists();
+  checkMilestones();
   return id;
 }
 
@@ -2133,9 +2200,103 @@ function recommendationsHtml() {
     return `<div class="stat-chart-card rec-empty">
       <div class="stat-chart-title">✨ Recommended for you</div>
       <p class="stat-empty">Rate a few titles 7+ or mark them watched, and picks tuned to your taste show up here.</p>
+      ${tasteQuizHtml()}
     </div>`;
   }
   return allBlocks.join('');
+}
+
+// ===================== STARTER TASTE QUIZ =====================
+/* Shown only in the empty-recommendations state above — once real ratings/
+   statuses/favorites exist, recommend()/recommendCross() take over and this
+   never renders again. Scores directly off chosen genre tags rather than a
+   seed item, since there's nothing rated yet to seed from. */
+const GENRE_LABEL_OVERRIDES = { scifi: 'Sci-Fi', rpg: 'RPG', fps: 'FPS', rts: 'RTS', openworld: 'Open World', soulslike: "Souls-like" };
+const genreLabel = t => GENRE_LABEL_OVERRIDES[t] || (t.charAt(0).toUpperCase() + t.slice(1));
+
+function tasteQuizGenres(limit = 14) {
+  const counts = {};
+  [...ANIME, ...GAMES].forEach(item => item.tags.forEach(t => { counts[t] = (counts[t] || 0) + 1; }));
+  return Object.keys(counts).sort((a, b) => counts[b] - counts[a]).slice(0, limit);
+}
+
+function tasteQuizHtml() {
+  const chips = tasteQuizGenres().map(t =>
+    `<button type="button" class="quiz-genre-chip" data-genre="${t}" aria-pressed="false">${genreLabel(t)}</button>`).join('');
+  return `
+    <p class="quiz-intro">Or take a 10-second quiz instead — pick a few genres you enjoy.</p>
+    <div class="quiz-genres" id="quiz-genres" role="group" aria-label="Pick genres you enjoy">${chips}</div>
+    <div class="quiz-medium" role="radiogroup" aria-label="Show recommendations for">
+      <button type="button" class="quiz-medium-btn active" data-medium="both" aria-pressed="true">Both</button>
+      <button type="button" class="quiz-medium-btn" data-medium="anime" aria-pressed="false">🎌 Anime</button>
+      <button type="button" class="quiz-medium-btn" data-medium="games" aria-pressed="false">🎮 PC Games</button>
+    </div>
+    <button type="button" class="quiz-submit-btn" id="quiz-submit-btn" disabled>Get my picks (pick 2+ genres)</button>
+    <div id="quiz-result"></div>`;
+}
+
+function quizCardHtml(item, matched, picked) {
+  return `
+    <button class="rec-card" data-title="${escapeHtml(item.title)}">
+      <span class="rec-art" style="background:${item.bg}">
+        ${item.img ? `<img src="${escapeHtml(item.img)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.remove()">` : `<span aria-hidden="true">${item.emoji}</span>`}
+      </span>
+      <span class="rec-info">
+        <span class="rec-title">${escapeHtml(item.title)}</span>
+        <span class="rec-sub">${item.year} · ${escapeHtml(item.studio)} · ${item.rating}</span>
+        <span class="rec-because">Matches ${matched} of your ${picked} picks</span>
+      </span>
+    </button>`;
+}
+
+function runTasteQuiz(genres, medium) {
+  const result = document.getElementById('quiz-result');
+  if (!result) return;
+  const sects = medium === 'both' ? SECTION_KEYS : [medium];
+  const seen  = new Set([...Object.keys(userStatus), ...Object.keys(userRatings), ...favorites]);
+
+  const blocks = sects.map(k => {
+    const scored = SECTIONS[k].data
+      .filter(x => !seen.has(x.title))
+      .map(item => ({ item, matched: item.tags.filter(t => genres.includes(t)).length }))
+      .filter(x => x.matched > 0)
+      .sort((a, b) => b.matched - a.matched || b.item.rating - a.item.rating)
+      .slice(0, 4);
+    if (!scored.length) return '';
+    const label = k === 'anime' ? '🎌 Anime picks' : '🎮 PC Game picks';
+    const cards = scored.map(({ item, matched }) => quizCardHtml(item, matched, genres.length)).join('');
+    return `<div class="quiz-result-block"><div class="quiz-result-label">${label}</div><div class="rec-list">${cards}</div></div>`;
+  }).filter(Boolean);
+
+  result.innerHTML = blocks.length ? blocks.join('')
+    : '<p class="stat-empty">No matches for that combination — try different genres.</p>';
+}
+
+function setupTasteQuiz() {
+  const genreGroup = document.getElementById('quiz-genres');
+  const submitBtn  = document.getElementById('quiz-submit-btn');
+  if (!genreGroup || !submitBtn) return;
+  let medium = 'both';
+
+  genreGroup.querySelectorAll('.quiz-genre-chip').forEach(chip => chip.addEventListener('click', () => {
+    const active = chip.classList.toggle('active');
+    chip.setAttribute('aria-pressed', String(active));
+    const count = genreGroup.querySelectorAll('.quiz-genre-chip.active').length;
+    submitBtn.disabled = count < 2;
+    submitBtn.textContent = count < 2 ? 'Get my picks (pick 2+ genres)' : 'Get my picks';
+  }));
+
+  document.querySelectorAll('.quiz-medium-btn').forEach(btn => btn.addEventListener('click', () => {
+    document.querySelectorAll('.quiz-medium-btn').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-pressed', 'false'); });
+    btn.classList.add('active');
+    btn.setAttribute('aria-pressed', 'true');
+    medium = btn.dataset.medium;
+  }));
+
+  submitBtn.addEventListener('click', () => {
+    const genres = [...genreGroup.querySelectorAll('.quiz-genre-chip.active')].map(c => c.dataset.genre);
+    runTasteQuiz(genres, medium);
+  });
 }
 
 // ===================== SHAREABLE TOP 10 CARD =====================
@@ -2486,6 +2647,9 @@ function renderStats() {
     <div class="stats-section-head">My Lists</div>
     <div id="my-lists-content"></div>
 
+    <div class="stats-section-head">🏅 Milestones</div>
+    <div id="milestones-content"></div>
+
     <div class="stats-section-head">The Catalogue</div>
     <div class="stats-charts">
       <div class="stat-chart-card"><div class="stat-chart-title">🎌 Anime by Decade</div>${barChart(byDecade(ANIME))}</div>
@@ -2505,6 +2669,13 @@ function renderStats() {
   });
   renderQueue();
   renderMyLists();
+  setupTasteQuiz();
+  // checkMilestones (not renderMilestones) so milestones earned via bulk
+  // import/sync/clear — which bypass setUserStatus/setUserRating/etc. and
+  // so never call checkMilestones themselves — still surface their one-time
+  // unlock toast the next time this page renders, instead of just silently
+  // flipping to earned.
+  checkMilestones();
 }
 
 // ===================== MISC UI =====================
@@ -2709,6 +2880,129 @@ function setupFranchiseProgress() {
   mount.innerHTML = `
     <div class="franchise-progress-label">You've ${verb} ${done} of ${titles.length}${done === titles.length ? ' — the whole series!' : ` (${pct}%)`}</div>
     <div class="franchise-progress-track"><div class="franchise-progress-fill" style="width:${pct}%"></div></div>`;
+}
+
+// ===================== HEAD-TO-HEAD COMPARE =====================
+const SLUG_INDEX = new Map();
+SECTION_KEYS.forEach(k => SECTIONS[k].data.forEach(item => SLUG_INDEX.set(slugOf(item), item)));
+
+function compareOptionsHtml() {
+  return SECTION_KEYS.map(k => {
+    const label = k === 'anime' ? 'Anime' : 'PC Games';
+    const opts = [...SECTIONS[k].data]
+      .sort((a, b) => a.title.localeCompare(b.title))
+      .map(item => `<option value="${escapeHtml(item.title)}">${escapeHtml(item.title)} (${item.year})</option>`)
+      .join('');
+    return `<optgroup label="${label}">${opts}</optgroup>`;
+  }).join('');
+}
+
+function compareHeadHtml(item) {
+  const cover = item.img
+    ? `<img class="compare-cover-img" src="${escapeHtml(item.img)}" alt="" decoding="async"
+         referrerpolicy="no-referrer" onload="this.classList.add('loaded')" onerror="this.remove()">` : '';
+  return `
+    <div class="compare-title-card">
+      <div class="compare-cover" style="background:${item.bg}">
+        <span class="compare-cover-emoji" aria-hidden="true">${item.emoji}</span>
+        ${cover}
+      </div>
+      <h2 class="compare-title-name">${escapeHtml(item.title)}</h2>
+      <a class="compare-open-link" href="${entryUrl(item)}">View full page →</a>
+    </div>`;
+}
+
+function compareRow(label, cellA, cellB, winA = false, winB = false) {
+  return `
+    <div class="compare-row">
+      <div class="compare-cell${winA ? ' compare-cell-win' : ''}">${cellA}</div>
+      <div class="compare-row-label">${label}</div>
+      <div class="compare-cell${winB ? ' compare-cell-win' : ''}">${cellB}</div>
+    </div>`;
+}
+
+function comparePersonalStats(item) {
+  const sect   = sectionOf(item.title);
+  const status = userStatus[item.title];
+  const rating = userRatings[item.title];
+  return {
+    statusText: status ? SECTIONS[sect].statusLabels[status] : 'Not tracked',
+    ratingText: rating ? `${rating}/10` : 'Not rated',
+  };
+}
+
+function renderCompare(titleA, titleB) {
+  const result = document.getElementById('compare-result');
+  if (!result) return;
+  if (!titleA || !titleB) { result.innerHTML = ''; return; }
+  if (titleA === titleB) {
+    result.innerHTML = '<p class="stat-empty">Pick two different titles to compare.</p>';
+    return;
+  }
+  const la = lookup(titleA), lb = lookup(titleB);
+  if (!la || !lb) { result.innerHTML = '<p class="stat-empty">Title not found.</p>'; return; }
+  const a = la.item, b = lb.item;
+
+  const tagsA = a.tags.map(t => `<span class="tag tag-${t}">${t}</span>`).join('');
+  const tagsB = b.tags.map(t => `<span class="tag tag-${t}">${t}</span>`).join('');
+  const platA = (STREAM_MAP[a.title] || []).map(p => `<span class="platform-badge platform-${p.toLowerCase()}">${p}</span>`).join('') || '—';
+  const platB = (STREAM_MAP[b.title] || []).map(p => `<span class="platform-badge platform-${p.toLowerCase()}">${p}</span>`).join('') || '—';
+  const awardsA = a.awards?.length ? a.awards.map(x => `<span class="award-badge award-${x.cls}">${escapeHtml(x.text)}</span>`).join('') : '';
+  const awardsB = b.awards?.length ? b.awards.map(x => `<span class="award-badge award-${x.cls}">${escapeHtml(x.text)}</span>`).join('') : '';
+  const pa = comparePersonalStats(a), pb = comparePersonalStats(b);
+
+  result.innerHTML = `
+    <div class="compare-grid">
+      <div class="compare-head">
+        ${compareHeadHtml(a)}
+        <div class="compare-vs-big" aria-hidden="true">VS</div>
+        ${compareHeadHtml(b)}
+      </div>
+      <div class="compare-rows">
+        ${compareRow('Rating',
+          `<span class="rating-num">${a.rating}</span> <span class="stars" aria-hidden="true">${starsHtml(a.rating)}</span>`,
+          `<span class="rating-num">${b.rating}</span> <span class="stars" aria-hidden="true">${starsHtml(b.rating)}</span>`,
+          a.rating > b.rating, b.rating > a.rating)}
+        ${compareRow('Tier',
+          `<span class="card-rank rank-${a.rank.toLowerCase()} compare-tier">Tier ${a.rank}</span>`,
+          `<span class="card-rank rank-${b.rank.toLowerCase()} compare-tier">Tier ${b.rank}</span>`)}
+        ${compareRow('Year', a.year, b.year)}
+        ${compareRow('Studio', escapeHtml(a.studio), escapeHtml(b.studio))}
+        ${compareRow('Genres', `<div class="compare-tags">${tagsA}</div>`, `<div class="compare-tags">${tagsB}</div>`)}
+        ${compareRow('Platforms', `<div class="compare-tags">${platA}</div>`, `<div class="compare-tags">${platB}</div>`)}
+        ${(awardsA || awardsB) ? compareRow('Awards', `<div class="compare-tags">${awardsA || '—'}</div>`, `<div class="compare-tags">${awardsB || '—'}</div>`) : ''}
+        ${compareRow('My Rating', pa.ratingText, pb.ratingText)}
+        ${compareRow('My Status', pa.statusText, pb.statusText)}
+      </div>
+    </div>`;
+}
+
+function setupComparePage() {
+  const selA = document.getElementById('compare-pick-a');
+  const selB = document.getElementById('compare-pick-b');
+  if (!selA || !selB) return;
+
+  const params = new URLSearchParams(location.hash.slice(1));
+  const initA = SLUG_INDEX.get(params.get('a'))?.title || '';
+  const initB = SLUG_INDEX.get(params.get('b'))?.title || '';
+
+  const optionsHtml = compareOptionsHtml();
+  selA.innerHTML = `<option value="">Pick a title…</option>${optionsHtml}`;
+  selB.innerHTML = `<option value="">Pick a title…</option>${optionsHtml}`;
+  selA.value = initA;
+  selB.value = initB;
+
+  function sync() {
+    const ta = selA.value, tb = selB.value;
+    const parts = [];
+    if (ta) parts.push(`a=${slugOf(lookup(ta).item)}`);
+    if (tb) parts.push(`b=${slugOf(lookup(tb).item)}`);
+    history.replaceState(null, '', parts.length ? `#${parts.join('&')}` : location.pathname + location.search);
+    renderCompare(ta, tb);
+  }
+  selA.addEventListener('change', sync);
+  selB.addEventListener('change', sync);
+  if (initA || initB) renderCompare(initA, initB);
 }
 
 // ===================== FIRST-VISIT ONBOARDING TOUR =====================
@@ -2992,6 +3286,7 @@ function init() {
 
   if (PAGE === 'insights') renderStats();
   if (PAGE === 'home') { renderHighlights(); renderAnniversaries(); renderDailyPick(); }
+  if (PAGE === 'compare') setupComparePage();
   setupEntryPage();
   setupFranchiseProgress();
 

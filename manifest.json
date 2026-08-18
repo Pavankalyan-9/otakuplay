@@ -20,6 +20,7 @@
   "shortcuts": [
     { "name": "Best Anime", "url": "./anime/", "description": "Browse the ranked anime catalogue" },
     { "name": "Best PC Games", "url": "./games/", "description": "Browse the ranked PC games catalogue" },
+    { "name": "Top 100", "url": "./top-100/", "description": "Anime and PC games ranked together on one list" },
     { "name": "Insights", "url": "./insights/", "description": "See collection and library stats" }
   ]
 }

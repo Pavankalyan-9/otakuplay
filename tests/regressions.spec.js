@@ -136,6 +136,48 @@ test.describe('bugs that shipped once', () => {
     expect(box.x + box.width).toBeLessThanOrEqual(width + 1);
   });
 
+  test('print stylesheet strips screen chrome and forces black-on-white', async ({ page }) => {
+    await page.emulateMedia({ media: 'print' });
+    await expect(page.locator('.header')).toBeHidden();
+    await expect(page.locator('.controls-row')).toBeHidden();
+    await expect(page.locator('.card-fav-btn').first()).toBeHidden();
+    await expect(page.locator('.card-banner').first()).toBeHidden();
+    await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(255, 255, 255)');
+    await expect(page.locator('.card-title').first()).toHaveCSS('color', 'rgb(0, 0, 0)');
+
+    await page.goto('/anime/cowboy-bebop/');
+    await page.emulateMedia({ media: 'print' });
+    await expect(page.locator('.entry-banner')).toBeHidden();
+    await expect(page.locator('.entry-track')).toBeHidden();
+    await expect(page.locator('.entry-title')).toBeVisible();
+  });
+
+  // Milestones are purely derived from userRatings/userStatus/favorites/userLists —
+  // this pins that a real action flips a card to earned, fires the toast exactly
+  // once, and the unlock survives reload without re-firing.
+  test('milestones unlock from real actions, toast once, and persist', async ({ page }) => {
+    await page.goto('/insights/');
+    await expect(page.locator('.milestone-card')).toHaveCount(8);
+    expect(await page.locator('.milestone-card.earned').count()).toBe(0);
+
+    await page.goto('/anime/');
+    await page.waitForFunction(() => document.querySelectorAll('#anime-grid .card').length > 0);
+    await page.locator('#anime-grid .card-open-btn').first().click();
+    await page.locator('.modal-pr-star[data-r="8"]').click();
+    await expect(page.locator('.toast-msg')).toContainText('Milestone unlocked: First Rating');
+    await page.keyboard.press('Escape');
+
+    await page.goto('/insights/');
+    const earned = page.locator('.milestone-card.earned');
+    await expect(earned).toHaveCount(1);
+    await expect(earned).toContainText('First Rating');
+
+    // Already-seen milestone — a fresh page load must not re-fire the toast.
+    await page.reload();
+    await expect(page.locator('#toast')).toHaveCount(0);
+    await expect(page.locator('.milestone-card.earned')).toHaveCount(1);
+  });
+
   test('list view toggle is dense, shared across sections, and persists', async ({ page }) => {
     const card = page.locator('#anime-grid .card').first();
     const before = await card.boundingBox();
@@ -526,7 +568,7 @@ test.describe('entry pages', () => {
       (await request.get('/search-index.json')).json(),
     ]);
     const urls = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m => m[1]);
-    const TOP_LEVEL_PAGES = 7; // /, /anime/, /games/, /top-100/, /insights/, /about/, /changelog/
+    const TOP_LEVEL_PAGES = 8; // /, /anime/, /games/, /top-100/, /insights/, /about/, /changelog/, /compare/
 
     expect(urls.length).toBeGreaterThanOrEqual(index.length + TOP_LEVEL_PAGES);
     expect(urls.some(u => u.endsWith('/anime/cowboy-bebop/'))).toBe(true);
@@ -668,6 +710,53 @@ test.describe('sync code', () => {
   });
 });
 
+test.describe('compare tool', () => {
+  test('picking two titles renders a side-by-side comparison and updates the shareable hash', async ({ page }) => {
+    await page.goto('/compare/');
+    await expect(page.locator('#compare-result')).toBeEmpty();
+
+    await page.locator('#compare-pick-a').selectOption('Cowboy Bebop');
+    await page.locator('#compare-pick-b').selectOption('Elden Ring');
+    await expect(page).toHaveURL(/#a=cowboy-bebop&b=elden-ring$/);
+
+    const result = page.locator('#compare-result');
+    await expect(result.locator('.compare-title-name').first()).toHaveText('Cowboy Bebop');
+    await expect(result.locator('.compare-title-name').last()).toHaveText('Elden Ring');
+    await expect(result).toContainText('Sunrise');       // studio, left side
+    await expect(result).toContainText('FromSoftware');  // studio, right side
+    // Cross-media comparison: anime's own streaming badges vs the game's store badge, not blank.
+    await expect(result.locator('.platform-crunchyroll')).toBeVisible();
+    await expect(result.locator('.platform-steam')).toBeVisible();
+  });
+
+  test('a shared #a=&b= link pre-selects both titles and renders immediately', async ({ page }) => {
+    await page.goto('/compare/#a=cowboy-bebop&b=elden-ring');
+    await expect(page.locator('#compare-pick-a')).toHaveValue('Cowboy Bebop');
+    await expect(page.locator('#compare-pick-b')).toHaveValue('Elden Ring');
+    await expect(page.locator('#compare-result .compare-title-name').first()).toHaveText('Cowboy Bebop');
+  });
+
+  test('picking the same title twice asks for two different ones instead of a broken comparison', async ({ page }) => {
+    await page.goto('/compare/');
+    await page.locator('#compare-pick-a').selectOption('Cowboy Bebop');
+    await page.locator('#compare-pick-b').selectOption('Cowboy Bebop');
+    await expect(page.locator('#compare-result')).toContainText('Pick two different titles');
+  });
+
+  test('reflects your own tracked rating and status for each side', async ({ page }) => {
+    await page.evaluate(() => {
+      localStorage.setItem('otakuplay-ratings', JSON.stringify({ 'Cowboy Bebop': 9 }));
+      localStorage.setItem('otakuplay-status', JSON.stringify({ 'Elden Ring': 'watched' }));
+    });
+    await page.goto('/compare/#a=cowboy-bebop&b=elden-ring');
+    const rows = page.locator('#compare-result .compare-rows');
+    await expect(rows).toContainText('9/10');
+    await expect(rows).toContainText('Not rated');
+    await expect(rows).toContainText('Played');    // games use "Played", not "Watched"
+    await expect(rows).toContainText('Not tracked');
+  });
+});
+
 test.describe('personal library', () => {
   test('status survives a reload and drives the status filter', async ({ page }) => {
     await page.locator('#anime-grid .card-open-btn').first().click();
@@ -702,7 +791,10 @@ test.describe('personal library', () => {
     await page.evaluate(() => document.getElementById('toast').classList.remove('visible'));
 
     await page.locator('.modal-pr-star[data-r="7"]').click();
-    await expect(page.locator('#toast')).not.toHaveClass(/visible/);
+    // Rating your first-ever title also earns the "First Rating" milestone,
+    // so a toast IS expected here now — just the milestone one, not Undo.
+    await expect(page.locator('.toast-msg')).toContainText('Milestone unlocked: First Rating');
+    await page.evaluate(() => document.getElementById('toast').classList.remove('visible'));
     await page.locator('.modal-pr-star[data-r="9"]').click();
     await expect(page.locator('.toast-msg')).toContainText('rated 7 → 9');
     await page.locator('.toast-action').click();
@@ -720,6 +812,44 @@ test.describe('personal library', () => {
     const titles = await recs.locator('.rec-title').allTextContents();
     expect(titles).not.toContain('Dark Souls');
     await expect(recs.first().locator('.rec-because')).toContainText('Because you liked');
+  });
+
+  test('starter taste quiz scores the catalogue by genre with no ratings needed, and only appears when empty', async ({ page }) => {
+    await page.goto('/insights/');
+    const quiz = page.locator('#quiz-genres');
+    await expect(quiz).toBeVisible();
+    const submitBtn = page.locator('#quiz-submit-btn');
+    await expect(submitBtn).toBeDisabled();
+
+    // One genre isn't enough to submit.
+    await page.locator('.quiz-genre-chip[data-genre="action"]').click();
+    await expect(submitBtn).toBeDisabled();
+    await page.locator('.quiz-genre-chip[data-genre="fantasy"]').click();
+    await expect(submitBtn).toBeEnabled();
+
+    await submitBtn.click();
+    const result = page.locator('#quiz-result');
+    await expect(result.locator('.rec-card').first()).toBeVisible();
+    await expect(result).toContainText('Matches 2 of your 2 picks');
+    // Both mediums by default.
+    await expect(result).toContainText('Anime picks');
+    await expect(result).toContainText('PC Game picks');
+
+    // A quiz pick opens the real detail modal, same as an organic rec-card.
+    await result.locator('.rec-card').first().click();
+    await expect(page.locator('#detail-modal')).toHaveClass(/open/);
+    await page.keyboard.press('Escape');
+
+    // Narrowing to one medium only shows that medium's block.
+    await page.locator('.quiz-medium-btn[data-medium="anime"]').click();
+    await submitBtn.click();
+    await expect(result).toContainText('Anime picks');
+    await expect(result).not.toContainText('PC Game picks');
+
+    // Once real signal exists, the organic engine takes over and the quiz is gone.
+    await page.evaluate(() => localStorage.setItem('otakuplay-ratings', JSON.stringify({ 'Dark Souls': 9 })));
+    await page.reload();
+    await expect(page.locator('#quiz-genres')).toHaveCount(0);
   });
 
   test('importing a MyAnimeList XML export merges without wiping existing data', async ({ page }) => {

@@ -1,0 +1,23 @@
+---
+layout: layouts/base.njk
+permalink: /compare/
+pageKey: compare
+title: Compare two titles — OtakuPlay
+description: Pick any two anime or PC games from the catalogue and see their rating, tier, year, studio, genres and platforms side by side.
+---
+
+<section class="content-section active" id="compare-section">
+  <div class="section-header">
+    <div class="section-tag">⚔️ Compare</div>
+    <h1 class="section-title">Compare Two Titles</h1>
+    <p class="section-desc">Pick anything from the catalogue — anime or PC games, any era — and see them side by side. The link updates as you pick, so you can share it.</p>
+  </div>
+
+  <div class="compare-pickers">
+    <select id="compare-pick-a" class="compare-pick" aria-label="First title to compare"></select>
+    <span class="compare-vs" aria-hidden="true">VS</span>
+    <select id="compare-pick-b" class="compare-pick" aria-label="Second title to compare"></select>
+  </div>
+
+  <div id="compare-result"></div>
+</section>
