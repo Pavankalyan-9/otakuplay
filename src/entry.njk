@@ -97,8 +97,23 @@ eleventyComputed:
       {% endif %}
     </div>
 
+    {% if entry.trailer %}
+      {# Click-to-play facade, not an eager iframe — YouTube's embed player is
+         heavy and would hurt this page's own load performance and CLS budget
+         for a video most visitors won't press play on. Loads from
+         youtube-nocookie.com, and only once actually clicked. #}
+      <div class="entry-trailer" data-video-id="{{ entry.trailer }}">
+        <button class="entry-trailer-facade" aria-label="Play trailer for {{ entry.title }}">
+          <img class="entry-trailer-thumb" src="https://i.ytimg.com/vi/{{ entry.trailer }}/hqdefault.jpg" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer">
+          <span class="entry-trailer-play" aria-hidden="true">▶</span>
+        </button>
+      </div>
+    {% endif %}
+
     <div class="entry-actions">
-      <a class="modal-trailer-btn" href="https://www.youtube.com/results?search_query={{ (entry.title + (' gameplay trailer' if entry.sect == 'games' else ' anime trailer')) | urlencode }}" target="_blank" rel="noopener noreferrer">▶ Watch trailer on YouTube</a>
+      {% if not entry.trailer %}
+        <a class="modal-trailer-btn" href="https://www.youtube.com/results?search_query={{ (entry.title + (' gameplay trailer' if entry.sect == 'games' else ' anime trailer')) | urlencode }}" target="_blank" rel="noopener noreferrer">▶ Watch trailer on YouTube</a>
+      {% endif %}
       <button class="modal-share-btn entry-share" data-title="{{ entry.title }}">🔗 Copy link</button>
     </div>
 

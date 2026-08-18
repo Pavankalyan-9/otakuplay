@@ -1202,5 +1202,95 @@
   "RollerCoaster Tycoon": {
     "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/285310/header.jpg",
     "matched": "RollerCoaster Tycoon®: Deluxe"
+  },
+  "Mind Game": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx875-kvQVUKDPcAKl.png",
+    "matched": "Mind Game",
+    "year": 2004
+  },
+  "Millennium Actress": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx1033-d5p1pbd5qa4L.png",
+    "matched": "Millennium Actress",
+    "year": 2002
+  },
+  "FLCL": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx227-qOB9ZhVvNnqO.jpg",
+    "matched": "FLCL",
+    "year": 2000
+  },
+  "From the New World": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx13125-2EDZb8ahshQc.png",
+    "matched": "From the New World",
+    "year": 2012
+  },
+  "Welcome to the NHK": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx1210-2XotjcgqdcaX.jpg",
+    "matched": "Welcome to the N-H-K",
+    "year": 2006
+  },
+  "Haibane Renmei": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx387-dS4aJivu0zPB.png",
+    "matched": "Haibane Renmei",
+    "year": 2002
+  },
+  "Nana": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx877-6BUYEWp8By8j.png",
+    "matched": "NANA",
+    "year": 2006
+  },
+  "Beck: Mongolian Chop Squad": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx57-4wTOlaVSgKoy.png",
+    "matched": "Beck: Mongolian Chop Squad",
+    "year": 2004
+  },
+  "March Comes in Like a Lion": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx21366-0wrYK0kjKeFn.jpg",
+    "matched": "March comes in like a lion",
+    "year": 2016
+  },
+  "Redline": {
+    "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx6675-NF4tFzAxSjkj.png",
+    "matched": "Redline",
+    "year": 2009
+  },
+  "Katana Zero": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/460950/header.jpg",
+    "matched": "Katana ZERO"
+  },
+  "Hyper Light Drifter": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/257850/header.jpg",
+    "matched": "Hyper Light Drifter"
+  },
+  "Kentucky Route Zero": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/231200/header.jpg",
+    "matched": "Kentucky Route Zero: PC Edition"
+  },
+  "SOMA": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/282140/header.jpg",
+    "matched": "SOMA"
+  },
+  "Hotline Miami": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/219150/header.jpg",
+    "matched": "Hotline Miami"
+  },
+  "Superhot": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/322500/header.jpg",
+    "matched": "SUPERHOT"
+  },
+  "The Witness": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/210970/header.jpg",
+    "matched": "The Witness"
+  },
+  "Subnautica": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/264710/header.jpg",
+    "matched": "Subnautica"
+  },
+  "Deep Rock Galactic": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/548430/header.jpg",
+    "matched": "Deep Rock Galactic"
+  },
+  "Rimworld": {
+    "url": "https://cdn.cloudflare.steamstatic.com/steam/apps/294100/header.jpg",
+    "matched": "RimWorld"
   }
 }

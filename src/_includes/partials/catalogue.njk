@@ -31,12 +31,13 @@
         </select>
       </label>
       <button class="btn-random" id="{{ sect }}-random" title="Jump to a random pick" aria-label="Random pick">🎲</button>
+      <button class="btn-view-toggle" id="{{ sect }}-view-toggle" aria-pressed="false" title="Switch to compact list view" aria-label="Switch to compact list view">☰</button>
       <div class="menu-wrap">
         <button class="more-btn" id="{{ sect }}-more" aria-haspopup="true" aria-expanded="false" aria-label="More actions">⋯</button>
         <div class="more-menu" id="{{ sect }}-more-menu" role="menu" hidden>
           <button class="more-item sync-open-btn" role="menuitem">🔗 Sync to another device</button>
           <button class="more-item export-btn" role="menuitem">⬇ Export library</button>
-          <button class="more-item import-btn" role="menuitem">⬆ Import library</button>
+          <button class="more-item import-btn" role="menuitem" title="OtakuPlay JSON, a MyAnimeList XML export, or a title,status,rating CSV">⬆ Import library</button>
           <button class="more-item clear-btn" role="menuitem">🗑 Clear my data</button>
         </div>
       </div>

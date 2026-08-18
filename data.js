@@ -233,7 +233,7 @@ const ANIME = [
     title:"Fullmetal Alchemist: Brotherhood", year:2009, rating:9.1,
     tags:["action","fantasy","drama","thriller"],
     desc:"Two brothers sacrifice their bodies in a forbidden alchemy ritual and race to restore what was lost. The gold standard of shonen storytelling — flawless pacing, unforgettable characters, perfect ending.",
-    info:"64 Episodes", studio:"Bones", img:"https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx5114-nSWCgQlmOMtj.jpg", awards:[{cls:'special', text:'🌟 #1 All-Time on MAL'}] },
+    info:"64 Episodes", studio:"Bones", img:"https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx5114-nSWCgQlmOMtj.jpg", awards:[{cls:'special', text:'🌟 #1 All-Time on MAL'}], trailer:"D9dap98L5nQ" },
 
   // ── 2011 ──────────────────────────────────────────────────────────────────
   { rank:"S", emoji:"⏳", bg:"linear-gradient(135deg,#0d1a00,#1a3300)",
@@ -246,7 +246,7 @@ const ANIME = [
     title:"Hunter x Hunter (2011)", year:2011, rating:9.0,
     tags:["action","fantasy","adventure","thriller"],
     desc:"A boy sets out to become a Hunter and find his missing father. The most intricately crafted power system and character arcs in shonen — Chimera Ant arc alone is a career-defining achievement.",
-    info:"148 Episodes", studio:"Madhouse", img:"https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx11061-y5gsT1hoHuHw.png" },
+    info:"148 Episodes", studio:"Madhouse", img:"https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx11061-y5gsT1hoHuHw.png", trailer:"d6kBeJjTGnY" },
 
   { rank:"S", emoji:"💜", bg:"linear-gradient(135deg,#0d001a,#200030)",
     title:"Puella Magi Madoka Magica", year:2011, rating:8.4,
@@ -272,7 +272,7 @@ const ANIME = [
     title:"Attack on Titan", year:2013, rating:9.0,
     tags:["action","thriller","drama","mystery"],
     desc:"Humanity survives inside massive walls from man-eating giants. An epic of war, betrayal, and the terrifying cost of freedom that evolved from monster horror into one of fiction's most complex political dramas.",
-    info:"87 Episodes", studio:"WIT / MAPPA", img:"https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx16498-buvcRTBx4NSm.jpg", awards:[{cls:'special', text:'🌟 Generation-Defining Series'}] },
+    info:"87 Episodes", studio:"WIT / MAPPA", img:"https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx16498-buvcRTBx4NSm.jpg", awards:[{cls:'special', text:'🌟 Generation-Defining Series'}], trailer:"HJaUvV9Hwgs" },
 
   { rank:"S", emoji:"✂️", bg:"linear-gradient(135deg,#1a0000,#3a0015)",
     title:"Kill la Kill", year:2013, rating:8.2,
@@ -386,7 +386,7 @@ const ANIME = [
     title:"Odd Taxi", year:2021, rating:9.0,
     tags:["mystery","thriller","drama"],
     desc:"An antisocial walrus taxi driver gets drawn into a missing girl's case. The most underrated anime of the decade — anthropomorphic animals mask a razor-sharp noir mystery with zero wasted scenes.",
-    info:"13 Episodes", studio:"OLM / P.I.C.S", img:"https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx128547-nNekWTKqmvEi.jpg" },
+    info:"13 Episodes", studio:"OLM / P.I.C.S", img:"https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx128547-nNekWTKqmvEi.jpg", trailer:"cBwOEX127Lw" },
 
   { rank:"A", emoji:"🧙", bg:"linear-gradient(135deg,#1a0800,#2e1500)",
     title:"Mushoku Tensei", year:2021, rating:8.4,
@@ -428,7 +428,7 @@ const ANIME = [
     title:"Frieren: Beyond Journey's End", year:2023, rating:9.2,
     tags:["fantasy","drama","adventure"],
     desc:"An elf mage who outlives her companions reflects on what she missed while they were alive. The most beautiful meditation on time, mortality, and connection in anime history. A new classic.",
-    info:"28 Episodes (S1)", studio:"Madhouse", img:"https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx170068-ijY3tCP8KoWP.jpg", awards:[{cls:'aoty', text:'🏆 AOTY 2025 · Crunchyroll'}] },
+    info:"28 Episodes (S1)", studio:"Madhouse", img:"https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx170068-ijY3tCP8KoWP.jpg", awards:[{cls:'aoty', text:'🏆 AOTY 2025 · Crunchyroll'}], trailer:"Iwr1aLEDpe4" },
 
   { rank:"S", emoji:"🍖", bg:"linear-gradient(135deg,#001a08,#003015)",
     title:"Delicious in Dungeon", year:2024, rating:9.0,
@@ -516,7 +516,7 @@ const ANIME = [
     title:"Spirited Away", year:2001, rating:9.1,
     tags:["fantasy","adventure","drama"],
     desc:"A 10-year-old girl's parents are turned into pigs, stranding her in the spirit world where she must work to free them. The highest-grossing anime film ever and a perfect piece of cinema — every frame is a painting, every moment rooted in genuine Shinto mythology and childhood anxiety.",
-    info:"Film", studio:"Studio Ghibli", img:"https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx199-sWefXJvXkDOb.jpg", awards:[{cls:'critics', text:'🎬 Academy Award Winner'}, {cls:'special', text:'🌟 Highest-Grossing Anime Film'}] },
+    info:"Film", studio:"Studio Ghibli", img:"https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx199-sWefXJvXkDOb.jpg", awards:[{cls:'critics', text:'🎬 Academy Award Winner'}, {cls:'special', text:'🌟 Highest-Grossing Anime Film'}], trailer:"fDUFP7EeXLE" },
 
   { rank:"S", emoji:"🏯", bg:"linear-gradient(135deg,#1a1000,#2e1c00)",
     title:"Howl's Moving Castle", year:2004, rating:8.7,
@@ -686,7 +686,7 @@ const ANIME = [
     title:"Grave of the Fireflies", year:1988, rating:9.1,
     tags:["drama","historical"],
     desc:"Two siblings orphaned by the firebombing of Kobe fight to survive in the last months of the Pacific War. Isao Takahata's devastating anti-war film is routinely named among the greatest animated works ever made, in any country, for any audience — a masterpiece it takes courage to watch twice.",
-    info:"Film", studio:"Studio Ghibli", img:"https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx578-vU6XcOlb1XFU.jpg" },
+    info:"Film", studio:"Studio Ghibli", img:"https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx578-vU6XcOlb1XFU.jpg", trailer:"4vPeTSRd580" },
 
   { rank:"S", emoji:"⭐", bg:"linear-gradient(135deg,#150015,#2a0025)",
     title:"JoJo's Bizarre Adventure", year:2012, rating:8.6,
@@ -819,6 +819,66 @@ const ANIME = [
     tags:["mystery","thriller","fantasy"],
     desc:"A headless \"Black Rider\" motorcycles through Ikebukuro's neon streets as gangs, information brokers, and a chainsaw-wielding bartender's ordinary night collide into an ensemble urban legend. Durarara!! weaves a dozen unreliable perspectives into one of the most stylish mystery-thrillers anime has produced.",
     info:"26 Episodes", studio:"Brain's Base", img:"https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx6746-3LTwM95Uqeoa.png" },
+
+  { rank:"A", emoji:"🌀", bg:"linear-gradient(135deg,#1a0033,#33005c)",
+    title:"Mind Game", year:2004, rating:8.4,
+    tags:["comedy","drama","fantasy"],
+    desc:"A failed manga artist dies in a yakuza shakedown, argues his way back to life, and is swallowed by a whale — and that's the least strange thing that happens. Studio 4°C's constantly-morphing animation style makes this one of the most purely inventive films anime has ever produced, cited by Satoshi Kon and Makoto Shinkai as a direct influence.",
+    info:"Film", studio:"Studio 4°C", img:"https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx875-kvQVUKDPcAKl.png" },
+
+  { rank:"A", emoji:"🎬", bg:"linear-gradient(135deg,#1a0010,#33001d)",
+    title:"Millennium Actress", year:2001, rating:8.5,
+    tags:["drama","mystery","romance"],
+    desc:"A retired film star recounts her life to a documentary crew, and her memories and old film roles blur into one continuous chase across decades of Japanese history. Satoshi Kon's most structurally daring film — Perfect Blue's director turning the same tricks toward something achingly romantic instead of horrifying.",
+    info:"Film", studio:"Madhouse", img:"https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx1033-d5p1pbd5qa4L.png" },
+
+  { rank:"A", emoji:"🍆", bg:"linear-gradient(135deg,#1a1500,#332900)",
+    title:"FLCL", year:2000, rating:8.1,
+    tags:["comedy","scifi","action"],
+    desc:"A robot bursts out of a twelve-year-old's forehead after a woman on a Vespa hits him with a bass guitar. Six frantic, hyper-stylized episodes about adolescence disguised as a giant-robot show — one of the most purely influential cult anime ever made, still cited by a generation of directors and animators.",
+    info:"6 Episodes", studio:"Gainax / Production I.G", img:"https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx227-qOB9ZhVvNnqO.jpg" },
+
+  { rank:"A", emoji:"🏝️", bg:"linear-gradient(135deg,#001a15,#00332a)",
+    title:"From the New World", year:2012, rating:8.6,
+    tags:["scifi","psychological","drama","thriller"],
+    desc:"A thousand years after psychic powers reshaped civilization, a group of children in an idyllic village start learning what happened to the ones who came before them. A slow-burn dystopian epic that earns every one of its twenty-five episodes — few anime commit this hard to a genuinely alien worldview.",
+    info:"25 Episodes", studio:"A-1 Pictures", img:"https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx13125-2EDZb8ahshQc.png" },
+
+  { rank:"A", emoji:"🚪", bg:"linear-gradient(135deg,#0d0d1a,#1a1a33)",
+    title:"Welcome to the NHK", year:2006, rating:8.2,
+    tags:["comedy","drama","psychological"],
+    desc:"A hikikomori convinced he's the target of a shadowy conspiracy is dragged back toward the world by a strange girl with an agenda of her own. Uncomfortably funny and uncomfortably honest about isolation, dependency, and self-sabotage in equal measure.",
+    info:"24 Episodes", studio:"Gonzo", img:"https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx1210-2XotjcgqdcaX.jpg" },
+
+  { rank:"A", emoji:"🪶", bg:"linear-gradient(135deg,#1a1a10,#33331d)",
+    title:"Haibane Renmei", year:2002, rating:8.3,
+    tags:["drama","fantasy","mystery"],
+    desc:"A girl wakes with no memory in a walled town, grows small grey wings and a halo overnight, and joins a community of others like her who quietly aren't allowed to ask why. One of anime's gentlest, saddest meditations on guilt and belonging — nothing is explained, and it doesn't need to be.",
+    info:"13 Episodes", studio:"Radix", img:"https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx387-dS4aJivu0zPB.png" },
+
+  { rank:"B", emoji:"🎸", bg:"linear-gradient(135deg,#1a0505,#330a0a)",
+    title:"Nana", year:2006, rating:8.2,
+    tags:["drama","romance","music"],
+    desc:"Two twenty-year-old women, both named Nana, share a Tokyo apartment by coincidence — one chasing a rock star boyfriend, the other chasing a band of her own. A shoujo classic that treats female friendship and ambition with more weight and mess than the genre usually allows.",
+    info:"47 Episodes", studio:"Madhouse", img:"https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx877-6BUYEWp8By8j.png" },
+
+  { rank:"B", emoji:"🎤", bg:"linear-gradient(135deg,#0a1a05,#152e0a)",
+    title:"Beck: Mongolian Chop Squad", year:2004, rating:8.0,
+    tags:["drama","music","comedy"],
+    desc:"A bored middle-schooler stumbles into a garage band led by a half-Japanese ex-street-musician with a dog named after a Ramones bassist. A patient, unglamorous coming-of-age story about actually getting good at something, soundtracked by real, licensed rock music rather than anime-original songs.",
+    info:"26 Episodes", studio:"Madhouse", img:"https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx57-4wTOlaVSgKoy.png" },
+
+  { rank:"A", emoji:"♟️", bg:"linear-gradient(135deg,#0d0505,#1a0a0a)",
+    title:"March Comes in Like a Lion", year:2016, rating:8.6,
+    tags:["drama","psychological"],
+    desc:"A teenage professional shogi player, orphaned and emotionally shut down, is slowly pulled back into life by three sisters next door. Shaft's most tender, least tricksy work — a quiet, watercolor-soft story about depression and small kindnesses rather than the game in its title.",
+    info:"22 Episodes (S1)", studio:"Shaft", img:"https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx21366-0wrYK0kjKeFn.jpg" },
+
+  { rank:"A", emoji:"🏎️", bg:"linear-gradient(135deg,#1a0800,#331000)",
+    title:"Redline", year:2009, rating:8.0,
+    tags:["action","scifi","comedy"],
+    desc:"An illegal street racer with a death wish enters the galaxy's most dangerous, barely-regulated race, held this time on a planet at war. Seven years of entirely hand-drawn animation for a movie that never stops moving — a hand-crafted maximalist spectacle with almost no modern equivalent.",
+    info:"Film", studio:"Madhouse", img:"https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx6675-NF4tFzAxSjkj.png" },
 ];
 
 // ===================== GAMES DATA (139 titles, 1992–2025) =====================
@@ -875,7 +935,7 @@ const GAMES = [
     title:"Half-Life", year:1998, rating:9.5,
     tags:["fps","scifi","action","adventure"],
     desc:"A physics experiment goes wrong. Gordon Freeman's silent journey through Black Mesa established the 'environmental storytelling' FPS — no cutscenes, just you and the collapsing world around you.",
-    info:"FPS", studio:"Valve", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/70/header.jpg", awards:[{cls:'goty', text:'🏆 50+ GOTY Awards'}, {cls:'special', text:'🌟 Changed Gaming Forever'}] },
+    info:"FPS", studio:"Valve", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/70/header.jpg", awards:[{cls:'goty', text:'🏆 50+ GOTY Awards'}, {cls:'special', text:'🌟 Changed Gaming Forever'}], trailer:"5Wavn29LMrs" },
 
   { rank:"S", emoji:"⚔️", bg:"linear-gradient(135deg,#1a0d00,#2e1a00)",
     title:"Baldur's Gate", year:1998, rating:9.0,
@@ -919,7 +979,7 @@ const GAMES = [
     title:"Baldur's Gate II", year:2000, rating:9.5,
     tags:["rpg","adventure","fantasy","drama"],
     desc:"The greatest CRPG ever made until 2023. Irenicus's story is still the most compelling villain arc in RPG history, and the companion writing set the bar for party-based games for two decades.",
-    info:"CRPG", studio:"BioWare", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/467620/header.jpg" },
+    info:"CRPG", studio:"BioWare", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/467620/header.jpg", trailer:"XqJxqr6piuE" },
 
   // ── 2001 ──────────────────────────────────────────────────────────────────
   { rank:"A", emoji:"🔫", bg:"linear-gradient(135deg,#1a0000,#2e0000)",
@@ -953,7 +1013,7 @@ const GAMES = [
     title:"Half-Life 2", year:2004, rating:9.7,
     tags:["fps","scifi","action","adventure"],
     desc:"Gordon Freeman returns to an alien-occupied Earth. HL2's physics engine, environmental storytelling, and world design were 10 years ahead of their time — it still holds up perfectly today.",
-    info:"FPS", studio:"Valve", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/220/header.jpg", awards:[{cls:'goty', text:'🏆 39 GOTY Awards'}] },
+    info:"FPS", studio:"Valve", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/220/header.jpg", awards:[{cls:'goty', text:'🏆 39 GOTY Awards'}], trailer:"kWnzRGD9NDE" },
 
   { rank:"S", emoji:"⚔️", bg:"linear-gradient(135deg,#001520,#002535)",
     title:"World of Warcraft", year:2004, rating:9.0,
@@ -1024,13 +1084,13 @@ const GAMES = [
     title:"Mass Effect 2", year:2010, rating:9.6,
     tags:["rpg","scifi","action","adventure","drama"],
     desc:"Assemble a suicide squad to save the galaxy. The finest ensemble cast in gaming history, with a structure built entirely around loyalties earned and betrayals paid for — the perfect sequel.",
-    info:"Action RPG", studio:"BioWare", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/2362420/header.jpg", awards:[{cls:'goty', text:'🏆 GOTY 2010 · Multiple Outlets'}] },
+    info:"Action RPG", studio:"BioWare", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/2362420/header.jpg", awards:[{cls:'goty', text:'🏆 GOTY 2010 · Multiple Outlets'}], trailer:"MYlSUjec8mY" },
 
   { rank:"S", emoji:"☢️", bg:"linear-gradient(135deg,#1a1000,#2e1c00)",
     title:"Fallout: New Vegas", year:2010, rating:9.5,
     tags:["rpg","openworld","fps","thriller"],
     desc:"The best Fallout game. Obsidian's Mojave Wasteland political saga gives every faction genuine ideological weight and lets you resolve every conflict in countless ways — reactive writing at its finest.",
-    info:"Open World RPG", studio:"Obsidian Entertainment", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/22380/header.jpg" },
+    info:"Open World RPG", studio:"Obsidian Entertainment", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/22380/header.jpg", trailer:"SrsI65olZjs" },
 
   { rank:"S", emoji:"👽", bg:"linear-gradient(135deg,#001020,#001830)",
     title:"StarCraft II", year:2010, rating:8.9,
@@ -1113,7 +1173,7 @@ const GAMES = [
     title:"The Witcher 3: Wild Hunt", year:2015, rating:9.8,
     tags:["rpg","openworld","adventure","fantasy"],
     desc:"Geralt of Rivia hunts for his surrogate daughter across a war-torn open world. The pinnacle of narrative RPGs — every side quest tells a complete story, and the world responds to every choice you make.",
-    info:"Open World RPG", studio:"CD Projekt Red", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/292030/header.jpg", awards:[{cls:'goty', text:'🏆 250+ GOTY Awards'}, {cls:'special', text:'🌟 Greatest RPG Ever Made'}] },
+    info:"Open World RPG", studio:"CD Projekt Red", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/292030/header.jpg", awards:[{cls:'goty', text:'🏆 250+ GOTY Awards'}, {cls:'special', text:'🌟 Greatest RPG Ever Made'}], trailer:"nYwe_WHARdc" },
 
   { rank:"S", emoji:"❤️", bg:"linear-gradient(135deg,#001020,#001830)",
     title:"Undertale", year:2015, rating:9.2,
@@ -1163,7 +1223,7 @@ const GAMES = [
     title:"Divinity: Original Sin 2", year:2017, rating:9.5,
     tags:["rpg","strategy","adventure","fantasy"],
     desc:"The RPG that rewrote what the genre could do. Every element in the world is a potential tool — combine fire and oil, charm enemies, teleport allies. The most reactive CRPG before Baldur's Gate 3.",
-    info:"CRPG", studio:"Larian Studios", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/435150/header.jpg" },
+    info:"CRPG", studio:"Larian Studios", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/435150/header.jpg", trailer:"bTWTFX8qzPI" },
 
   { rank:"A", emoji:"☕", bg:"linear-gradient(135deg,#1a0d00,#2e1800)",
     title:"Cuphead", year:2017, rating:8.9,
@@ -1182,7 +1242,7 @@ const GAMES = [
     title:"Red Dead Redemption 2", year:2018, rating:9.7,
     tags:["action","openworld","adventure","drama"],
     desc:"Arthur Morgan's final chapter in a dying West. The most technically ambitious open world ever made — a slow, patient story about a man grappling with the violence he's built his life on.",
-    info:"Open World", studio:"Rockstar Games", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/1174180/header.jpg" },
+    info:"Open World", studio:"Rockstar Games", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/1174180/header.jpg", trailer:"F63h3v9QV7w" },
 
   { rank:"A", emoji:"🐉", bg:"linear-gradient(135deg,#001a05,#003210)",
     title:"Monster Hunter: World", year:2018, rating:9.0,
@@ -1246,7 +1306,7 @@ const GAMES = [
     title:"Elden Ring", year:2022, rating:9.5,
     tags:["action","rpg","soulslike","openworld","fantasy"],
     desc:"George R.R. Martin's lore, FromSoftware's design. An epic open-world dark fantasy where every corner hides a secret, a story, or a devastating boss — the biggest artistic achievement in gaming in years.",
-    info:"Open World Action RPG", studio:"FromSoftware", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/1245620/header.jpg", awards:[{cls:'goty', text:'🏆 GOTY 2022 · TGA'}, {cls:'critics', text:'🎬 BAFTA Game of the Year'}] },
+    info:"Open World Action RPG", studio:"FromSoftware", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/1245620/header.jpg", awards:[{cls:'goty', text:'🏆 GOTY 2022 · TGA'}, {cls:'critics', text:'🎬 BAFTA Game of the Year'}], trailer:"AKXiKBnzpBQ" },
 
   { rank:"S", emoji:"⚡", bg:"linear-gradient(135deg,#1a0500,#300a00)",
     title:"God of War: Ragnarök", year:2022, rating:9.5,
@@ -1265,7 +1325,7 @@ const GAMES = [
     title:"Baldur's Gate 3", year:2023, rating:9.6,
     tags:["rpg","strategy","adventure","fantasy"],
     desc:"A mind-flayer tadpole forces unlikely companions together. Larian's D&D masterwork is the most reactive, deepest, and most replayable RPG ever made — a game that genuinely listens to what you do.",
-    info:"Turn-Based CRPG", studio:"Larian Studios", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/1086940/header.jpg", awards:[{cls:'goty', text:'🏆 GOTY 2023 · TGA'}, {cls:'critics', text:'🎬 BAFTA Game of the Year'}] },
+    info:"Turn-Based CRPG", studio:"Larian Studios", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/1086940/header.jpg", awards:[{cls:'goty', text:'🏆 GOTY 2023 · TGA'}, {cls:'critics', text:'🎬 BAFTA Game of the Year'}], trailer:"1T22wNvoNiU" },
 
   { rank:"S", emoji:"💡", bg:"linear-gradient(135deg,#001a18,#003230)",
     title:"Alan Wake 2", year:2023, rating:9.1,
@@ -1698,6 +1758,66 @@ const GAMES = [
     tags:["action","scifi","rpg"],
     desc:"Space ninjas in bio-mechanical exosuits slice through enemy factions with some of the fastest, most acrobatic melee and gunplay combat on PC, all free-to-play and refined for over a decade of continuous content updates. Digital Extremes' longevity-through-quality approach makes it the rare live-service game praised for treating its players well.",
     info:"Looter Shooter", studio:"Digital Extremes", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/230410/header.jpg" },
+
+  { rank:"A", emoji:"🗡️", bg:"linear-gradient(135deg,#0a0015,#180028)",
+    title:"Katana Zero", year:2019, rating:8.9,
+    tags:["action","platformer","indie"],
+    desc:"A one-hit-kill assassin with the ability to slow time carves through a neon-soaked city, one perfectly-choreographed room at a time, then rewinds his own memory of it. Brutal precision-platforming wrapped around a genuinely unsettling noir story about trauma and control.",
+    info:"Action Platformer", studio:"Askiisoft", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/460950/header.jpg" },
+
+  { rank:"A", emoji:"🔺", bg:"linear-gradient(135deg,#1a0030,#2e0055)",
+    title:"Hyper Light Drifter", year:2016, rating:8.5,
+    tags:["action","adventure","indie","scifi"],
+    desc:"A wordless drifter, dying from an unnamed illness, explores the ruins of a civilization undone by technology it didn't understand, cutting through corrupted guardians with a sword and a pixel-art palette that looks like a dying dream. Built by a single developer coping with a real heart condition.",
+    info:"Action Adventure", studio:"Heart Machine", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/257850/header.jpg" },
+
+  { rank:"A", emoji:"🚂", bg:"linear-gradient(135deg,#0a0a1a,#151530)",
+    title:"Kentucky Route Zero", year:2020, rating:8.7,
+    tags:["adventure","indie","mystery","drama"],
+    desc:"A delivery driver looking for an address that doesn't exist on any map turns down a secret highway underneath Kentucky, and the game becomes a slow, magical-realist meditation on debt, labor, and disappearing small towns. Released in five acts over seven years, unhurried in a way almost nothing else is.",
+    info:"Adventure", studio:"Cardboard Computer", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/231200/header.jpg" },
+
+  { rank:"S", emoji:"🌊", bg:"linear-gradient(135deg,#001015,#001d24)",
+    title:"SOMA", year:2015, rating:8.8,
+    tags:["horror","scifi","psychological","adventure"],
+    desc:"After an accident, a man wakes up in an undersea research station decades after he should have died — and the horror isn't the machines stalking the corridors, it's the questions the game keeps forcing about what a mind actually is. Frictional Games' scariest work precisely because its real subject is philosophical.",
+    info:"Survival Horror", studio:"Frictional Games", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/282140/header.jpg" },
+
+  { rank:"A", emoji:"🔫", bg:"linear-gradient(135deg,#1a0000,#330000)",
+    title:"Hotline Miami", year:2012, rating:8.6,
+    tags:["action","indie","thriller"],
+    desc:"A man in an animal mask answers cryptic phone messages and walks into buildings full of the Russian mafia, armed with whatever he can find. Twenty-second levels of ultraviolent top-down carnage, a synthwave soundtrack, and a comedown after every kill that makes the whole thing feel much less like a power fantasy than it looks.",
+    info:"Top-Down Action", studio:"Dennaton Games", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/219150/header.jpg" },
+
+  { rank:"A", emoji:"🔴", bg:"linear-gradient(135deg,#1a0505,#330a0a)",
+    title:"Superhot", year:2016, rating:8.3,
+    tags:["action","indie","scifi","puzzle"],
+    desc:"Time moves only when you move, turning every fight into a slow-motion chess puzzle where a single step can be the difference between a clean sweep and a restart. A genuinely novel mechanic that the entire game is built around and never overstays its welcome exploring.",
+    info:"FPS Puzzle", studio:"SUPERHOT Team", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/322500/header.jpg" },
+
+  { rank:"A", emoji:"👁️", bg:"linear-gradient(135deg,#001a10,#00331f)",
+    title:"The Witness", year:2016, rating:8.5,
+    tags:["puzzle","indie","adventure"],
+    desc:"A silent island covered in hundreds of line-maze puzzles that teach their own rules purely through the environment around them — no text, no hints, no hand-holding. Jonathan Blow's follow-up to Braid, and a more demanding, more purely cerebral puzzle game than almost anything else on PC.",
+    info:"Puzzle", studio:"Thekla, Inc.", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/210970/header.jpg" },
+
+  { rank:"S", emoji:"🐟", bg:"linear-gradient(135deg,#001a20,#003040)",
+    title:"Subnautica", year:2018, rating:9.0,
+    tags:["survival","scifi","adventure","indie"],
+    desc:"Crash-landed alone on an ocean planet with nothing but a fabricator, you build a life from the reef upward while the actual depths below stay genuinely, memorably terrifying. The rare survival game with a real story and an ending, not just an ever-expanding tech tree.",
+    info:"Survival", studio:"Unknown Worlds Entertainment", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/264710/header.jpg" },
+
+  { rank:"A", emoji:"⛏️", bg:"linear-gradient(135deg,#0a1500,#182a00)",
+    title:"Deep Rock Galactic", year:2020, rating:8.9,
+    tags:["fps","survival","indie"],
+    desc:"Four dwarves rappel into procedurally-generated caves to mine minerals for a space corporation that clearly does not care if they come back. Co-op done right — every class matters, every cave is fully destructible, and \"Rock and Stone\" is a genuine rallying cry by hour ten.",
+    info:"Co-op FPS", studio:"Ghost Ship Games", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/548430/header.jpg" },
+
+  { rank:"S", emoji:"🪐", bg:"linear-gradient(135deg,#0a0a1a,#151530)",
+    title:"Rimworld", year:2018, rating:9.1,
+    tags:["strategy","simulation","indie","survival"],
+    desc:"Three crash-landed colonists try to survive on a hostile planet while the game's storyteller AI quietly writes tragedies and triumphs out of every relationship, mood, and disaster. The best procedural-narrative generator in gaming — every colony produces a story worth telling someone else.",
+    info:"Colony Sim", studio:"Ludeon Studios", img:"https://cdn.cloudflare.steamstatic.com/steam/apps/294100/header.jpg" },
 ];
 
 // ===================== STREAMING & JP DATA =====================
@@ -1776,6 +1896,9 @@ const STREAM_MAP = {
 };
 
 const JP_TITLES = {
+  "Millennium Actress":"千年女優", "FLCL":"フリクリ",
+  "From the New World":"新世界より", "Welcome to the NHK":"NHKにようこそ！",
+  "Haibane Renmei":"灰羽連盟", "March Comes in Like a Lion":"3月のライオン",
   "Astro Boy":"鉄腕アトム", "Mobile Suit Gundam":"機動戦士ガンダム",
   "Dragon Ball":"ドラゴンボール", "Dragon Ball Z":"ドラゴンボールZ",
   "Akira":"AKIRA", "Neon Genesis Evangelion":"新世紀エヴァンゲリオン",

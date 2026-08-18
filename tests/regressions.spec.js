@@ -136,17 +136,79 @@ test.describe('bugs that shipped once', () => {
     expect(box.x + box.width).toBeLessThanOrEqual(width + 1);
   });
 
-  test('first-visit onboarding tip shows once, dismisses, and never nags again', async ({ page }) => {
-    await expect(page.locator('.onboard-banner')).toBeVisible();
+  test('list view toggle is dense, shared across sections, and persists', async ({ page }) => {
+    const card = page.locator('#anime-grid .card').first();
+    const before = await card.boundingBox();
+
+    await page.locator('#anime-view-toggle').click();
+    await expect(page.locator('#anime-grid')).toHaveClass(/list-view/);
+    await expect(page.locator('#anime-view-toggle')).toHaveAttribute('aria-pressed', 'true');
+    const after = await card.boundingBox();
+    expect(after.height).toBeLessThan(before.height);
+    // Card stays reachable and correctly labeled in list view, not just visually smaller.
+    await expect(page.locator('#anime-grid .card-open-btn').first()).toBeVisible();
+
+    await page.goto('/games/');
+    await expect(page.locator('#games-grid')).toHaveClass(/list-view/);
+
+    await page.reload();
+    await expect(page.locator('#games-grid')).toHaveClass(/list-view/);
+  });
+
+  test('onboarding tour walks all four steps, positions correctly, and shows once', async ({ page }) => {
+    const box = page.locator('#tour-box');
+    await expect(box).toContainText('Step 1 of 4');
+    await expect(box).toContainText('Search everything');
+    await expect(page.locator('.search-trigger')).toHaveClass(/tour-highlight/);
+
+    // The box must actually be positioned near its target, not left at (0,0).
+    const boxRect = await box.boundingBox();
+    const targetRect = await page.locator('.search-trigger').boundingBox();
+    expect(Math.abs(boxRect.y - targetRect.y)).toBeLessThan(400);
+
+    await box.getByRole('button', { name: 'Next' }).click();
+    await expect(box).toContainText('Step 2 of 4');
+    await expect(page.locator('#anime-filter-toggle')).toHaveClass(/tour-highlight/);
+    await expect(page.locator('.search-trigger')).not.toHaveClass(/tour-highlight/);
+
+    await box.getByRole('button', { name: 'Next' }).click();
+    await expect(box).toContainText('Step 3 of 4');
+    await expect(page.locator('#anime-grid .card').first()).toHaveClass(/tour-highlight/);
+
+    await box.getByRole('button', { name: 'Back' }).click();
+    await expect(box).toContainText('Step 2 of 4');
+
+    await box.getByRole('button', { name: 'Next' }).click();
+    await box.getByRole('button', { name: 'Next' }).click();
+    await expect(box).toContainText('Step 4 of 4');
+    await expect(box.getByRole('button', { name: 'Done' })).toBeVisible();
+    await box.getByRole('button', { name: 'Done' }).click();
+    await expect(box).toHaveCount(0);
+    await expect(page.locator('.tour-highlight')).toHaveCount(0);
     expect(await page.evaluate(() => localStorage.getItem('otakuplay-onboarded'))).toBe('1');
 
-    // Marked "seen" on render, not only on dismissal — navigating away with
-    // it still open must not bring it back on the next catalogue page.
-    await page.goto('/games/');
-    await expect(page.locator('.onboard-banner')).toHaveCount(0);
+    // Marked "seen" the instant it started — reload mid-nowhere doesn't repeat it.
+    await page.reload();
+    await expect(page.locator('#tour-box')).toHaveCount(0);
+  });
 
-    await page.goto('/anime/');
-    await expect(page.locator('.onboard-banner')).toHaveCount(0);
+  test('onboarding tour: Escape skips it, but not while a modal owns the keyboard', async ({ page }) => {
+    await expect(page.locator('#tour-box')).toContainText('Step 1 of 4');
+    await page.getByRole('button', { name: 'Next' }).click();
+    await page.getByRole('button', { name: 'Next' }).click();
+    await expect(page.locator('#tour-box')).toContainText('Step 3 of 4');
+
+    // Step 3 highlights the first card — click it to open the modal, exactly
+    // what the tour's own copy invites, then confirm Escape closes the modal
+    // (not skip the tour), and a second Escape then does skip it.
+    await page.locator('#anime-grid .card').first().click();
+    await expect(page.locator('#detail-modal')).toHaveClass(/open/);
+    await page.keyboard.press('Escape');
+    await expect(page.locator('#detail-modal')).not.toHaveClass(/open/);
+    await expect(page.locator('#tour-box')).toBeVisible();
+
+    await page.keyboard.press('Escape');
+    await expect(page.locator('#tour-box')).toHaveCount(0);
   });
 
   test('theme toggle switches to light and persists across reload', async ({ page }) => {
@@ -242,9 +304,13 @@ test.describe('toolbar and filter drawer', () => {
     await expect(page.locator('#anime-filter-panel')).toBeHidden();
     await expect(page.locator('#anime-chips')).toBeHidden();
 
-    // Was 293px of stacked rows. Phones wrap the toolbar onto a second line.
+    // Was 293px of stacked rows. Phones wrap the toolbar onto a second line —
+    // the mobile budget was 150 until the list/view toggle became a sixth
+    // control and pushed a genuine, deliberate addition onto a third line
+    // (measured 178px); the budget moved with it rather than the CSS being
+    // fought into fitting five buttons' worth of touch targets into 150px.
     const height = await page.locator('#anime-section .controls-row').evaluate(el => el.getBoundingClientRect().height);
-    const budget = (page.viewportSize()?.width ?? 1280) < 700 ? 150 : 110;
+    const budget = (page.viewportSize()?.width ?? 1280) < 700 ? 190 : 110;
     expect(height).toBeLessThan(budget);
 
     await openFilters(page);
@@ -376,6 +442,23 @@ test.describe('entry pages', () => {
     await expect(page.locator('link[rel=canonical]')).toHaveAttribute(
       'href', /\/anime\/cowboy-bebop\/$/);
     await expect(page.locator('.entry-related-card').first()).toBeVisible();
+  });
+
+  test('a title with a verified trailer shows a click-to-play facade, not an eager iframe', async ({ page }) => {
+    await page.goto('/games/elden-ring/');
+    // No iframe until clicked — the facade pattern exists specifically to
+    // avoid loading YouTube's heavy player for a video most visitors won't play.
+    await expect(page.locator('.entry-trailer-frame')).toHaveCount(0);
+    await expect(page.locator('.entry-trailer-thumb')).toHaveAttribute('src', /ytimg\.com\/vi\/AKXiKBnzpBQ/);
+
+    await page.locator('.entry-trailer-facade').click();
+    const iframe = page.locator('.entry-trailer-frame');
+    await expect(iframe).toHaveAttribute('src', 'https://www.youtube-nocookie.com/embed/AKXiKBnzpBQ?autoplay=1');
+
+    // A title without one keeps the honest fallback link instead.
+    await page.goto('/anime/cowboy-bebop/');
+    await expect(page.locator('.entry-trailer')).toHaveCount(0);
+    await expect(page.locator('.modal-trailer-btn')).toHaveAttribute('href', /youtube\.com\/results/);
   });
 
   test('cover art opens a lightbox, traps focus, and Escape returns focus to the art', async ({ page }) => {
@@ -602,6 +685,30 @@ test.describe('personal library', () => {
     await expect(cards.first()).toContainText(title ?? '');
   });
 
+  test('overwriting a status or rating offers Undo, and first-time sets stay quiet', async ({ page }) => {
+    await page.locator('#anime-grid .card-open-btn').first().click();
+    await page.locator('.modal-status-opt[data-status="watched"]').click();
+    // First-time set on a title with no prior status — no toast, nothing to lose yet.
+    // (The #toast element itself doesn't exist until the first toast ever fires.)
+    await expect(page.locator('#toast')).toHaveCount(0);
+
+    await page.locator('.modal-status-opt[data-status="dropped"]').click();
+    await expect(page.locator('#toast')).toHaveClass(/visible/);
+    await expect(page.locator('.toast-msg')).toContainText('Watched → Dropped');
+    await page.locator('.toast-action').click();
+    await expect(page.locator('.modal-status-opt[data-status="watched"]')).toHaveClass(/active/);
+    // Clicking an action doesn't hide the toast itself (matches the existing
+    // "new version available" toast) — reset it so the next check is meaningful.
+    await page.evaluate(() => document.getElementById('toast').classList.remove('visible'));
+
+    await page.locator('.modal-pr-star[data-r="7"]').click();
+    await expect(page.locator('#toast')).not.toHaveClass(/visible/);
+    await page.locator('.modal-pr-star[data-r="9"]').click();
+    await expect(page.locator('.toast-msg')).toContainText('rated 7 → 9');
+    await page.locator('.toast-action').click();
+    await expect(page.locator('#modal-pr-display')).toHaveText('My rating: 7/10');
+  });
+
   test('recommendations appear once you rate something, and exclude it', async ({ page }) => {
     await page.evaluate(() => {
       localStorage.setItem('otakuplay-ratings', JSON.stringify({ 'Dark Souls': 10, 'Elden Ring': 9 }));
@@ -613,6 +720,96 @@ test.describe('personal library', () => {
     const titles = await recs.locator('.rec-title').allTextContents();
     expect(titles).not.toContain('Dark Souls');
     await expect(recs.first().locator('.rec-because')).toContainText('Because you liked');
+  });
+
+  test('importing a MyAnimeList XML export merges without wiping existing data', async ({ page }) => {
+    // Pre-existing data that must survive the import — this is a merge, not a replace.
+    await page.evaluate(() => { toggleFavorite('Berserk'); });
+
+    const malXml = [
+      '<?xml version="1.0" encoding="UTF-8"?><myanimelist>',
+      '<anime><series_title>Cowboy Bebop</series_title><my_status>Completed</my_status><my_score>9</my_score></anime>',
+      '<anime><series_title>Not A Real Anime</series_title><my_status>Watching</my_status><my_score>7</my_score></anime>',
+      '</myanimelist>',
+    ].join('');
+    await page.locator('#import-file').setInputFiles({
+      name: 'animelist.xml', mimeType: 'text/xml', buffer: Buffer.from(malXml),
+    });
+
+    await expect(page.locator('.toast-msg')).toContainText('Imported 2 fields from 2 entries');
+    const state = await page.evaluate(() => ({
+      favs: JSON.parse(localStorage.getItem('otakuplay-favs')),
+      status: JSON.parse(localStorage.getItem('otakuplay-status')),
+      ratings: JSON.parse(localStorage.getItem('otakuplay-ratings')),
+    }));
+    expect(state.favs).toContain('Berserk');
+    expect(state.status['Cowboy Bebop']).toBe('watched');
+    expect(state.ratings['Cowboy Bebop']).toBe(9);
+    expect(state.status['Not A Real Anime']).toBeUndefined();
+  });
+
+  test('importing a generic CSV maps status synonyms and skips unmatched titles', async ({ page }) => {
+    await page.goto('/games/');
+    const csv = 'title,status,rating\nElden Ring,Completed,10\nHalf-Life 2,plan to play,\nNot A Real Game,watched,5\n';
+    await page.locator('#import-file').setInputFiles({
+      name: 'library.csv', mimeType: 'text/csv', buffer: Buffer.from(csv),
+    });
+
+    await expect(page.locator('.toast-msg')).toContainText('Imported 3 fields from 3 entries');
+    const status = await page.evaluate(() => JSON.parse(localStorage.getItem('otakuplay-status')));
+    expect(status['Elden Ring']).toBe('watched');
+    expect(status['Half-Life 2']).toBe('plan');
+    expect(status['Not A Real Game']).toBeUndefined();
+  });
+
+  test('custom lists: create, add from the modal, and manage from Insights', async ({ page }) => {
+    await page.locator('#anime-grid .card-open-btn').first().click();
+    const title = await page.locator('#modal-title').textContent();
+
+    await page.locator('#modal-lists-new-input').fill('Halloween Queue');
+    await page.locator('#modal-lists-add-btn').click();
+    await expect(page.locator('.list-chip.active')).toHaveText('Halloween Queue');
+    await page.keyboard.press('Escape');
+
+    await page.goto('/insights/');
+    const card = page.locator('.my-list-card', { hasText: 'Halloween Queue' });
+    await expect(card).toBeVisible();
+    await expect(card.locator('.queue-title')).toHaveText(title ?? '');
+
+    await card.locator('.list-item-remove').click();
+    await expect(card.locator('.stat-empty')).toBeVisible();
+
+    page.on('dialog', d => d.accept());
+    await card.locator('.my-list-delete').click();
+    await expect(page.locator('.my-list-card')).toHaveCount(0);
+  });
+
+  test('year in review only counts activity dated from today, not backfilled history', async ({ page }) => {
+    await page.goto('/insights/');
+    await expect(page.locator('.year-review-card')).toContainText('Nothing dated yet this year');
+
+    // Marking watched/rated through the real UI (not seeded localStorage) is
+    // what actually stamps activityLog — that's the mechanism under test.
+    await page.goto('/anime/');
+    await page.waitForFunction(() => document.querySelectorAll('#anime-grid .card').length > 0);
+    await page.locator('#anime-grid .card-open-btn').first().click();
+    await page.locator('.modal-status-opt[data-status="watched"]').click();
+    await page.locator('.modal-pr-star[data-r="9"]').click();
+    await page.keyboard.press('Escape');
+    await page.goto('/insights/');
+
+    const card = page.locator('.year-review-card');
+    await expect(card.locator('.stat-ov-num').first()).toHaveText('1');
+    await expect(card).not.toContainText('Nothing dated yet');
+
+    // Status/ratings set before this feature existed have no activity record —
+    // simulate that directly, since there's no way to fake it through the UI.
+    await page.evaluate(() => {
+      localStorage.setItem('otakuplay-status', JSON.stringify({ 'Death Note': 'watched' }));
+      localStorage.setItem('otakuplay-activity', JSON.stringify({}));
+    });
+    await page.reload();
+    await expect(page.locator('.year-review-card')).toContainText('Nothing dated yet this year');
   });
 
   test('next-up queue orders "plan" titles and survives reload', async ({ page }) => {

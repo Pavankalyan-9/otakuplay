@@ -96,12 +96,26 @@ let favorites   = new Set(loadStore('otakuplay-favs', []));
 // A user-chosen watch order for "plan" titles — separate from userStatus
 // because status is a set (unordered) and this needs a sequence.
 let queueOrder  = loadStore('otakuplay-queue', []);
+// User-created lists beyond the four status buckets — {id: {name, titles: [...]}}.
+let userLists   = loadStore('otakuplay-lists', {});
+/* When a status/rating was last set — {title: {status: isoString, rating: isoString}}.
+   Didn't exist before this shipped, so it can't be backfilled for anything
+   touched earlier; the Year in Review reads this honestly (see below) rather
+   than pretending to know dates it was never told. */
+let activityLog = loadStore('otakuplay-activity', {});
 
 const saveUserStatus  = () => saveStore('otakuplay-status',  userStatus);
 const saveUserRatings = () => saveStore('otakuplay-ratings', userRatings);
 const saveUserNotes   = () => saveStore('otakuplay-notes',   userNotes);
 const saveFavorites   = () => saveStore('otakuplay-favs', [...favorites]);
 const saveQueueOrder  = () => saveStore('otakuplay-queue', queueOrder);
+const saveUserLists   = () => saveStore('otakuplay-lists', userLists);
+const saveActivityLog = () => saveStore('otakuplay-activity', activityLog);
+
+function recordActivity(title, kind) {
+  activityLog[title] = { ...activityLog[title], [kind]: new Date().toISOString() };
+  saveActivityLog();
+}
 
 // ===================== VIEW STATE =====================
 const state = {};
@@ -144,9 +158,11 @@ function toast(message, action) {
 
 // ===================== USER DATA MUTATIONS =====================
 function setUserStatus(title, status) {
+  const prevStatus = userStatus[title] || '';
   if (!status || userStatus[title] === status) delete userStatus[title];
   else userStatus[title] = status;
   saveUserStatus();
+  if (userStatus[title]) recordActivity(title, 'status');
 
   const inQueue = queueOrder.includes(title);
   if (userStatus[title] === 'plan') {
@@ -167,6 +183,17 @@ function setUserStatus(title, status) {
     btn.classList.toggle('active', active);
     btn.setAttribute('aria-pressed', String(active));
   });
+
+  // Only worth an Undo when a prior value was actually overwritten or
+  // cleared — flagging every first-time click would just be noise.
+  const newStatus = userStatus[title] || '';
+  if (prevStatus && prevStatus !== newStatus) {
+    const labels = SECTIONS[sect].statusLabels;
+    const newLabel = newStatus ? labels[newStatus] : 'cleared';
+    toast(`${title}: ${labels[prevStatus]} → ${newLabel}.`, {
+      label: 'Undo', onClick: () => setUserStatus(title, prevStatus),
+    });
+  }
 }
 
 function setUserRating(title, rating) {
@@ -174,6 +201,12 @@ function setUserRating(title, rating) {
   if (prev === rating) delete userRatings[title]; else userRatings[title] = rating;
   saveUserRatings();
   const r = userRatings[title] || 0;
+  if (r) recordActivity(title, 'rating');
+  if (prev > 0 && prev !== r) {
+    toast(`${title}: rated ${prev} → ${r || 'unrated'}.`, {
+      label: 'Undo', onClick: () => setUserRating(title, prev),
+    });
+  }
   document.querySelectorAll('.modal-pr-star').forEach(btn => {
     btn.classList.toggle('filled', parseInt(btn.dataset.r, 10) <= r);
   });
@@ -262,11 +295,136 @@ function sanitizeImport(data) {
   return matched > 0 ? out : null;
 }
 
+// ===================== EXTERNAL LIBRARY IMPORT =====================
+/* Matches an external title against the catalogue: exact first, then a
+   normalized (lowercase, punctuation-stripped) fallback so "Cowboy Bebop"
+   from a CSV or "Fullmetal Alchemist: Brotherhood" from MAL's export still
+   lines up despite minor formatting differences. Titles that genuinely
+   don't match are skipped, never guessed at. */
+const normalizeTitleForMatch = s => s.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+const NORMALIZED_TITLE_INDEX = new Map(
+  [...TITLE_INDEX.keys()].map(t => [normalizeTitleForMatch(t), t]));
+function findCatalogueTitle(raw) {
+  if (!raw) return null;
+  if (TITLE_INDEX.has(raw)) return raw;
+  return NORMALIZED_TITLE_INDEX.get(normalizeTitleForMatch(raw)) || null;
+}
+
+const MAL_STATUS_MAP = {
+  Completed: 'watched', Watching: 'watching',
+  // MAL has no direct "watching" equivalent for a paused show; treating it
+  // as watching (in progress) is closer than dropping it into "plan" or
+  // ignoring it outright.
+  'On-Hold': 'watching', Dropped: 'dropped', 'Plan to Watch': 'plan',
+};
+
+function parseMalXml(text) {
+  const doc = new DOMParser().parseFromString(text, 'application/xml');
+  if (doc.querySelector('parsererror')) return null;
+  const nodes = [...doc.querySelectorAll('anime')];
+  if (!nodes.length) return null;
+
+  const out = { favorites: [], status: {}, ratings: {}, notes: {} };
+  let matched = 0;
+  for (const node of nodes) {
+    const rawTitle = node.querySelector('series_title')?.textContent?.trim();
+    const found = rawTitle && findCatalogueTitle(rawTitle);
+    if (!found) continue;
+
+    const malStatus = node.querySelector('my_status')?.textContent?.trim();
+    if (MAL_STATUS_MAP[malStatus]) { out.status[found] = MAL_STATUS_MAP[malStatus]; matched++; }
+
+    const score = parseInt(node.querySelector('my_score')?.textContent, 10);
+    if (score >= 1 && score <= 10) { out.ratings[found] = score; matched++; }
+  }
+  return { clean: matched > 0 ? out : null, total: nodes.length, matched };
+}
+
+/* No dependency on any single platform's export shape — any source (Steam,
+   Backloggd, a hand-built spreadsheet) works as long as it's shaped as
+   title,status,rating with a header row. Status accepts common synonyms
+   from a few platforms' own vocabularies. */
+const CSV_STATUS_SYNONYMS = {
+  watched: 'watched', completed: 'watched', played: 'watched', finished: 'watched',
+  watching: 'watching', playing: 'watching', 'on-hold': 'watching', onhold: 'watching', 'in progress': 'watching',
+  plan: 'plan', 'plan to watch': 'plan', 'plan to play': 'plan', planning: 'plan', backlog: 'plan', wishlist: 'plan',
+  dropped: 'dropped',
+};
+
+function splitCsvLine(line) {
+  const cells = [];
+  let cur = '', inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (c === '"') inQuotes = !inQuotes;
+    else if (c === ',' && !inQuotes) { cells.push(cur); cur = ''; }
+    else cur += c;
+  }
+  cells.push(cur);
+  return cells.map(s => s.trim().replace(/^"|"$/g, ''));
+}
+
+function parseGenericCsv(text) {
+  const lines = text.split(/\r?\n/).filter(l => l.trim());
+  if (!lines.length) return null;
+  const header = splitCsvLine(lines[0]).map(h => h.toLowerCase().trim());
+  const titleIdx  = header.indexOf('title');
+  const statusIdx = header.indexOf('status');
+  const ratingIdx = header.indexOf('rating');
+  if (titleIdx === -1) return null;
+
+  const out = { favorites: [], status: {}, ratings: {}, notes: {} };
+  let matched = 0, total = 0;
+  for (const line of lines.slice(1)) {
+    const cells = splitCsvLine(line);
+    const found = findCatalogueTitle(cells[titleIdx]);
+    if (!cells[titleIdx]) continue;
+    total++;
+    if (!found) continue;
+
+    if (statusIdx !== -1) {
+      const st = CSV_STATUS_SYNONYMS[(cells[statusIdx] || '').toLowerCase().trim()];
+      if (st) { out.status[found] = st; matched++; }
+    }
+    if (ratingIdx !== -1) {
+      const r = Math.round(Number(cells[ratingIdx]));
+      if (Number.isFinite(r) && r >= 1 && r <= 10) { out.ratings[found] = r; matched++; }
+    }
+  }
+  return { clean: matched > 0 ? out : null, total, matched };
+}
+
+function importExternalLibrary(text, parser, input) {
+  let result = null;
+  try { result = parser(text); } catch { result = null; }
+  if (!result || !result.clean) {
+    toast("Couldn't find any matching titles in that file.");
+    input.value = '';
+    return;
+  }
+  applySyncData(result.clean, 'merge');
+  toast(`Imported ${result.matched} field${result.matched === 1 ? '' : 's'} from ${result.total} entries — titles this catalogue doesn't have were skipped.`);
+  input.value = '';
+}
+
 function importData(input) {
   const file = input.files && input.files[0];
   if (!file) return;
+  const name = file.name.toLowerCase();
   const reader = new FileReader();
   reader.onerror = () => { toast('Could not read that file.'); input.value = ''; };
+
+  if (name.endsWith('.xml')) {
+    reader.onload = e => importExternalLibrary(e.target.result, parseMalXml, input);
+    reader.readAsText(file);
+    return;
+  }
+  if (name.endsWith('.csv')) {
+    reader.onload = e => importExternalLibrary(e.target.result, parseGenericCsv, input);
+    reader.readAsText(file);
+    return;
+  }
+
   reader.onload = e => {
     let clean = null;
     try { clean = sanitizeImport(JSON.parse(e.target.result)); }
@@ -1297,6 +1455,37 @@ function syncRefineRow(sectKey) {
   row.querySelectorAll('.genre-mode-btn').forEach(b => setPressed(b, b.dataset.mode === s.genreMode));
 }
 
+// ===================== GRID / LIST VIEW =====================
+/* One global preference, not per-section — someone who wants density wants
+   it on both catalogues, and a click on either toggle should apply to both
+   even though only one grid is ever rendered on a given page. */
+const VIEW_KEY = 'otakuplay-view-mode';
+let listView = localStorage.getItem(VIEW_KEY) === 'list';
+
+function applyViewMode(sectKey) {
+  const grid = document.getElementById(ids(sectKey).grid);
+  const btn  = document.getElementById(`${sectKey}-view-toggle`);
+  if (grid) grid.classList.toggle('list-view', listView);
+  if (btn) {
+    btn.textContent = listView ? '⊞' : '☰';
+    btn.setAttribute('aria-pressed', String(listView));
+    const label = listView ? 'Switch to card view' : 'Switch to compact list view';
+    btn.setAttribute('aria-label', label);
+    btn.title = label;
+  }
+}
+
+function setupViewToggle(sectKey) {
+  const btn = document.getElementById(`${sectKey}-view-toggle`);
+  if (!btn) return;
+  applyViewMode(sectKey);
+  btn.addEventListener('click', () => {
+    listView = !listView;
+    localStorage.setItem(VIEW_KEY, listView ? 'list' : 'grid');
+    SECTION_KEYS.forEach(applyViewMode);
+  });
+}
+
 function setupRandom(sectKey) {
   document.getElementById(ids(sectKey).random)?.addEventListener('click', () => randomPick(sectKey));
 }
@@ -1341,6 +1530,112 @@ function jumpToDecade(sectKey, decade) {
   if (header && !header.classList.contains('hidden')) {
     header.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'start' });
   }
+}
+
+// ===================== CUSTOM LISTS =====================
+function createList(name) {
+  const trimmed = name.trim().slice(0, 40);
+  if (!trimmed) return null;
+  const id = `list-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+  userLists[id] = { name: trimmed, titles: [] };
+  saveUserLists();
+  return id;
+}
+
+function deleteList(id) {
+  delete userLists[id];
+  saveUserLists();
+}
+
+function toggleListMembership(id, title) {
+  const list = userLists[id];
+  if (!list) return;
+  const i = list.titles.indexOf(title);
+  if (i === -1) list.titles.push(title); else list.titles.splice(i, 1);
+  saveUserLists();
+}
+
+/* Rendered inside the detail modal — chips toggle membership directly,
+   mirroring how status/rating already work there rather than adding a
+   separate picker UI. */
+function renderModalListChips(title) {
+  const wrap = document.getElementById('modal-lists-chips');
+  if (!wrap) return;
+  const ids = Object.keys(userLists);
+  wrap.innerHTML = ids.length
+    ? ids.map(id => {
+        const list = userLists[id];
+        const active = list.titles.includes(title);
+        return `<button class="list-chip${active ? ' active' : ''}" data-list-id="${id}" aria-pressed="${active}">${escapeHtml(list.name)}</button>`;
+      }).join('')
+    : `<p class="stat-empty">No lists yet — create one below.</p>`;
+
+  wrap.querySelectorAll('.list-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      toggleListMembership(chip.dataset.listId, title);
+      renderModalListChips(title);
+    });
+  });
+}
+
+function renderMyLists() {
+  const mount = document.getElementById('my-lists-content');
+  if (!mount) return;
+  const ids = Object.keys(userLists);
+
+  const cards = ids.map(id => {
+    const list  = userLists[id];
+    const items = list.titles.map(t => lookup(t)?.item).filter(Boolean);
+    const rows = items.length
+      ? items.map(item => `
+          <div class="list-item-row">
+            <button class="queue-open" data-title="${escapeHtml(item.title)}">
+              <span class="queue-art" style="background:${item.bg}">
+                ${item.img ? `<img src="${escapeHtml(item.img)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.remove()">` : `<span aria-hidden="true">${item.emoji}</span>`}
+              </span>
+              <span class="queue-info">
+                <span class="queue-title">${escapeHtml(item.title)}</span>
+                <span class="queue-sub">${item.year} · ${escapeHtml(item.studio)}</span>
+              </span>
+            </button>
+            <button class="list-item-remove" data-list-id="${id}" data-title="${escapeHtml(item.title)}" aria-label="Remove ${escapeHtml(item.title)} from ${escapeHtml(list.name)}">✕</button>
+          </div>`).join('')
+      : `<p class="stat-empty">Empty — add titles from any entry's detail view.</p>`;
+
+    return `
+      <div class="stat-chart-card my-list-card">
+        <div class="my-list-head">
+          <div class="stat-chart-title">🗂️ ${escapeHtml(list.name)}</div>
+          <button class="my-list-delete" data-list-id="${id}" aria-label="Delete list ${escapeHtml(list.name)}">Delete</button>
+        </div>
+        ${rows}
+      </div>`;
+  }).join('');
+
+  mount.innerHTML = `
+    <div class="my-list-new-row">
+      <input type="text" class="my-list-new-input" id="my-list-new-input" placeholder="New list name…" maxlength="40" aria-label="New list name" />
+      <button class="btn-secondary my-list-new-btn" id="my-list-new-btn">+ Create list</button>
+    </div>
+    <div class="stats-charts">${cards || '<p class="stat-empty">No lists yet — create one above, then add titles from any entry’s detail view.</p>'}</div>`;
+
+  const input = document.getElementById('my-list-new-input');
+  document.getElementById('my-list-new-btn')?.addEventListener('click', () => {
+    if (createList(input.value)) { input.value = ''; renderMyLists(); }
+  });
+  input?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); if (createList(input.value)) { input.value = ''; renderMyLists(); } }
+  });
+  mount.querySelectorAll('.my-list-delete').forEach(btn => btn.addEventListener('click', () => {
+    if (confirm(`Delete the list "${userLists[btn.dataset.listId]?.name}"? This cannot be undone.`)) {
+      deleteList(btn.dataset.listId);
+      renderMyLists();
+    }
+  }));
+  mount.querySelectorAll('.list-item-remove').forEach(btn => btn.addEventListener('click', () => {
+    toggleListMembership(btn.dataset.listId, btn.dataset.title);
+    renderMyLists();
+  }));
 }
 
 // ===================== DETAIL MODAL =====================
@@ -1446,6 +1741,15 @@ function openModal(item) {
         <textarea class="modal-notes-area" id="modal-notes" placeholder="Your thoughts…"></textarea>
       </div>
 
+      <div class="modal-lists-section">
+        <span class="modal-user-label">My Lists</span>
+        <div class="modal-lists-chips" id="modal-lists-chips"></div>
+        <div class="modal-lists-new">
+          <input type="text" class="modal-lists-input" id="modal-lists-new-input" placeholder="New list name…" maxlength="40" aria-label="New list name" />
+          <button class="modal-lists-add-btn" id="modal-lists-add-btn">+ Add</button>
+        </div>
+      </div>
+
       ${related.length ? `<div class="modal-related-section"><div class="modal-related-head">Similar Picks</div>${relatedHtml}</div>` : ''}
     </div>`;
 
@@ -1463,6 +1767,18 @@ function openModal(item) {
     e.currentTarget.textContent = on ? '♥ Favorited' : '♡ Add to Favorites';
   });
   body.querySelector('.modal-share-btn')?.addEventListener('click', e => shareEntry(item.title, e.currentTarget));
+
+  renderModalListChips(item.title);
+  const newListInput = document.getElementById('modal-lists-new-input');
+  const addToNewList = () => {
+    const id = createList(newListInput.value);
+    if (!id) return;
+    toggleListMembership(id, item.title);
+    newListInput.value = '';
+    renderModalListChips(item.title);
+  };
+  document.getElementById('modal-lists-add-btn')?.addEventListener('click', addToNewList);
+  newListInput?.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); addToNewList(); } });
   body.querySelectorAll('.modal-related-item').forEach(el => {
     el.addEventListener('click', () => {
       const rel = lookup(el.dataset.relTitle);
@@ -1985,6 +2301,56 @@ function renderQueue() {
     </div>`).join('');
 }
 
+// ===================== YEAR IN REVIEW =====================
+/* Reads activityLog, which only exists from the moment this feature shipped
+   — there is no way to know when something was actually finished before
+   that, so this deliberately doesn't guess. A returning visitor with years
+   of history will see this start near-empty and fill in as they use the
+   site, rather than a fabricated backfill. */
+function yearInReviewData() {
+  const year = new Date().getFullYear();
+  const inThisYear = iso => iso && new Date(iso).getFullYear() === year;
+
+  const finished = [];
+  const rated = [];
+  for (const [title, log] of Object.entries(activityLog)) {
+    const item = lookup(title)?.item;
+    if (!item) continue;
+    if (userStatus[title] === 'watched' && inThisYear(log.status)) finished.push(item);
+    if (userRatings[title] > 0 && inThisYear(log.rating)) rated.push({ item, rating: userRatings[title] });
+  }
+
+  const genreCounts = {};
+  finished.forEach(item => item.tags.forEach(t => { genreCounts[t] = (genreCounts[t] || 0) + 1; }));
+  const topGenre = Object.entries(genreCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || null;
+  const avgRating = rated.length ? (rated.reduce((s, r) => s + r.rating, 0) / rated.length).toFixed(1) : null;
+  const highlights = [...rated].sort((a, b) => b.rating - a.rating).slice(0, 3);
+
+  return { year, finishedCount: finished.length, ratedCount: rated.length, topGenre, avgRating, highlights };
+}
+
+function yearInReviewHtml() {
+  const d = yearInReviewData();
+  const hasAny = d.finishedCount > 0 || d.ratedCount > 0;
+  const highlightsHtml = d.highlights.length
+    ? `<ul class="year-review-highlights">${d.highlights.map(h => `<li>${escapeHtml(h.item.title)} <span class="sync-compare-mine">${h.rating}/10</span></li>`).join('')}</ul>`
+    : '';
+
+  return `
+    <div class="stat-chart-card year-review-card">
+      <div class="stat-chart-title">🎊 ${d.year} in Review</div>
+      ${hasAny ? `
+        <div class="stats-overview year-review-overview">
+          <div class="stat-ov-card"><div class="stat-ov-num">${d.finishedCount}</div><div class="stat-ov-label">Finished</div></div>
+          <div class="stat-ov-card"><div class="stat-ov-num">${d.ratedCount}</div><div class="stat-ov-label">Rated</div></div>
+          <div class="stat-ov-card"><div class="stat-ov-num">${d.avgRating ?? '—'}</div><div class="stat-ov-label">Avg Rating</div></div>
+        </div>
+        ${d.topGenre ? `<p class="year-review-genre">Your most-finished genre this year: <strong>${escapeHtml(d.topGenre)}</strong></p>` : ''}
+        ${highlightsHtml}
+      ` : `<p class="stat-empty">Nothing dated yet this year — this only counts activity from today onward, not your history from before this shipped.</p>`}
+    </div>`;
+}
+
 // ===================== GENRE AFFINITY RADAR =====================
 /* Average personal rating per genre, not just how many titles you've tracked
    in it (that's what the "Your Top Genres" bar chart already shows) — this
@@ -2110,11 +2476,15 @@ function renderStats() {
       <div class="stat-ov-card"><div class="stat-ov-num">${myAvg}</div><div class="stat-ov-label">My Avg Rating</div></div>
     </div>
     <div class="stats-charts">
+      ${yearInReviewHtml()}
       <div class="stat-chart-card"><div class="stat-chart-title">❤️ Your Top Genres</div>${barChart(myGenres, 'pink')}</div>
       ${genreAffinityHtml()}
       <div class="stat-chart-card"><div class="stat-chart-title">📋 Next Up</div><div id="queue-list"></div></div>
       ${recommendationsHtml()}
     </div>
+
+    <div class="stats-section-head">My Lists</div>
+    <div id="my-lists-content"></div>
 
     <div class="stats-section-head">The Catalogue</div>
     <div class="stats-charts">
@@ -2134,6 +2504,7 @@ function renderStats() {
     content.querySelectorAll('.stat-bar-fill[data-w]').forEach(el => { el.style.width = el.dataset.w; });
   });
   renderQueue();
+  renderMyLists();
 }
 
 // ===================== MISC UI =====================
@@ -2211,7 +2582,7 @@ function setupDelegation() {
 
     // Card titles are real links to the entry page. A plain click opens the modal
     // (faster, keeps your place); ctrl/cmd/shift-click follows the link as usual.
-    const openBtn = e.target.closest('.card-open-btn, .stat-top-item, .rec-card, .highlight-item, .queue-open');
+    const openBtn = e.target.closest('.card-open-btn, .stat-top-item, .rec-card, .highlight-item, .queue-open, .daily-pick-inner');
     if (openBtn) {
       if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
       const found = lookup(openBtn.dataset.title);
@@ -2305,6 +2676,18 @@ function setupEntryPage() {
   }
 
   document.querySelector('.entry-share')?.addEventListener('click', e => shareEntry(item.title, e.currentTarget));
+
+  const trailer = document.querySelector('.entry-trailer');
+  trailer?.querySelector('.entry-trailer-facade')?.addEventListener('click', () => {
+    const id = trailer.dataset.videoId;
+    const iframe = document.createElement('iframe');
+    iframe.className = 'entry-trailer-frame';
+    iframe.src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(id)}?autoplay=1`;
+    iframe.title = `Trailer for ${item.title}`;
+    iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+    iframe.allowFullscreen = true;
+    trailer.replaceChildren(iframe);
+  });
 }
 
 // ===================== FRANCHISE HUB PROGRESS =====================
@@ -2328,14 +2711,123 @@ function setupFranchiseProgress() {
     <div class="franchise-progress-track"><div class="franchise-progress-fill" style="width:${pct}%"></div></div>`;
 }
 
-// ===================== FIRST-VISIT ONBOARDING =====================
-/* A single dismissible tip rather than a multi-step spotlight tour — it
-   covers the interactions that aren't otherwise explained anywhere (click a
-   card, global search, keyboard shortcuts, privacy) without the fragility of
-   positioning popovers against moving targets. Marked "seen" the moment it
-   renders, not only on explicit dismissal, so leaving it open and browsing
-   to another catalogue page doesn't show it again mid-session. */
+// ===================== FIRST-VISIT ONBOARDING TOUR =====================
+/* A sequential spotlight tour — four real controls, one at a time, each with
+   its own explanation, rather than one banner trying to cover everything at
+   once. Marked "seen" the moment it starts, not only on completion/skip, so
+   leaving it mid-tour and browsing away doesn't bring it back. No dimming
+   overlay with a cutout: that's a lot of positioning math for a feature that
+   only ever runs once per visitor, so the target just gets an outline ring
+   instead — simpler, and it doesn't block interaction with the rest of the
+   page if someone scrolls or clicks past the tour. */
 const ONBOARD_KEY = 'otakuplay-onboarded';
+const TOUR_STEPS = [
+  { selector: () => '.search-trigger', title: 'Search everything',
+    text: 'Find any anime or PC game from any page — press Ctrl+K anytime.' },
+  { selector: sect => `#${sect}-filter-toggle`, title: 'Filter the catalogue',
+    text: 'Genre, year range, studio, minimum rating, watch status — narrow it down however you like.' },
+  { selector: () => '.card', title: 'Click any card',
+    text: 'Rate it, mark it watched, add a private note, or open its full page.' },
+  { selector: sect => `#${sect}-more`, title: 'Sync, export, import',
+    text: "Move your library to another device, back it up to a file, or import from MyAnimeList — nothing leaves your browser unless you generate a link yourself." },
+];
+
+let tourStep = 0;
+let tourSect = null;
+let tourResizeHandler = null;
+
+function tourTarget(step, sect) {
+  return document.querySelector(step.selector(sect));
+}
+
+function positionTourBox(target, box) {
+  const rect = target.getBoundingClientRect();
+  const margin = 12;
+  let top = rect.bottom + margin;
+  if (top + box.offsetHeight > window.innerHeight - 10) top = Math.max(10, rect.top - box.offsetHeight - margin);
+  const left = Math.min(Math.max(10, rect.left), window.innerWidth - box.offsetWidth - 10);
+  box.style.top = `${top + window.scrollY}px`;
+  box.style.left = `${left + window.scrollX}px`;
+}
+
+function renderTourStep() {
+  const step = TOUR_STEPS[tourStep];
+  const target = tourTarget(step, tourSect);
+  document.querySelectorAll('.tour-highlight').forEach(el => el.classList.remove('tour-highlight'));
+  if (!target) { endTour(); return; }
+  target.classList.add('tour-highlight');
+  // The header's own controls are position:fixed — always on screen regardless
+  // of scroll, so scrollIntoView() on one of them tries to scroll the document
+  // to wherever that element sits in normal flow, not where it's actually
+  // rendered, producing a huge, wrong scroll offset. Only scroll when the
+  // target genuinely isn't visible yet (e.g. a card further down the grid).
+  const r = target.getBoundingClientRect();
+  if (r.top < 0 || r.bottom > window.innerHeight) {
+    target.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'center' });
+  }
+
+  let box = document.getElementById('tour-box');
+  if (!box) {
+    box = document.createElement('div');
+    box.id = 'tour-box';
+    box.className = 'tour-box';
+    box.setAttribute('role', 'dialog');
+    box.setAttribute('aria-label', 'Guided tour');
+    box.tabIndex = -1;
+    document.body.appendChild(box);
+  }
+  const isLast = tourStep === TOUR_STEPS.length - 1;
+  box.innerHTML = `
+    <div class="tour-step-count">Step ${tourStep + 1} of ${TOUR_STEPS.length}</div>
+    <div class="tour-title">${escapeHtml(step.title)}</div>
+    <p class="tour-text">${escapeHtml(step.text)}</p>
+    <div class="tour-actions">
+      <button class="tour-skip" id="tour-skip">Skip tour</button>
+      <div class="tour-nav">
+        ${tourStep > 0 ? '<button class="tour-back" id="tour-back">Back</button>' : ''}
+        <button class="tour-next" id="tour-next">${isLast ? 'Done' : 'Next'}</button>
+      </div>
+    </div>`;
+
+  document.getElementById('tour-skip').addEventListener('click', endTour);
+  document.getElementById('tour-next').addEventListener('click', () => {
+    if (isLast) endTour(); else { tourStep++; renderTourStep(); }
+  });
+  document.getElementById('tour-back')?.addEventListener('click', () => { tourStep--; renderTourStep(); });
+
+  // No requestAnimationFrame needed: reading offsetHeight below already
+  // forces a synchronous layout of the innerHTML just set above, so the
+  // measurement is correct immediately — waiting a frame just left the box
+  // rendered at its unpositioned default (bottom of <body>) for one frame.
+  positionTourBox(target, box);
+  box.focus();
+}
+
+function endTour() {
+  document.querySelectorAll('.tour-highlight').forEach(el => el.classList.remove('tour-highlight'));
+  document.getElementById('tour-box')?.remove();
+  if (tourResizeHandler) { window.removeEventListener('resize', tourResizeHandler); tourResizeHandler = null; }
+  document.removeEventListener('keydown', tourKeydownHandler, true);
+}
+
+/* Registered on the capture phase specifically so this runs BEFORE the
+   modal's own bubble-phase Escape handler — checking ".modal-overlay.open"
+   after the fact doesn't work, because by the time a bubble-phase listener
+   runs, the modal's own handler (attached earlier, in setupModal) has
+   already closed it and removed that class. Capture-phase runs first, so
+   the check sees the true pre-keypress state: a modal owns Escape/Tab
+   while it's open, the tour only gets them once nothing else is open. */
+function tourKeydownHandler(e) {
+  if (document.querySelector('.modal-overlay.open')) return;
+  if (e.key === 'Escape') { endTour(); return; }
+  if (e.key !== 'Tab') return;
+  const box = document.getElementById('tour-box');
+  const items = box ? [...box.querySelectorAll('button')] : [];
+  if (!items.length) return;
+  const first = items[0], last = items[items.length - 1];
+  if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+}
 
 function setupOnboarding() {
   const sect = activeSection();
@@ -2343,23 +2835,58 @@ function setupOnboarding() {
   if (localStorage.getItem(ONBOARD_KEY)) return;
   localStorage.setItem(ONBOARD_KEY, '1');
 
-  const section = document.getElementById(ids(sect).section);
-  const header  = section?.querySelector('.section-header');
-  if (!header) return;
+  tourStep = 0;
+  tourSect = sect;
+  renderTourStep();
+  tourResizeHandler = () => {
+    const target = tourTarget(TOUR_STEPS[tourStep], sect);
+    const box = document.getElementById('tour-box');
+    if (target && box) positionTourBox(target, box);
+  };
+  window.addEventListener('resize', tourResizeHandler);
+  document.addEventListener('keydown', tourKeydownHandler, true);
+}
 
-  const banner = document.createElement('div');
-  banner.className = 'onboard-banner';
-  banner.setAttribute('role', 'note');
-  banner.innerHTML = `
-    <span class="onboard-icon" aria-hidden="true">👋</span>
-    <div class="onboard-text">
-      <strong>New here?</strong> Click any card for the full details, press <kbd>Ctrl</kbd>+<kbd>K</kbd>
-      to search everything on the site, and <kbd>/</kbd> to jump to search on this page.
-      Your ratings, statuses and notes stay in your browser — nothing is sent anywhere.
-    </div>
-    <button class="onboard-dismiss" aria-label="Dismiss this tip">✕</button>`;
-  header.insertAdjacentElement('afterend', banner);
-  banner.querySelector('.onboard-dismiss').addEventListener('click', () => banner.remove());
+// ===================== DAILY PICK =====================
+/* Deterministic from the date, not Math.random() — every visitor on a given
+   UTC day sees the same title, which a per-visit random pick can't offer.
+   UTC (not local time) is deliberate: a single canonical day boundary means
+   visitors in different timezones agree on what "today" picked, rather than
+   each seeing a different title depending on when their local midnight falls. */
+function dailyPick() {
+  const all = [...ANIME, ...GAMES];
+  const dateKey = new Date().toISOString().slice(0, 10);
+  let hash = 0;
+  for (let i = 0; i < dateKey.length; i++) hash = (hash * 31 + dateKey.charCodeAt(i)) >>> 0;
+  return all[hash % all.length];
+}
+
+function renderDailyPick() {
+  const section = document.getElementById('daily-pick-section');
+  const mount = document.getElementById('daily-pick-card');
+  if (!section || !mount) return;
+
+  const item = dailyPick();
+  const sect = sectionOf(item.title);
+  const tagsHtml = item.tags.map(t => `<span class="tag tag-${t}">${t}</span>`).join('');
+
+  mount.innerHTML = `
+    <button class="daily-pick-inner" data-title="${escapeHtml(item.title)}">
+      <span class="daily-pick-art" style="background:${item.bg}">
+        ${item.img ? `<img src="${escapeHtml(item.img)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.remove()">` : `<span aria-hidden="true">${item.emoji}</span>`}
+      </span>
+      <span class="daily-pick-info">
+        <span class="daily-pick-meta">
+          <span class="card-rank rank-${item.rank.toLowerCase()}">Tier ${item.rank}</span>
+          <span class="daily-pick-sect">${sect === 'anime' ? '🎌 Anime' : '🎮 PC Game'}</span>
+        </span>
+        <span class="daily-pick-title">${escapeHtml(item.title)}</span>
+        <span class="daily-pick-sub">${item.year} · ${escapeHtml(item.studio)} · ${item.rating}/10</span>
+        <span class="daily-pick-desc">${escapeHtml(item.desc)}</span>
+        <span class="daily-pick-tags">${tagsHtml}</span>
+      </span>
+    </button>`;
+  section.hidden = false;
 }
 
 // ===================== LANDING PAGE =====================
@@ -2459,11 +2986,12 @@ function init() {
     setupToolbar(sect);
     setupRandom(sect);
     setupJpToggle();
+    setupViewToggle(sect);
     setupOnboarding();
   }
 
   if (PAGE === 'insights') renderStats();
-  if (PAGE === 'home') { renderHighlights(); renderAnniversaries(); }
+  if (PAGE === 'home') { renderHighlights(); renderAnniversaries(); renderDailyPick(); }
   setupEntryPage();
   setupFranchiseProgress();
 
