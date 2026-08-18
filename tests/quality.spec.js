@@ -60,6 +60,25 @@ test.describe('accessibility', () => {
     });
   }
 
+  test('the light theme has no WCAG A/AA violations', async ({ page }) => {
+    // The catalogue carries the widest variety of accent-colored badges
+    // (tiers, platforms, awards) — the surface most likely to break contrast
+    // when a color is darkened for a white background but a sibling badge
+    // sharing the same hue token is missed.
+    test.setTimeout(75_000);
+    await stubThirdParty(page);
+    await page.addInitScript(() => localStorage.setItem('otakuplay-theme', 'light'));
+    await page.goto('/anime/');
+    await page.waitForLoadState('networkidle');
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+
+    const { violations } = await new AxeBuilder({ page })
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+      .analyze();
+    const summary = violations.map(v => `${v.id} (${v.impact}) — ${v.nodes.length} node(s): ${v.help}`);
+    expect(summary, summary.join('\n')).toEqual([]);
+  });
+
   test('the filter drawer stays accessible when open', async ({ page }) => {
     test.setTimeout(75_000); // same large-DOM scan cost as the catalogue page above
     await stubThirdParty(page);

@@ -3,10 +3,12 @@ permalink: /search-index.json
 eleventyExcludeFromCollections: true
 ---
 {#- Compact keys keep this small: t=title, y=year, u=url, s=studio, r=rating,
-    e=emoji, c=section, g=tags, i=cover image. Regenerated on every build, so it
-    can never drift from the catalogue the way a hand-maintained index would. -#}
+    e=emoji, c=section, g=tags, i=cover image, d=description (for full-text
+    matching only — never shown, so it's not sanitized for display). Regenerated
+    on every build, so it can never drift from the catalogue the way a
+    hand-maintained index would. -#}
 [
 {%- for entry in catalogue.entries %}
-  {"t":{{ entry.title | dump | safe }},"y":{{ entry.year }},"u":{{ entry.url | dump | safe }},"s":{{ entry.studio | dump | safe }},"r":{{ entry.rating }},"e":{{ entry.emoji | dump | safe }},"c":"{{ entry.sect }}","g":{{ entry.tags | dump | safe }}{% if entry.img %},"i":{{ entry.img | dump | safe }}{% endif %}}{% if not loop.last %},{% endif %}
+  {"t":{{ entry.title | dump | safe }},"y":{{ entry.year }},"u":{{ entry.url | dump | safe }},"s":{{ entry.studio | dump | safe }},"r":{{ entry.rating }},"e":{{ entry.emoji | dump | safe }},"c":"{{ entry.sect }}","g":{{ entry.tags | dump | safe }},"d":{{ entry.desc | dump | safe }}{% if entry.img %},"i":{{ entry.img | dump | safe }}{% endif %}}{% if not loop.last %},{% endif %}
 {%- endfor %}
 ]

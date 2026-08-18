@@ -5,9 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{{ title }}</title>
 
+  {# Runs before the stylesheet loads so a returning visitor's saved theme
+     never flashes dark-then-light. Ignores system prefers-color-scheme by
+     design — the site defaults to dark for everyone until a visitor
+     explicitly opts into light via the header toggle, matching how it
+     already behaved before the toggle existed. #}
+  <script>
+    (function () {
+      var saved = localStorage.getItem('otakuplay-theme');
+      if (saved === 'light') document.documentElement.dataset.theme = 'light';
+    })();
+  </script>
+
   <meta name="description" content="{{ description }}" />
   {% if noindex %}<meta name="robots" content="noindex" />{% else %}<link rel="canonical" href="{{ page.url | absoluteUrl(site.url) }}" />{% endif %}
-  <meta name="color-scheme" content="dark" />
+  <meta name="color-scheme" content="dark light" />
   <meta name="theme-color" content="#09090f" />
 
   <meta property="og:type" content="website" />
@@ -25,6 +37,7 @@
   <meta name="twitter:description" content="{{ description }}" />
   <meta name="twitter:image" content="{{ socialImage }}" />
 
+  <link rel="alternate" type="application/rss+xml" title="OtakuPlay Changelog" href="{{ root }}feed.xml" />
   <link rel="icon" href="{{ root }}icons/favicon.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="{{ root }}icons/icon-180.png" />
   <link rel="manifest" href="{{ root }}manifest.json" />
@@ -63,6 +76,11 @@
   {% include "partials/modal.njk" %}
   {% include "partials/search-modal.njk" %}
   {% include "partials/sync-modal.njk" %}
+
+  <div class="modal-overlay lightbox-overlay" id="lightbox-modal" role="dialog" aria-modal="true" aria-label="Cover art, enlarged" aria-hidden="true">
+    <button class="modal-close lightbox-close" id="lightbox-close" aria-label="Close">✕</button>
+    <img class="lightbox-img" id="lightbox-img" src="" alt="" />
+  </div>
 
   <input type="file" id="import-file" accept="application/json,.json" hidden aria-hidden="true" tabindex="-1" />
   <script src="{{ root }}vendor/qrcode.js" defer></script>

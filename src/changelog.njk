@@ -1,0 +1,31 @@
+---
+layout: layouts/base.njk
+permalink: /changelog/
+pageKey: changelog
+title: Changelog — OtakuPlay
+description: Every change to the OtakuPlay catalogue, pulled straight from git history at build time — not a hand-maintained list that can drift from what actually shipped.
+---
+
+<section class="content-section">
+  <div class="section-header">
+    <div class="section-tag">📜 History</div>
+    <h1 class="section-title">Changelog</h1>
+    <p class="section-desc">
+      Every commit that touched the catalogue, newest first — generated from git
+      history at build time, so it can't drift from what actually shipped.
+      <a href="{{ root }}feed.xml">RSS feed</a>
+    </p>
+  </div>
+
+  <ol class="changelog-list">
+    {% for entry in changelog %}
+      <li class="changelog-item" id="{{ entry.hash }}">
+        <span class="changelog-date">{{ entry.date }}</span>
+        <span class="changelog-subject">{{ entry.subject }}</span>
+        <a class="changelog-hash" href="{{ site.repo }}/commit/{{ entry.hash }}" target="_blank" rel="noopener noreferrer">{{ entry.hash }}</a>
+      </li>
+    {% else %}
+      <p class="stat-empty">No history available in this build.</p>
+    {% endfor %}
+  </ol>
+</section>

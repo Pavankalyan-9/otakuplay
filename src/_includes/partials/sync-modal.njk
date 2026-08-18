@@ -24,6 +24,8 @@
             <p class="sync-qr-hint">Scan with your other device's camera</p>
           </div>
         </div>
+
+        <button class="panel-reset sync-switch-btn" id="sync-open-compare-btn">🆚 Compare with a friend's link instead</button>
       </div>
 
       <div id="sync-incoming-view" hidden>
@@ -34,6 +36,28 @@
           <button class="btn-primary" id="sync-merge-btn">Merge into my library</button>
           <button class="btn-secondary" id="sync-replace-btn">Replace my library</button>
           <button class="panel-reset" id="sync-cancel-btn">Cancel</button>
+        </div>
+      </div>
+
+      <div id="sync-compare-input-view" hidden>
+        <h2 class="modal-title">Compare with a friend</h2>
+        <p class="modal-desc">
+          Paste a sync link or code your friend sent you. This only reads it to
+          show what you have in common — it never changes your own library.
+        </p>
+        <textarea class="sync-compare-textarea" id="sync-compare-input" rows="3" placeholder="Paste their sync link here…" aria-label="Friend's sync link"></textarea>
+        <p class="sync-compare-error" id="sync-compare-error" hidden></p>
+        <div class="sync-incoming-actions">
+          <button class="btn-primary" id="sync-compare-run-btn">Compare</button>
+          <button class="panel-reset" id="sync-compare-cancel-btn">Cancel</button>
+        </div>
+      </div>
+
+      <div id="sync-compare-result-view" hidden>
+        <h2 class="modal-title">You &amp; your friend</h2>
+        <div id="sync-compare-result"></div>
+        <div class="sync-incoming-actions">
+          <button class="panel-reset" id="sync-compare-back-btn">Done</button>
         </div>
       </div>
 

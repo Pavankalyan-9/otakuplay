@@ -86,7 +86,7 @@ test.describe('bugs that shipped once', () => {
   });
 
   test('every page is reachable from the nav', async ({ page }) => {
-    for (const [label, path] of [['PC Games', '/games/'], ['Insights', '/insights/'], ['About', '/about/']]) {
+    for (const [label, path] of [['PC Games', '/games/'], ['Top 100', '/top-100/'], ['Insights', '/insights/'], ['About', '/about/']]) {
       await page.goto('/anime/');
       await page.getByRole('link', { name: label, exact: true }).click();
       await expect(page).toHaveURL(new RegExp(path.replace(/\//g, '\\/') + '$'));
@@ -134,6 +134,36 @@ test.describe('bugs that shipped once', () => {
     expect(box).not.toBeNull();
     expect(box.x).toBeGreaterThanOrEqual(0);
     expect(box.x + box.width).toBeLessThanOrEqual(width + 1);
+  });
+
+  test('first-visit onboarding tip shows once, dismisses, and never nags again', async ({ page }) => {
+    await expect(page.locator('.onboard-banner')).toBeVisible();
+    expect(await page.evaluate(() => localStorage.getItem('otakuplay-onboarded'))).toBe('1');
+
+    // Marked "seen" on render, not only on dismissal — navigating away with
+    // it still open must not bring it back on the next catalogue page.
+    await page.goto('/games/');
+    await expect(page.locator('.onboard-banner')).toHaveCount(0);
+
+    await page.goto('/anime/');
+    await expect(page.locator('.onboard-banner')).toHaveCount(0);
+  });
+
+  test('theme toggle switches to light and persists across reload', async ({ page }) => {
+    await expect(page.locator('html')).not.toHaveAttribute('data-theme', 'light');
+    await page.locator('#theme-toggle').click();
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+    await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(246, 246, 251)');
+
+    await page.reload();
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+
+    // Toggling back removes the attribute entirely rather than setting "dark" —
+    // the inline no-flash script only special-cases the "light" value.
+    await page.locator('#theme-toggle').click();
+    await expect(page.locator('html')).not.toHaveAttribute('data-theme', 'light');
+    await page.reload();
+    await expect(page.locator('html')).not.toHaveAttribute('data-theme', 'light');
   });
 });
 
@@ -256,8 +286,10 @@ test.describe('global search', () => {
     await expect(page.locator('#search-modal')).toHaveClass(/open/);
     await expect(page.locator('#global-search-input')).toBeFocused();
 
+    // A title match ("Elden Ring") outranks a description-only match (Dragon
+    // Age: Origins mentions "Ferelden") — description search is real but weak.
     await page.locator('#global-search-input').fill('elden');
-    await expect(page.locator('.search-result-title')).toHaveText('Elden Ring');
+    await expect(page.locator('.search-result-title').first()).toHaveText('Elden Ring');
 
     await page.keyboard.press('ArrowDown');
     await page.keyboard.press('Enter');
@@ -267,7 +299,7 @@ test.describe('global search', () => {
   test('an unmatched query shows an empty state, not a stale result', async ({ page }) => {
     await page.locator('.open-global-search').first().click();
     const input = page.locator('#global-search-input');
-    await input.fill('elden');
+    await input.fill('elden ring');
     await expect(page.locator('.search-result')).toHaveCount(1);
     await input.fill('zzzznotarealtitle');
     await expect(page.locator('.search-box-empty')).toBeVisible();
@@ -346,6 +378,26 @@ test.describe('entry pages', () => {
     await expect(page.locator('.entry-related-card').first()).toBeVisible();
   });
 
+  test('cover art opens a lightbox, traps focus, and Escape returns focus to the art', async ({ page }) => {
+    await page.goto('/anime/cowboy-bebop/');
+    const art = page.locator('.entry-art.zoomable');
+    await art.click();
+
+    const lightbox = page.locator('#lightbox-modal');
+    await expect(lightbox).toHaveClass(/open/);
+    await expect(page.locator('#lightbox-img')).toHaveAttribute('src', /^https:\/\//);
+    await expect(page.locator('#lightbox-close')).toBeFocused();
+
+    await page.keyboard.press('Escape');
+    await expect(lightbox).not.toHaveClass(/open/);
+    await expect(art).toBeFocused();
+
+    // Keyboard activation (not just mouse) opens it too.
+    await art.focus();
+    await page.keyboard.press('Enter');
+    await expect(lightbox).toHaveClass(/open/);
+  });
+
   // Malformed structured data is worse than none — it gets the page penalised.
   test('structured data is valid and describes the entry', async ({ page }) => {
     await page.goto('/games/elden-ring/');
@@ -391,7 +443,7 @@ test.describe('entry pages', () => {
       (await request.get('/search-index.json')).json(),
     ]);
     const urls = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m => m[1]);
-    const TOP_LEVEL_PAGES = 5; // /, /anime/, /games/, /insights/, /about/
+    const TOP_LEVEL_PAGES = 7; // /, /anime/, /games/, /top-100/, /insights/, /about/, /changelog/
 
     expect(urls.length).toBeGreaterThanOrEqual(index.length + TOP_LEVEL_PAGES);
     expect(urls.some(u => u.endsWith('/anime/cowboy-bebop/'))).toBe(true);
@@ -399,6 +451,30 @@ test.describe('entry pages', () => {
     expect(urls.some(u => u.endsWith('/anime/genre/mecha/'))).toBe(true);
     expect(urls.some(u => /\/decade\/\d{4}s\/$/.test(u))).toBe(true);
     expect(urls.some(u => u.includes('/franchise/'))).toBe(true);
+  });
+
+  test('the changelog and its RSS feed are built from real git history', async ({ page, request }) => {
+    await page.goto('/changelog/');
+    const items = page.locator('.changelog-item');
+    expect(await items.count()).toBeGreaterThan(0);
+    // A hash-linked entry and its matching in-page anchor.
+    const firstHash = await items.first().getAttribute('id');
+    expect(firstHash).toMatch(/^[0-9a-f]{7}$/);
+    await expect(page.locator(`.changelog-hash[href*="${firstHash}"]`).first()).toBeVisible();
+
+    const feedRes = await request.get('/feed.xml');
+    expect(feedRes.status()).toBe(200);
+    const feedText = await feedRes.text();
+
+    // Well-formed XML, not just "some text that looks like tags" — a real
+    // parser catches an unescaped "&" in a commit subject that regex would miss.
+    const parseErrors = await page.evaluate(xml => {
+      const doc = new DOMParser().parseFromString(xml, 'application/xml');
+      return doc.getElementsByTagName('parsererror').length;
+    }, feedText);
+    expect(parseErrors).toBe(0);
+    expect(feedText).toContain('<rss version="2.0">');
+    expect((feedText.match(/<item>/g) || []).length).toBeGreaterThan(0);
   });
 });
 
@@ -471,6 +547,42 @@ test.describe('sync code', () => {
     expect(errors).toEqual([]);
     await expect(page.locator('#sync-modal')).not.toHaveClass(/open/);
   });
+
+  test('comparing with a friend never touches your own library', async ({ page, context }) => {
+    // A second tab stands in for the friend's own device/library.
+    const friend = await context.newPage();
+    await friend.goto('/insights/');
+    await friend.evaluate(() => {
+      localStorage.setItem('otakuplay-ratings', JSON.stringify({ 'Cowboy Bebop': 9, 'Death Note': 3 }));
+    });
+    await friend.reload();
+    await friend.locator('#insights-sync-btn').click();
+    await friend.locator('#sync-generate-btn').click();
+    await friend.waitForSelector('#sync-result:not([hidden])');
+    const friendLink = await friend.locator('#sync-link-input').inputValue();
+    await friend.close();
+
+    await page.goto('/insights/');
+    await page.evaluate(() => {
+      localStorage.setItem('otakuplay-ratings', JSON.stringify({ 'Cowboy Bebop': 7, Berserk: 9 }));
+    });
+    await page.reload();
+
+    await page.locator('#insights-sync-btn').click();
+    await page.locator('#sync-open-compare-btn').click();
+    await expect(page.locator('#sync-compare-input-view')).toBeVisible();
+    await page.locator('#sync-compare-input').fill(friendLink);
+    await page.locator('#sync-compare-run-btn').click();
+
+    await expect(page.locator('#sync-compare-result-view')).toBeVisible();
+    const result = page.locator('#sync-compare-result');
+    await expect(result).toContainText('Berserk');       // you loved it, they haven't tried it
+    await expect(result.locator('.stat-ov-num').first()).toHaveText('1'); // one shared title: Cowboy Bebop
+
+    // The comparison is read-only — my own ratings must be exactly what I set them to.
+    const myRatings = await page.evaluate(() => JSON.parse(localStorage.getItem('otakuplay-ratings')));
+    expect(myRatings).toEqual({ 'Cowboy Bebop': 7, Berserk: 9 });
+  });
 });
 
 test.describe('personal library', () => {
@@ -501,6 +613,57 @@ test.describe('personal library', () => {
     const titles = await recs.locator('.rec-title').allTextContents();
     expect(titles).not.toContain('Dark Souls');
     await expect(recs.first().locator('.rec-because')).toContainText('Because you liked');
+  });
+
+  test('next-up queue orders "plan" titles and survives reload', async ({ page }) => {
+    await page.evaluate(() => {
+      localStorage.setItem('otakuplay-status', JSON.stringify({
+        'Cowboy Bebop': 'plan', 'Death Note': 'plan', 'Berserk': 'plan',
+      }));
+    });
+    await page.goto('/insights/');
+
+    const titlesBefore = page.locator('.queue-title');
+    await expect(titlesBefore).toHaveText(['Cowboy Bebop', 'Death Note', 'Berserk']);
+
+    // Move the second item up — it should swap with the first.
+    await page.locator('.queue-move[data-title="Death Note"][data-dir="up"]').click();
+    await expect(titlesBefore).toHaveText(['Death Note', 'Cowboy Bebop', 'Berserk']);
+
+    await page.reload();
+    await expect(page.locator('.queue-title')).toHaveText(['Death Note', 'Cowboy Bebop', 'Berserk']);
+
+    // Clearing status drops a title out of the queue entirely.
+    await page.locator('.queue-open[data-title="Berserk"]').click();
+    await page.locator('.modal-status-opt[data-status=""]').click();
+    await page.keyboard.press('Escape');
+    await expect(page.locator('.queue-title')).toHaveText(['Death Note', 'Cowboy Bebop']);
+  });
+
+  test('shareable Top 10 card downloads a real PNG, and needs 3+ ratings first', async ({ page }) => {
+    await page.goto('/insights/');
+    await page.locator('#share-top10-btn').click();
+    await expect(page.locator('.toast:has-text("Rate at least 3 titles")')).toBeVisible();
+
+    await page.evaluate(() => {
+      localStorage.setItem('otakuplay-ratings', JSON.stringify({
+        'Cowboy Bebop': 9, 'Death Note': 10, 'Berserk': 8,
+      }));
+    });
+    await page.reload();
+
+    const [download] = await Promise.all([
+      page.waitForEvent('download'),
+      page.locator('#share-top10-btn').click(),
+    ]);
+    expect(download.suggestedFilename()).toBe('otakuplay-my-top-10.png');
+    const stream = await download.createReadStream();
+    const chunks = [];
+    for await (const chunk of stream) chunks.push(chunk);
+    const buf = Buffer.concat(chunks);
+    // PNG magic bytes — confirms a real image came out the other end, not an empty or broken blob.
+    expect(buf.subarray(0, 8).toString('hex')).toBe('89504e470d0a1a0a');
+    expect(buf.length).toBeGreaterThan(1000);
   });
 });
 

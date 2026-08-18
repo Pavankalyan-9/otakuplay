@@ -16,7 +16,7 @@ eleventyComputed:
   <div class="entry-banner" style="background:{{ entry.bg }}">
     {% if entry.img %}
       <img class="entry-art-blur" src="{{ entry.img }}" alt="" aria-hidden="true" referrerpolicy="no-referrer" onerror="this.remove()">
-      <img class="entry-art" src="{{ entry.img }}" alt="Cover art for {{ entry.title }}" referrerpolicy="no-referrer" onerror="this.remove()">
+      <img class="entry-art zoomable" src="{{ entry.img }}" alt="Cover art for {{ entry.title }}" referrerpolicy="no-referrer" onerror="this.remove()">
     {% else %}
       <span class="entry-emoji" aria-hidden="true">{{ entry.emoji }}</span>
     {% endif %}
@@ -89,6 +89,8 @@ eleventyComputed:
       {% endfor %}
       {% set decadeHub = hubs.decade | findHub(entry.sect, (entry.year // 10 * 10) ~ 's') %}
       {% if decadeHub %}<a class="tag" href="{{ root }}{{ decadeHub.url }}">{{ decadeHub.slug }}</a>{% endif %}
+      {% set yearHub = hubs.year | findHub(entry.sect, entry.year ~ '') %}
+      {% if yearHub %}<a class="tag" href="{{ root }}{{ yearHub.url }}">{{ entry.year }}</a>{% endif %}
       {% if entry.franchise %}
         {% set fHub = hubs.franchise | findFranchiseHub('The ' ~ entry.franchise ~ ' Series') %}
         {% if fHub %}<a class="tag" href="{{ root }}{{ fHub.url }}">{{ entry.franchise }}</a>{% endif %}

@@ -20,11 +20,19 @@ eleventyComputed:
 
   <div class="section-header">
     <div class="section-tag">
-      {%- if hub.kind == 'genre' %}🏷️ Genre{% elif hub.kind == 'decade' %}🕰️ Decade{% else %}🎬 Franchise{% endif -%}
+      {%- if hub.kind == 'genre' %}🏷️ Genre{% elif hub.kind == 'decade' %}🕰️ Decade{% elif hub.kind == 'year' %}📅 Year{% else %}🎬 Franchise{% endif -%}
     </div>
     <h1 class="section-title">{{ hub.heading }}</h1>
     <p class="section-desc">{{ hub.intro }}</p>
   </div>
+
+  {% if hub.kind == 'franchise' %}
+    {# Personal status lives in localStorage, so this is hydrated by app.js —
+       the titles are handed over as a data island rather than a build-time
+       count, which would be stale the moment you mark one watched. #}
+    <script type="application/json" id="franchise-titles">{{ hub.titles | dump | safe }}</script>
+    <div class="franchise-progress" id="franchise-progress" hidden></div>
+  {% endif %}
 
   <ol class="hub-list">
     {% for item in hub.entries %}

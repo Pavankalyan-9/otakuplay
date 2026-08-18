@@ -66,6 +66,29 @@ function decadeHubs() {
   return hubs;
 }
 
+function yearHubs() {
+  const hubs = [];
+  for (const sect of ['anime', 'games']) {
+    const years = [...new Set(catalogue[sect].map(x => x.year))].sort();
+    for (const year of years) {
+      const entries = catalogue[sect].filter(x => x.year === year).sort(byRating);
+      if (entries.length < MIN_ENTRIES) continue;
+      hubs.push({
+        kind: 'year',
+        sect,
+        slug: `${year}`,
+        url: `${sect}/year/${year}/`,
+        heading: `Best ${SECTION_NOUN[sect]} of ${year}`,
+        title: `Best ${SECTION_NOUN[sect]} of ${year} — ${entries.length} Ranked`,
+        description: `The ${entries.length} best ${sect === 'anime' ? 'anime' : 'PC games'} released in ${year}, ranked — led by ${entries[0].title}.`,
+        intro: `Everything in the catalogue released in ${year}, ranked by rating.`,
+        entries,
+      });
+    }
+  }
+  return hubs;
+}
+
 function franchiseHubs() {
   const groups = new Map();
   for (const entry of catalogue.entries) {
@@ -89,16 +112,18 @@ function franchiseHubs() {
         description: `All ${entries.length} ${name} entries in the OtakuPlay catalogue, in release order — ${sorted.map(e => e.year).join(', ')}.`,
         intro: `Every ${name} title in the catalogue, in release order.`,
         entries: sorted,
+        titles: sorted.map(e => e.title),
       };
     });
 }
 
-const all = [...genreHubs(), ...decadeHubs(), ...franchiseHubs()];
+const all = [...genreHubs(), ...decadeHubs(), ...yearHubs(), ...franchiseHubs()];
 
 export default {
   all,
   genre: all.filter(h => h.kind === 'genre'),
   decade: all.filter(h => h.kind === 'decade'),
+  year: all.filter(h => h.kind === 'year'),
   franchise: all.filter(h => h.kind === 'franchise'),
   labels: LABELS,
 };

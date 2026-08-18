@@ -1,0 +1,68 @@
+---
+layout: layouts/base.njk
+permalink: /top-100/
+pageKey: top100
+title: Top 100 — Anime & PC Games Ranked Together | OtakuPlay
+description: The 100 highest-rated titles in the OtakuPlay catalogue, anime and PC games ranked together on one list, sorted purely by rating.
+---
+
+<section class="content-section hub">
+  <div class="section-header">
+    <div class="section-tag">🏆 The Definitive List</div>
+    <h1 class="section-title">Top 100 — Anime &amp; PC Games</h1>
+    <p class="section-desc">Every anime and PC game in the catalogue shares one scale — this ranks the best 100 of both together, purely by rating.</p>
+  </div>
+
+  <ol class="hub-list">
+    {% for item in top100 %}
+      <li class="hub-item">
+        <a class="hub-link" href="{{ root }}{{ item.url }}">
+          <span class="hub-rank">{{ loop.index }}</span>
+          <span class="hub-art" style="background:{{ item.bg }}">
+            {% if item.img %}
+              <img src="{{ item.img }}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.remove()">
+            {% else %}
+              <span aria-hidden="true">{{ item.emoji }}</span>
+            {% endif %}
+          </span>
+          <span class="hub-info">
+            <span class="hub-title">{{ item.title }} <span class="top100-sect" aria-label="{{ 'Anime' if item.sect == 'anime' else 'PC Game' }}">{{ '🎌' if item.sect == 'anime' else '🎮' }}</span></span>
+            <span class="hub-sub">{{ item.year }} · {{ item.studio }}</span>
+            <span class="hub-desc">{{ item.desc | truncate(140) }}</span>
+          </span>
+          <span class="hub-score">
+            <span class="hub-rating">{{ item.rating }}</span>
+            <span class="card-rank rank-{{ item.rank | lower }} hub-tier">Tier {{ item.rank }}</span>
+          </span>
+        </a>
+      </li>
+    {% endfor %}
+  </ol>
+
+  <div class="hub-footer">
+    <a class="btn-secondary" href="{{ root }}anime/">Browse all anime →</a>
+    <a class="btn-secondary" href="{{ root }}games/">Browse all PC games →</a>
+  </div>
+</section>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": "Top 100 — Anime & PC Games Ranked Together",
+  "description": {{ description | dump | safe }},
+  "url": {{ ("top-100/" | absoluteUrl(site.url)) | dump | safe }},
+  "numberOfItems": {{ top100 | length }},
+  "itemListOrder": "https://schema.org/ItemListOrderDescending",
+  "itemListElement": [
+    {%- for item in top100 %}
+    {
+      "@type": "ListItem",
+      "position": {{ loop.index }},
+      "url": {{ (item.url | absoluteUrl(site.url)) | dump | safe }},
+      "name": {{ item.title | dump | safe }}
+    }{% if not loop.last %},{% endif %}
+    {%- endfor %}
+  ]
+}
+</script>

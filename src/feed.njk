@@ -1,0 +1,22 @@
+---
+permalink: /feed.xml
+eleventyExcludeFromCollections: true
+---
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+<channel>
+  <title>OtakuPlay Changelog</title>
+  <link>{{ 'changelog/' | absoluteUrl(site.url) }}</link>
+  <description>Catalogue changes to OtakuPlay — anime and PC games added, fixed or reranked — generated from git history.</description>
+  <language>en</language>
+  <atom:link xmlns:atom="http://www.w3.org/2005/Atom" href="{{ 'feed.xml' | absoluteUrl(site.url) }}" rel="self" type="application/rss+xml" />
+{%- for entry in changelog %}
+  <item>
+    <title>{{ entry.subject }}</title>
+    <link>{{ ('changelog/#' ~ entry.hash) | absoluteUrl(site.url) }}</link>
+    <guid isPermaLink="false">{{ entry.hash }}</guid>
+    <pubDate>{{ entry.rfcDate }}</pubDate>
+  </item>
+{%- endfor %}
+</channel>
+</rss>

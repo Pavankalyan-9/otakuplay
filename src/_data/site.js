@@ -20,6 +20,7 @@ export default {
   nav: [
     { label: 'Anime',    url: 'anime/',    key: 'anime' },
     { label: 'PC Games', url: 'games/',    key: 'games' },
+    { label: 'Top 100',  url: 'top-100/',  key: 'top100' },
     { label: 'Insights', url: 'insights/', key: 'insights' },
     { label: 'About',    url: 'about/',    key: 'about' },
   ],

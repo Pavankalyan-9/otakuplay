@@ -93,11 +93,15 @@ let userStatus  = loadStore('otakuplay-status',  {});
 let userRatings = loadStore('otakuplay-ratings', {});
 let userNotes   = loadStore('otakuplay-notes',   {});
 let favorites   = new Set(loadStore('otakuplay-favs', []));
+// A user-chosen watch order for "plan" titles — separate from userStatus
+// because status is a set (unordered) and this needs a sequence.
+let queueOrder  = loadStore('otakuplay-queue', []);
 
 const saveUserStatus  = () => saveStore('otakuplay-status',  userStatus);
 const saveUserRatings = () => saveStore('otakuplay-ratings', userRatings);
 const saveUserNotes   = () => saveStore('otakuplay-notes',   userNotes);
 const saveFavorites   = () => saveStore('otakuplay-favs', [...favorites]);
+const saveQueueOrder  = () => saveStore('otakuplay-queue', queueOrder);
 
 // ===================== VIEW STATE =====================
 const state = {};
@@ -143,6 +147,15 @@ function setUserStatus(title, status) {
   if (!status || userStatus[title] === status) delete userStatus[title];
   else userStatus[title] = status;
   saveUserStatus();
+
+  const inQueue = queueOrder.includes(title);
+  if (userStatus[title] === 'plan') {
+    if (!inQueue) { queueOrder.push(title); saveQueueOrder(); }
+  } else if (inQueue) {
+    queueOrder = queueOrder.filter(t => t !== title);
+    saveQueueOrder();
+  }
+  if (document.getElementById('queue-list')) renderQueue();
 
   // Patch just the affected cards instead of rebuilding the whole grid.
   refreshCardBadges(title);
@@ -373,18 +386,86 @@ function syncCounts(clean) {
   };
 }
 
+/* Accepts a full sync URL, just its hash fragment, or a bare code — whatever
+   someone actually pastes from a chat message tends to lose the "https://"
+   or get line-wrapped, so this only requires the "sync=" marker to still be
+   intact, and falls back to treating the whole paste as the code itself. */
+function extractSyncCode(pasted) {
+  const trimmed = pasted.trim();
+  const marker = 'sync=';
+  const idx = trimmed.lastIndexOf(marker);
+  return idx !== -1 ? trimmed.slice(idx + marker.length) : trimmed;
+}
+
+/* Read-only: never touches userStatus/userRatings/favorites. Compares against
+   the friend's decoded (and already-sanitized) payload in memory only. */
+function buildComparison(friend) {
+  const myTitles     = new Set([...Object.keys(userStatus), ...Object.keys(userRatings), ...favorites]);
+  const friendTitles = new Set([...Object.keys(friend.status), ...Object.keys(friend.ratings), ...friend.favorites]);
+  const shared = [...myTitles].filter(t => friendTitles.has(t));
+
+  const bothRated = shared.filter(t => userRatings[t] && friend.ratings[t]);
+  const agree = bothRated.filter(t => Math.abs(userRatings[t] - friend.ratings[t]) <= 1).length;
+  const disagreements = bothRated
+    .map(t => ({ title: t, mine: userRatings[t], theirs: friend.ratings[t], diff: Math.abs(userRatings[t] - friend.ratings[t]) }))
+    .filter(x => x.diff >= 3)
+    .sort((a, b) => b.diff - a.diff)
+    .slice(0, 5);
+
+  const pick = (ratings, excludeTitles) => Object.entries(ratings)
+    .filter(([t, r]) => r >= 8 && !excludeTitles.has(t))
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([title, rating]) => ({ title, rating }));
+
+  return {
+    sharedCount: shared.length,
+    bothRatedCount: bothRated.length,
+    agree,
+    disagreements,
+    friendRecommends: pick(friend.ratings, myTitles),
+    youRecommend: pick(userRatings, friendTitles),
+  };
+}
+
+function comparisonHtml(cmp) {
+  const list = (items, cls) => items.length
+    ? `<ul class="sync-compare-list">${items.map(x => `<li>${escapeHtml(x.title)} <span class="${cls}">${x.rating}/10</span></li>`).join('')}</ul>`
+    : `<p class="stat-empty">Nothing here.</p>`;
+
+  const diffRows = cmp.disagreements.length
+    ? `<ul class="sync-compare-list">${cmp.disagreements.map(d =>
+        `<li>${escapeHtml(d.title)} — you: <span class="sync-compare-mine">${d.mine}</span>, them: <span class="sync-compare-theirs">${d.theirs}</span></li>`).join('')}</ul>`
+    : `<p class="stat-empty">No big disagreements — your tastes line up.</p>`;
+
+  return `
+    <div class="stats-overview sync-compare-overview">
+      <div class="stat-ov-card"><div class="stat-ov-num">${cmp.sharedCount}</div><div class="stat-ov-label">Titles in common</div></div>
+      <div class="stat-ov-card"><div class="stat-ov-num">${cmp.bothRatedCount}</div><div class="stat-ov-label">Both rated</div></div>
+      <div class="stat-ov-card"><div class="stat-ov-num">${cmp.agree}</div><div class="stat-ov-label">Close agreement</div></div>
+    </div>
+    <div class="stat-chart-card"><div class="stat-chart-title">🍿 Your friend loved, you haven't tried</div>${list(cmp.friendRecommends, 'sync-compare-theirs')}</div>
+    <div class="stat-chart-card"><div class="stat-chart-title">✨ You loved, they haven't tried</div>${list(cmp.youRecommend, 'sync-compare-mine')}</div>
+    <div class="stat-chart-card"><div class="stat-chart-title">🤔 Where you disagree most</div>${diffRows}</div>`;
+}
+
+const SYNC_VIEWS = ['sync-generate-view', 'sync-incoming-view', 'sync-compare-input-view', 'sync-compare-result-view'];
+const SYNC_MODE_VIEW = {
+  generate: 'sync-generate-view', incoming: 'sync-incoming-view',
+  'compare-input': 'sync-compare-input-view', 'compare-result': 'sync-compare-result-view',
+};
+
 function openSyncModal(mode, data) {
   const overlay = document.getElementById('sync-modal');
   if (!overlay) return;
   if (!overlay.classList.contains('open')) lastFocused = document.activeElement;
 
-  document.getElementById('sync-generate-view').hidden = mode !== 'generate';
-  document.getElementById('sync-incoming-view').hidden = mode !== 'incoming';
+  SYNC_VIEWS.forEach(id => { document.getElementById(id).hidden = id !== SYNC_MODE_VIEW[mode]; });
 
   if (mode === 'generate') {
     document.getElementById('sync-result').hidden = true;
     document.getElementById('sync-link-input').value = '';
-  } else {
+  } else if (mode === 'incoming') {
     const counts = syncCounts(data);
     const parts = [
       counts.favorites && `${counts.favorites} favorite${counts.favorites === 1 ? '' : 's'}`,
@@ -395,6 +476,11 @@ function openSyncModal(mode, data) {
     document.getElementById('sync-incoming-summary').textContent =
       parts.length ? `This link contains ${parts.join(', ')}.` : 'This link has no data in it.';
     overlay.dataset.pending = JSON.stringify(data);
+  } else if (mode === 'compare-input') {
+    document.getElementById('sync-compare-input').value = '';
+    document.getElementById('sync-compare-error').hidden = true;
+  } else if (mode === 'compare-result') {
+    document.getElementById('sync-compare-result').innerHTML = data;
   }
 
   overlay.classList.add('open');
@@ -463,6 +549,31 @@ function setupSyncModal() {
       closeSyncModal();
     }
   });
+
+  document.getElementById('sync-open-compare-btn')?.addEventListener('click', () => openSyncModal('compare-input'));
+  document.getElementById('sync-compare-cancel-btn')?.addEventListener('click', () => openSyncModal('generate'));
+  document.getElementById('sync-compare-back-btn')?.addEventListener('click', closeSyncModal);
+
+  document.getElementById('sync-compare-run-btn')?.addEventListener('click', async () => {
+    const input = document.getElementById('sync-compare-input');
+    const errorEl = document.getElementById('sync-compare-error');
+    errorEl.hidden = true;
+    const code = extractSyncCode(input.value);
+    if (!code) { errorEl.textContent = 'Paste a sync link first.'; errorEl.hidden = false; return; }
+
+    const btn = document.getElementById('sync-compare-run-btn');
+    btn.disabled = true; btn.textContent = 'Comparing…';
+    try {
+      const friend = await decodeSyncCode(code);
+      if (!friend) throw new Error('empty');
+      openSyncModal('compare-result', comparisonHtml(buildComparison(friend)));
+    } catch {
+      errorEl.textContent = "Couldn't read that link — check it was copied in full.";
+      errorEl.hidden = false;
+    } finally {
+      btn.disabled = false; btn.textContent = 'Compare';
+    }
+  });
 }
 
 /* Runs once on load. A sync link always points at /insights/, so this only
@@ -512,6 +623,9 @@ function scoreEntry(entry, query) {
   if (title.includes(query)) return 60;
   if (entry.s.toLowerCase().includes(query)) return 30;
   if (entry.g.some(t => t.includes(query))) return 20;
+  // Weakest signal, checked last: a short query like "rpg" would otherwise
+  // match half the descriptions and drown out real title/studio/tag hits.
+  if (query.length >= 4 && entry.d && entry.d.toLowerCase().includes(query)) return 10;
   return 0;
 }
 
@@ -1392,10 +1506,56 @@ function setupModal() {
   overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
 }
 
+// ===================== COVER ART LIGHTBOX =====================
+function openLightbox(src, alt) {
+  const overlay = document.getElementById('lightbox-modal');
+  const img = document.getElementById('lightbox-img');
+  if (!overlay || !img || !src) return;
+  if (!overlay.classList.contains('open')) lastFocused = document.activeElement;
+  img.src = src;
+  img.alt = alt;
+  overlay.classList.add('open');
+  overlay.removeAttribute('aria-hidden');
+  overlay.removeAttribute('inert');
+  document.body.style.overflow = 'hidden';
+  document.getElementById('lightbox-close')?.focus();
+}
+
+function closeLightbox() {
+  const overlay = document.getElementById('lightbox-modal');
+  if (!overlay || !overlay.classList.contains('open')) return;
+  overlay.classList.remove('open');
+  overlay.setAttribute('aria-hidden', 'true');
+  overlay.setAttribute('inert', '');
+  document.getElementById('lightbox-img').src = '';
+  document.body.style.overflow = '';
+  if (lastFocused && document.contains(lastFocused)) lastFocused.focus();
+  lastFocused = null;
+}
+
+function setupLightbox() {
+  const overlay = document.getElementById('lightbox-modal');
+  if (!overlay) return;
+  overlay.setAttribute('inert', '');
+  document.getElementById('lightbox-close')?.addEventListener('click', closeLightbox);
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeLightbox(); });
+
+  document.querySelectorAll('.entry-art.zoomable').forEach(img => {
+    img.setAttribute('tabindex', '0');
+    img.setAttribute('role', 'button');
+    img.setAttribute('aria-label', `Enlarge cover art for ${img.alt.replace(/^Cover art for /, '')}`);
+    const open = () => openLightbox(img.currentSrc || img.src, img.alt);
+    img.addEventListener('click', open);
+    img.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); }
+    });
+  });
+}
+
 /* Escape and focus-trapping apply to whichever .modal-overlay is currently
    open — the detail modal and the sync modal share this rather than each
    reimplementing it. */
-const MODAL_CLOSERS = { 'detail-modal': closeModal, 'sync-modal': closeSyncModal, 'search-modal': closeSearchModal };
+const MODAL_CLOSERS = { 'detail-modal': closeModal, 'sync-modal': closeSyncModal, 'search-modal': closeSearchModal, 'lightbox-modal': closeLightbox };
 
 document.addEventListener('keydown', e => {
   const overlay = document.querySelector('.modal-overlay.open');
@@ -1584,32 +1744,300 @@ function recommend(sectKey, limit = 4) {
   return scored.slice(0, limit);
 }
 
+/* Same idea as recommend(), but the seeds and the candidates come from
+   opposite catalogues — "you liked this game, try this anime." Studio and
+   franchise bonuses don't apply (a game studio never matches an anime
+   studio), so this scores on genre overlap and era proximity alone. */
+function recommendCross(targetSect, limit = 4) {
+  const otherSect = targetSect === 'anime' ? 'games' : 'anime';
+  const seeds = tasteSeeds().filter(s => sectionOf(s.item.title) === otherSect && s.weight > 0);
+  if (!seeds.length) return [];
+
+  const seen = new Set([...Object.keys(userStatus), ...Object.keys(userRatings), ...favorites]);
+  const scored = SECTIONS[targetSect].data
+    .filter(x => !seen.has(x.title))
+    .map(candidate => {
+      let score = 0, best = null, bestScore = 0;
+      for (const seed of seeds) {
+        const shared = candidate.tags.filter(t => seed.item.tags.includes(t)).length;
+        const union  = new Set([...candidate.tags, ...seed.item.tags]).size;
+        let sim = union ? shared / union : 0;
+        if (Math.abs(candidate.year - seed.item.year) <= 5) sim += 0.1;
+        const contribution = sim * seed.weight;
+        score += contribution;
+        if (contribution > bestScore) { bestScore = contribution; best = seed.item; }
+      }
+      score *= 0.75 + (candidate.rating / 10) * 0.25;
+      return { item: candidate, score, because: best };
+    })
+    .filter(x => x.score > 0.08)   // cross-media overlap is weaker signal than same-catalogue — a higher bar avoids noise
+    .sort((a, b) => b.score - a.score);
+
+  return scored.slice(0, limit);
+}
+
+function recCardHtml(item, because, crossMedium) {
+  const becauseText = because
+    ? `Because you liked ${crossMedium ? `the ${crossMedium} ` : ''}${escapeHtml(because.title)}` : '';
+  return `
+    <button class="rec-card" data-title="${escapeHtml(item.title)}">
+      <span class="rec-art" style="background:${item.bg}">
+        ${item.img ? `<img src="${escapeHtml(item.img)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.remove()">` : `<span aria-hidden="true">${item.emoji}</span>`}
+      </span>
+      <span class="rec-info">
+        <span class="rec-title">${escapeHtml(item.title)}</span>
+        <span class="rec-sub">${item.year} · ${escapeHtml(item.studio)} · ${item.rating}</span>
+        ${becauseText ? `<span class="rec-because">${becauseText}</span>` : ''}
+      </span>
+    </button>`;
+}
+
 function recommendationsHtml() {
   const blocks = SECTION_KEYS.map(k => {
     const recs = recommend(k);
     if (!recs.length) return '';
     const label = k === 'anime' ? '🎌 Anime for you' : '🎮 Games for you';
-    const cards = recs.map(({ item, because }) => `
-      <button class="rec-card" data-title="${escapeHtml(item.title)}">
-        <span class="rec-art" style="background:${item.bg}">
-          ${item.img ? `<img src="${escapeHtml(item.img)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.remove()">` : `<span aria-hidden="true">${item.emoji}</span>`}
-        </span>
-        <span class="rec-info">
-          <span class="rec-title">${escapeHtml(item.title)}</span>
-          <span class="rec-sub">${item.year} · ${escapeHtml(item.studio)} · ${item.rating}</span>
-          ${because ? `<span class="rec-because">Because you liked ${escapeHtml(because.title)}</span>` : ''}
-        </span>
-      </button>`).join('');
+    const cards = recs.map(({ item, because }) => recCardHtml(item, because)).join('');
     return `<div class="stat-chart-card"><div class="stat-chart-title">${label}</div><div class="rec-list">${cards}</div></div>`;
   }).filter(Boolean);
 
-  if (!blocks.length) {
+  // "You liked this game, try this anime" and vice versa — a weaker, cross-media
+  // signal, so it's kept as its own block rather than mixed into the same-catalogue picks.
+  const crossBlocks = SECTION_KEYS.map(k => {
+    const recs = recommendCross(k);
+    if (!recs.length) return '';
+    const label = k === 'anime' ? '🔀 Anime, because you play games' : '🔀 Games, because you watch anime';
+    const otherMedium = k === 'anime' ? 'game' : 'anime';
+    const cards = recs.map(({ item, because }) => recCardHtml(item, because, otherMedium)).join('');
+    return `<div class="stat-chart-card"><div class="stat-chart-title">${label}</div><div class="rec-list">${cards}</div></div>`;
+  }).filter(Boolean);
+
+  const allBlocks = [...blocks, ...crossBlocks];
+  if (!allBlocks.length) {
     return `<div class="stat-chart-card rec-empty">
       <div class="stat-chart-title">✨ Recommended for you</div>
       <p class="stat-empty">Rate a few titles 7+ or mark them watched, and picks tuned to your taste show up here.</p>
     </div>`;
   }
-  return blocks.join('');
+  return allBlocks.join('');
+}
+
+// ===================== SHAREABLE TOP 10 CARD =====================
+/* Cover art comes from third-party CDNs without CORS headers for anonymous
+   use, so drawing it onto a canvas would taint it and block toBlob() with a
+   SecurityError — this draws each item's own gradient (already just two hex
+   stops in data.js) as a swatch instead, never the image itself. */
+function gradientStops(bg) {
+  const hex = bg.match(/#[0-9a-fA-F]{3,8}/g);
+  return hex && hex.length >= 2 ? [hex[0], hex[1]] : ['#8b5cf6', '#3b82f6'];
+}
+
+function roundRectPath(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+function truncateToWidth(ctx, text, maxWidth) {
+  if (ctx.measureText(text).width <= maxWidth) return text;
+  let t = text;
+  while (t.length > 1 && ctx.measureText(`${t}…`).width > maxWidth) t = t.slice(0, -1);
+  return `${t}…`;
+}
+
+function buildTop10Canvas(ranked) {
+  const W = 800, headerH = 168, rowH = 92, footerH = 64;
+  const H = headerH + ranked.length * rowH + footerH;
+  const canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  const sans = 'Arial, Helvetica, sans-serif';
+
+  const bg = ctx.createLinearGradient(0, 0, W, H);
+  bg.addColorStop(0, '#120a28'); bg.addColorStop(1, '#07070e');
+  ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+
+  ctx.fillStyle = '#a78bfa';
+  ctx.font = `700 18px ${sans}`;
+  ctx.fillText('⚡ OTAKUPLAY', 40, 52);
+  ctx.fillStyle = '#f5f5fa';
+  ctx.font = `900 42px ${sans}`;
+  ctx.fillText('My Top 10', 40, 104);
+  ctx.fillStyle = '#9a9ac4';
+  ctx.font = `400 15px ${sans}`;
+  ctx.fillText('Ranked by my own rating, not the catalogue score', 40, 134);
+
+  ranked.forEach(({ item, rating }, i) => {
+    const y = headerH + i * rowH;
+    const [c1, c2] = gradientStops(item.bg);
+    const sw = ctx.createLinearGradient(40, y, 104, y + 64);
+    sw.addColorStop(0, c1); sw.addColorStop(1, c2);
+    ctx.fillStyle = sw;
+    roundRectPath(ctx, 40, y + 14, 64, 64, 10);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.92)';
+    ctx.font = `28px ${sans}`;
+    ctx.textAlign = 'center';
+    ctx.fillText(item.emoji, 72, y + 55);
+    ctx.textAlign = 'left';
+
+    ctx.fillStyle = '#6d28d9';
+    ctx.font = `900 30px ${sans}`;
+    ctx.fillText(`${i + 1}`, 118, y + 48);
+
+    ctx.fillStyle = '#f5f5fa';
+    ctx.font = `700 23px ${sans}`;
+    ctx.fillText(truncateToWidth(ctx, item.title, 430), 172, y + 38);
+
+    ctx.fillStyle = '#8484b0';
+    ctx.font = `400 15px ${sans}`;
+    ctx.fillText(`${item.year} · ${truncateToWidth(ctx, item.studio, 260)}`, 172, y + 63);
+
+    ctx.fillStyle = '#fbbf24';
+    ctx.font = `900 21px ${sans}`;
+    ctx.textAlign = 'right';
+    ctx.fillText(`${rating}/10`, W - 40, y + 48);
+    ctx.textAlign = 'left';
+  });
+
+  ctx.fillStyle = '#63637f';
+  ctx.font = `400 13px ${sans}`;
+  ctx.fillText('pavankalyan-9.github.io/otakuplay', 40, H - 26);
+  ctx.textAlign = 'right';
+  ctx.fillText(new Date().toLocaleDateString(), W - 40, H - 26);
+  ctx.textAlign = 'left';
+
+  return canvas;
+}
+
+function shareTop10() {
+  const ranked = Object.entries(userRatings)
+    .map(([title, rating]) => ({ item: lookup(title)?.item, rating }))
+    .filter(x => x.item && x.rating > 0)
+    .sort((a, b) => b.rating - a.rating || b.item.rating - a.item.rating)
+    .slice(0, 10);
+
+  if (ranked.length < 3) { toast('Rate at least 3 titles to generate a Top 10 card.'); return; }
+
+  const canvas = buildTop10Canvas(ranked);
+  canvas.toBlob(blob => {
+    if (!blob) { toast('Could not generate the image on this browser.'); return; }
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'otakuplay-my-top-10.png';
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    toast('Top 10 card downloaded.');
+  }, 'image/png');
+}
+
+// ===================== NEXT-UP QUEUE =====================
+/* queueOrder is authoritative for ordering, but import/sync can set statuses
+   directly without going through setUserStatus — so this reconciles it
+   against the real "plan" set every render rather than trusting it blindly. */
+function getQueueItems() {
+  const planTitles = new Set(Object.keys(userStatus).filter(t => userStatus[t] === 'plan'));
+  queueOrder = queueOrder.filter(t => planTitles.has(t));
+  planTitles.forEach(t => { if (!queueOrder.includes(t)) queueOrder.push(t); });
+  saveQueueOrder();
+  return queueOrder.map(t => lookup(t)?.item).filter(Boolean);
+}
+
+function moveQueueItem(title, dir) {
+  const i = queueOrder.indexOf(title);
+  if (i === -1) return;
+  const j = dir === 'up' ? i - 1 : i + 1;
+  if (j < 0 || j >= queueOrder.length) return;
+  [queueOrder[i], queueOrder[j]] = [queueOrder[j], queueOrder[i]];
+  saveQueueOrder();
+  renderQueue();
+}
+
+function renderQueue() {
+  const mount = document.getElementById('queue-list');
+  if (!mount) return;
+  const items = getQueueItems();
+  if (!items.length) {
+    mount.innerHTML = `<p class="stat-empty">Mark titles "Plan to Watch/Play" and they'll queue up here — reorder them with the arrows.</p>`;
+    return;
+  }
+  mount.innerHTML = items.map((item, i) => `
+    <div class="queue-item">
+      <span class="queue-pos">${i + 1}</span>
+      <button class="queue-open" data-title="${escapeHtml(item.title)}">
+        <span class="queue-art" style="background:${item.bg}">
+          ${item.img ? `<img src="${escapeHtml(item.img)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.remove()">` : `<span aria-hidden="true">${item.emoji}</span>`}
+        </span>
+        <span class="queue-info">
+          <span class="queue-title">${escapeHtml(item.title)}</span>
+          <span class="queue-sub">${item.year} · ${escapeHtml(item.studio)}</span>
+        </span>
+      </button>
+      <span class="queue-actions">
+        <button class="queue-move" data-title="${escapeHtml(item.title)}" data-dir="up" aria-label="Move ${escapeHtml(item.title)} up in the queue"${i === 0 ? ' disabled' : ''}>▲</button>
+        <button class="queue-move" data-title="${escapeHtml(item.title)}" data-dir="down" aria-label="Move ${escapeHtml(item.title)} down in the queue"${i === items.length - 1 ? ' disabled' : ''}>▼</button>
+      </span>
+    </div>`).join('');
+}
+
+// ===================== GENRE AFFINITY RADAR =====================
+/* Average personal rating per genre, not just how many titles you've tracked
+   in it (that's what the "Your Top Genres" bar chart already shows) — this
+   answers "which genres do I actually rate highest", which a count can't. */
+function genreAffinity(limit = 6) {
+  const sums = {}, counts = {};
+  for (const [title, rating] of Object.entries(userRatings)) {
+    if (!rating) continue;
+    const item = lookup(title)?.item;
+    if (!item) continue;
+    item.tags.forEach(t => { sums[t] = (sums[t] || 0) + rating; counts[t] = (counts[t] || 0) + 1; });
+  }
+  return Object.keys(counts)
+    .map(tag => ({ tag, avg: sums[tag] / counts[tag], n: counts[tag] }))
+    .sort((a, b) => b.n - a.n || b.avg - a.avg)
+    .slice(0, limit);
+}
+
+function radarChartSvg(genres) {
+  const n = genres.length, W = 280, H = 250, cx = 140, cy = 120, maxR = 80;
+  const angleFor = i => (Math.PI * 2 * i / n) - Math.PI / 2;
+  const pointAt = (i, val) => {
+    const r = (Math.max(val, 0) / 10) * maxR;
+    const a = angleFor(i);
+    return [cx + r * Math.cos(a), cy + r * Math.sin(a)];
+  };
+  const rings = [2, 4, 6, 8, 10].map(v =>
+    `<polygon points="${genres.map((_, i) => pointAt(i, v).join(',')).join(' ')}" class="radar-grid" />`).join('');
+  const axes = genres.map((_, i) => {
+    const [x, y] = pointAt(i, 10);
+    return `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" class="radar-axis" />`;
+  }).join('');
+  const dataPoly = genres.map((g, i) => pointAt(i, g.avg).join(',')).join(' ');
+  const dots = genres.map((g, i) => { const [x, y] = pointAt(i, g.avg); return `<circle cx="${x}" cy="${y}" r="3.5" class="radar-point" />`; }).join('');
+  const labels = genres.map((g, i) => {
+    const [x, y] = pointAt(i, 12.6);
+    return `<text x="${x}" y="${y}" class="radar-label" text-anchor="middle" dominant-baseline="middle">${escapeHtml(g.tag)}</text>`;
+  }).join('');
+  return `<svg viewBox="0 0 ${W} ${H}" class="radar-chart" role="img" aria-label="Your average rating by genre: ${genres.map(g => `${g.tag} ${g.avg.toFixed(1)}`).join(', ')}">
+    ${rings}${axes}
+    <polygon points="${dataPoly}" class="radar-data" />
+    ${dots}
+    ${labels}
+  </svg>`;
+}
+
+function genreAffinityHtml() {
+  const genres = genreAffinity();
+  if (genres.length < 3) {
+    return `<div class="stat-chart-card"><div class="stat-chart-title">🎯 Your Genre Affinity</div>
+      <p class="stat-empty">Rate titles across at least three genres to see which ones you actually score highest.</p></div>`;
+  }
+  return `<div class="stat-chart-card stat-chart-radar"><div class="stat-chart-title">🎯 Your Genre Affinity</div>${radarChartSvg(genres)}</div>`;
 }
 
 // ===================== STATS =====================
@@ -1683,6 +2111,8 @@ function renderStats() {
     </div>
     <div class="stats-charts">
       <div class="stat-chart-card"><div class="stat-chart-title">❤️ Your Top Genres</div>${barChart(myGenres, 'pink')}</div>
+      ${genreAffinityHtml()}
+      <div class="stat-chart-card"><div class="stat-chart-title">📋 Next Up</div><div id="queue-list"></div></div>
       ${recommendationsHtml()}
     </div>
 
@@ -1703,9 +2133,34 @@ function renderStats() {
   requestAnimationFrame(() => {
     content.querySelectorAll('.stat-bar-fill[data-w]').forEach(el => { el.style.width = el.dataset.w; });
   });
+  renderQueue();
 }
 
 // ===================== MISC UI =====================
+const THEME_KEY = 'otakuplay-theme';
+
+/* The document already carries the saved theme by the time this runs — an
+   inline script in <head> applies it before first paint, so a returning
+   visitor never sees a flash of the wrong theme. This just wires the button. */
+function setupThemeToggle() {
+  const btn = document.getElementById('theme-toggle');
+  if (!btn) return;
+  const sync = () => {
+    const light = document.documentElement.dataset.theme === 'light';
+    btn.textContent = light ? '☀️' : '🌙';
+    btn.setAttribute('aria-label', light ? 'Switch to dark theme' : 'Switch to light theme');
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', light ? '#f6f6fb' : '#09090f');
+  };
+  sync();
+  btn.addEventListener('click', () => {
+    const light = document.documentElement.dataset.theme === 'light';
+    if (light) delete document.documentElement.dataset.theme;
+    else document.documentElement.dataset.theme = 'light';
+    localStorage.setItem(THEME_KEY, light ? 'dark' : 'light');
+    sync();
+  });
+}
+
 function setupJpToggle() {
   const btn = document.getElementById('jp-toggle');
   if (!btn) return;
@@ -1751,9 +2206,12 @@ function setupDelegation() {
     const fav = e.target.closest('.card-fav-btn');
     if (fav) { e.stopPropagation(); toggleFavorite(fav.dataset.title); return; }
 
+    const queueMove = e.target.closest('.queue-move');
+    if (queueMove) { moveQueueItem(queueMove.dataset.title, queueMove.dataset.dir); return; }
+
     // Card titles are real links to the entry page. A plain click opens the modal
     // (faster, keeps your place); ctrl/cmd/shift-click follows the link as usual.
-    const openBtn = e.target.closest('.card-open-btn, .stat-top-item, .rec-card, .highlight-item');
+    const openBtn = e.target.closest('.card-open-btn, .stat-top-item, .rec-card, .highlight-item, .queue-open');
     if (openBtn) {
       if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
       const found = lookup(openBtn.dataset.title);
@@ -1777,6 +2235,7 @@ function setupDelegation() {
     if (e.target.closest('.import-btn')) { document.getElementById('import-file').click(); return; }
     if (e.target.closest('.clear-btn'))  { clearUserData(); return; }
     if (e.target.closest('.sync-open-btn')) { openSyncModal('generate'); }
+    if (e.target.closest('#share-top10-btn')) { shareTop10(); }
   });
 }
 
@@ -1848,7 +2307,97 @@ function setupEntryPage() {
   document.querySelector('.entry-share')?.addEventListener('click', e => shareEntry(item.title, e.currentTarget));
 }
 
+// ===================== FRANCHISE HUB PROGRESS =====================
+function setupFranchiseProgress() {
+  const data  = document.getElementById('franchise-titles');
+  const mount = document.getElementById('franchise-progress');
+  if (!data || !mount) return;
+
+  let titles = [];
+  try { titles = JSON.parse(data.textContent); } catch { return; }
+  if (!titles.length) return;
+
+  const done = titles.filter(t => userStatus[t] === 'watched').length;
+  if (done === 0) { mount.hidden = true; return; }
+
+  const verb = SECTIONS[sectionOf(titles[0])].isGame ? 'played' : 'watched';
+  const pct  = Math.round((done / titles.length) * 100);
+  mount.hidden = false;
+  mount.innerHTML = `
+    <div class="franchise-progress-label">You've ${verb} ${done} of ${titles.length}${done === titles.length ? ' — the whole series!' : ` (${pct}%)`}</div>
+    <div class="franchise-progress-track"><div class="franchise-progress-fill" style="width:${pct}%"></div></div>`;
+}
+
+// ===================== FIRST-VISIT ONBOARDING =====================
+/* A single dismissible tip rather than a multi-step spotlight tour — it
+   covers the interactions that aren't otherwise explained anywhere (click a
+   card, global search, keyboard shortcuts, privacy) without the fragility of
+   positioning popovers against moving targets. Marked "seen" the moment it
+   renders, not only on explicit dismissal, so leaving it open and browsing
+   to another catalogue page doesn't show it again mid-session. */
+const ONBOARD_KEY = 'otakuplay-onboarded';
+
+function setupOnboarding() {
+  const sect = activeSection();
+  if (!sect || !document.getElementById(ids(sect).grid)) return;
+  if (localStorage.getItem(ONBOARD_KEY)) return;
+  localStorage.setItem(ONBOARD_KEY, '1');
+
+  const section = document.getElementById(ids(sect).section);
+  const header  = section?.querySelector('.section-header');
+  if (!header) return;
+
+  const banner = document.createElement('div');
+  banner.className = 'onboard-banner';
+  banner.setAttribute('role', 'note');
+  banner.innerHTML = `
+    <span class="onboard-icon" aria-hidden="true">👋</span>
+    <div class="onboard-text">
+      <strong>New here?</strong> Click any card for the full details, press <kbd>Ctrl</kbd>+<kbd>K</kbd>
+      to search everything on the site, and <kbd>/</kbd> to jump to search on this page.
+      Your ratings, statuses and notes stay in your browser — nothing is sent anywhere.
+    </div>
+    <button class="onboard-dismiss" aria-label="Dismiss this tip">✕</button>`;
+  header.insertAdjacentElement('afterend', banner);
+  banner.querySelector('.onboard-dismiss').addEventListener('click', () => banner.remove());
+}
+
 // ===================== LANDING PAGE =====================
+/* Data.js only stores a release year, never a month or day — so this can't
+   claim "on this day" without fabricating a date. What it can honestly say
+   is which titles hit a round-number anniversary this year, using whatever
+   year it is on the visitor's own clock rather than whenever the page was
+   last built. */
+function renderAnniversaries() {
+  const wrap  = document.getElementById('anniversaries');
+  const mount = document.getElementById('anniversary-list');
+  if (!wrap || !mount) return;
+
+  const thisYear = new Date().getFullYear();
+  const hits = [...ANIME, ...GAMES]
+    .map(item => ({ item, years: thisYear - item.year }))
+    .filter(x => x.years > 0 && x.years % 5 === 0)
+    .sort((a, b) => a.years - b.years || b.item.rating - a.item.rating)
+    .slice(0, 6);
+
+  if (!hits.length) { wrap.hidden = true; return; }
+  wrap.hidden = false;
+  mount.innerHTML = hits.map(({ item, years }) => `
+    <button class="highlight-item" data-title="${escapeHtml(item.title)}">
+      <span class="highlight-rank">${years}y</span>
+      <span class="highlight-art" style="background:${item.bg}">
+        ${item.img
+          ? `<img src="${escapeHtml(item.img)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.remove()">`
+          : `<span aria-hidden="true">${item.emoji}</span>`}
+      </span>
+      <span class="highlight-info">
+        <span class="highlight-title">${escapeHtml(item.title)}</span>
+        <span class="highlight-sub">${item.year} · ${years} years ago</span>
+      </span>
+      <span class="highlight-rating">${item.rating}</span>
+    </button>`).join('');
+}
+
 function renderHighlights() {
   const build = (sectKey, mountId) => {
     const mount = document.getElementById(mountId);
@@ -1910,15 +2459,19 @@ function init() {
     setupToolbar(sect);
     setupRandom(sect);
     setupJpToggle();
+    setupOnboarding();
   }
 
   if (PAGE === 'insights') renderStats();
-  if (PAGE === 'home') renderHighlights();
+  if (PAGE === 'home') { renderHighlights(); renderAnniversaries(); }
   setupEntryPage();
+  setupFranchiseProgress();
 
   setupModal();
   setupSyncModal();
   setupGlobalSearch();
+  setupThemeToggle();
+  setupLightbox();
   setupScrollTop();
   setupKeyboardShortcuts();
   setupDelegation();

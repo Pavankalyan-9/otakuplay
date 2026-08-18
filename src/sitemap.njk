@@ -7,7 +7,7 @@ eleventyExcludeFromCollections: true
     sitemap at all. A test asserts the count. -#}
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-{%- for path in ['', 'anime/', 'games/', 'insights/', 'about/'] %}
+{%- for path in ['', 'anime/', 'games/', 'top-100/', 'insights/', 'about/', 'changelog/'] %}
   <url>
     <loc>{{ path | absoluteUrl(site.url) }}</loc>
     <changefreq>weekly</changefreq>
