@@ -248,7 +248,7 @@ function setUserStatus(title, status) {
   // Patch just the affected cards instead of rebuilding the whole grid.
   refreshCardBadges(title);
   const sect = sectionOf(title);
-  if (state[sect].status !== 'all') applyFilter(sect);
+  if (sect && state[sect].status !== 'all') applyFilter(sect);
 
   document.querySelectorAll('.modal-status-opt').forEach(btn => {
     const active = btn.dataset.status === (userStatus[title] || '');
@@ -2898,7 +2898,10 @@ function setupFranchiseProgress() {
   const done = titles.filter(t => userStatus[t] === 'watched').length;
   if (done === 0) { mount.hidden = true; return; }
 
-  const verb = SECTIONS[sectionOf(titles[0])].statusLabels.watched.toLowerCase();
+  /* titles come from a build-time JSON island, not a live lookup — a
+     service-worker-cached hub page whose titles were since renamed in data.js
+     would resolve to no section, so fall back rather than throw. */
+  const verb = (SECTIONS[sectionOf(titles[0])]?.statusLabels.watched || 'finished').toLowerCase();
   const pct  = Math.round((done / titles.length) * 100);
   mount.hidden = false;
   mount.innerHTML = `
