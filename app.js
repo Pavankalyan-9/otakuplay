@@ -25,8 +25,10 @@ const GAME_ERA_LABELS = {
 };
 
 const SECTIONS = {
-  anime: { key:'anime', data:ANIME, isGame:false, eraLabels:ERA_LABELS,      statusLabels:STATUS_DISPLAY },
-  games: { key:'games', data:GAMES, isGame:true,  eraLabels:GAME_ERA_LABELS, statusLabels:GAME_STATUS_DISPLAY },
+  anime: { key:'anime', data:ANIME, isGame:false, eraLabels:ERA_LABELS,      statusLabels:STATUS_DISPLAY,
+           noun:'Anime',    nounSingular:'Anime',   nounSingularLower:'anime',    nounLower:'anime',    emoji:'🎌', trailerQuery:'anime trailer', chartColor:'pink' },
+  games: { key:'games', data:GAMES, isGame:true,  eraLabels:GAME_ERA_LABELS, statusLabels:GAME_STATUS_DISPLAY,
+           noun:'PC Games', nounSingular:'PC Game', nounSingularLower:'PC game', nounLower:'PC games', emoji:'🎮', trailerQuery:'gameplay trailer', chartColor:'gold' },
 };
 const SECTION_KEYS = Object.keys(SECTIONS);
 
@@ -68,7 +70,10 @@ function slugOf(item) {
 function entryUrl(item) {
   return `${window.OTAKU_ROOT || ''}${sectionOf(item.title)}/${slugOf(item)}/`;
 }
-const sectionOf   = title => (TITLE_INDEX.get(title)?.sect) || 'anime';
+// null (not a guessed default) on a miss — every real caller passes a title
+// that's already known to exist; a miss means the caller should handle it,
+// not silently get misreported as anime.
+const sectionOf   = title => TITLE_INDEX.get(title)?.sect ?? null;
 const isNewEntry  = item => item.year >= NEW_SINCE;
 
 // ===================== PERSISTENCE =====================
@@ -173,10 +178,14 @@ const MILESTONES = [
     check: () => Object.keys(userRatings).length >= 10 },
   { id: 'completionist', emoji: '🏆', name: 'Completionist', desc: 'Rate 50 titles.',
     check: () => Object.keys(userRatings).length >= 50 },
-  { id: 'both-worlds', emoji: '🌐', name: 'Both Worlds', desc: 'Finish an anime and a PC game.',
+  { id: 'both-worlds', emoji: '🌐', name: 'Both Worlds', desc: 'Finish something in two different mediums.',
+    // "id" stays 'both-worlds' even though the check is no longer anime+games
+    // specifically — it's the badgesSeen persistence key, and changing it
+    // would incorrectly re-trigger the unlock toast for anyone who already
+    // earned it under the old, narrower rule.
     check: () => {
       const finished = Object.entries(userStatus).filter(([, s]) => s === 'watched').map(([t]) => t);
-      return finished.some(t => sectionOf(t) === 'anime') && finished.some(t => sectionOf(t) === 'games');
+      return new Set(finished.map(sectionOf).filter(Boolean)).size >= 2;
     } },
   { id: 'favorite-fan', emoji: '❤️', name: 'Favorite Fan', desc: 'Favorite 5 titles.',
     check: () => favorites.size >= 5 },
@@ -239,7 +248,7 @@ function setUserStatus(title, status) {
   // Patch just the affected cards instead of rebuilding the whole grid.
   refreshCardBadges(title);
   const sect = sectionOf(title);
-  if (state[sect].status !== 'all') applyFilter(sect);
+  if (sect && state[sect].status !== 'all') applyFilter(sect);
 
   document.querySelectorAll('.modal-status-opt').forEach(btn => {
     const active = btn.dataset.status === (userStatus[title] || '');
@@ -888,7 +897,7 @@ function renderSearchResults(results, query) {
       </span>
       <span class="search-result-info">
         <span class="search-result-title">${escapeHtml(r.t)}</span>
-        <span class="search-result-sub">${r.y} · ${escapeHtml(r.s)} · ${r.c === 'games' ? 'PC Game' : 'Anime'}</span>
+        <span class="search-result-sub">${r.y} · ${escapeHtml(r.s)} · ${SECTIONS[r.c]?.nounSingular || r.c}</span>
       </span>
       <span class="search-result-rating">${r.r}</span>
     </a>`).join('');
@@ -1758,7 +1767,7 @@ function openModal(item) {
       <span class="modal-related-rating">${r.rating}</span>
     </button>`).join('');
 
-  const trailerQuery = encodeURIComponent(`${item.title} ${SECTIONS[sect].isGame ? 'gameplay trailer' : 'anime trailer'}`);
+  const trailerQuery = encodeURIComponent(`${item.title} ${SECTIONS[sect].trailerQuery}`);
   const t = escapeHtml(item.title);
 
   banner.style.background = item.bg;
@@ -2127,13 +2136,16 @@ function recommend(sectKey, limit = 4) {
   return scored.slice(0, limit);
 }
 
-/* Same idea as recommend(), but the seeds and the candidates come from
-   opposite catalogues — "you liked this game, try this anime." Studio and
-   franchise bonuses don't apply (a game studio never matches an anime
-   studio), so this scores on genre overlap and era proximity alone. */
+/* Same idea as recommend(), but the seeds come from every OTHER medium, not
+   the same one being scored — "you liked this game, try this anime." Pooling
+   every other section (rather than one fixed pair) is what lets this scale
+   past exactly two mediums; the per-candidate `because` still tracks the
+   single best-matching seed, so "Because you liked the X Y" attribution stays
+   specific even though the seed pool is now N-1 sections wide. Studio and
+   franchise bonuses don't apply across mediums (a game studio never matches
+   an anime studio), so this scores on genre overlap and era proximity alone. */
 function recommendCross(targetSect, limit = 4) {
-  const otherSect = targetSect === 'anime' ? 'games' : 'anime';
-  const seeds = tasteSeeds().filter(s => sectionOf(s.item.title) === otherSect && s.weight > 0);
+  const seeds = tasteSeeds().filter(s => sectionOf(s.item.title) !== targetSect && s.weight > 0);
   if (!seeds.length) return [];
 
   const seen = new Set([...Object.keys(userStatus), ...Object.keys(userRatings), ...favorites]);
@@ -2179,19 +2191,24 @@ function recommendationsHtml() {
   const blocks = SECTION_KEYS.map(k => {
     const recs = recommend(k);
     if (!recs.length) return '';
-    const label = k === 'anime' ? '🎌 Anime for you' : '🎮 Games for you';
+    const label = `${SECTIONS[k].emoji} ${SECTIONS[k].noun} for you`;
     const cards = recs.map(({ item, because }) => recCardHtml(item, because)).join('');
     return `<div class="stat-chart-card"><div class="stat-chart-title">${label}</div><div class="rec-list">${cards}</div></div>`;
   }).filter(Boolean);
 
   // "You liked this game, try this anime" and vice versa — a weaker, cross-media
   // signal, so it's kept as its own block rather than mixed into the same-catalogue picks.
+  // The heading can't name one specific other medium once there are more than
+  // two — the per-card "Because you liked the X Y" line (crossMedium, derived
+  // from whichever seed actually matched) still gives the specific attribution.
   const crossBlocks = SECTION_KEYS.map(k => {
     const recs = recommendCross(k);
     if (!recs.length) return '';
-    const label = k === 'anime' ? '🔀 Anime, because you play games' : '🔀 Games, because you watch anime';
-    const otherMedium = k === 'anime' ? 'game' : 'anime';
-    const cards = recs.map(({ item, because }) => recCardHtml(item, because, otherMedium)).join('');
+    const label = `🔀 ${SECTIONS[k].noun}, based on your other tastes`;
+    const cards = recs.map(({ item, because }) => {
+      const crossMedium = because ? SECTIONS[sectionOf(because.title)]?.nounSingularLower : null;
+      return recCardHtml(item, because, crossMedium);
+    }).join('');
     return `<div class="stat-chart-card"><div class="stat-chart-title">${label}</div><div class="rec-list">${cards}</div></div>`;
   }).filter(Boolean);
 
@@ -2216,7 +2233,7 @@ const genreLabel = t => GENRE_LABEL_OVERRIDES[t] || (t.charAt(0).toUpperCase() +
 
 function tasteQuizGenres(limit = 14) {
   const counts = {};
-  [...ANIME, ...GAMES].forEach(item => item.tags.forEach(t => { counts[t] = (counts[t] || 0) + 1; }));
+  SECTION_KEYS.flatMap(k => SECTIONS[k].data).forEach(item => item.tags.forEach(t => { counts[t] = (counts[t] || 0) + 1; }));
   return Object.keys(counts).sort((a, b) => counts[b] - counts[a]).slice(0, limit);
 }
 
@@ -2227,9 +2244,8 @@ function tasteQuizHtml() {
     <p class="quiz-intro">Or take a 10-second quiz instead — pick a few genres you enjoy.</p>
     <div class="quiz-genres" id="quiz-genres" role="group" aria-label="Pick genres you enjoy">${chips}</div>
     <div class="quiz-medium" role="radiogroup" aria-label="Show recommendations for">
-      <button type="button" class="quiz-medium-btn active" data-medium="both" aria-pressed="true">Both</button>
-      <button type="button" class="quiz-medium-btn" data-medium="anime" aria-pressed="false">🎌 Anime</button>
-      <button type="button" class="quiz-medium-btn" data-medium="games" aria-pressed="false">🎮 PC Games</button>
+      <button type="button" class="quiz-medium-btn active" data-medium="both" aria-pressed="true">All</button>
+      ${SECTION_KEYS.map(k => `<button type="button" class="quiz-medium-btn" data-medium="${k}" aria-pressed="false">${SECTIONS[k].emoji} ${SECTIONS[k].noun}</button>`).join('')}
     </div>
     <button type="button" class="quiz-submit-btn" id="quiz-submit-btn" disabled>Get my picks (pick 2+ genres)</button>
     <div id="quiz-result"></div>`;
@@ -2263,7 +2279,7 @@ function runTasteQuiz(genres, medium) {
       .sort((a, b) => b.matched - a.matched || b.item.rating - a.item.rating)
       .slice(0, 4);
     if (!scored.length) return '';
-    const label = k === 'anime' ? '🎌 Anime picks' : '🎮 PC Game picks';
+    const label = `${SECTIONS[k].emoji} ${SECTIONS[k].nounSingular} picks`;
     const cards = scored.map(({ item, matched }) => quizCardHtml(item, matched, genres.length)).join('');
     return `<div class="quiz-result-block"><div class="quiz-result-label">${label}</div><div class="rec-list">${cards}</div></div>`;
   }).filter(Boolean);
@@ -2572,9 +2588,7 @@ function renderStats() {
   const content = document.getElementById('stats-content');
   if (!content) return;
 
-  const all      = [...ANIME, ...GAMES];
-  const avgAnime = (ANIME.reduce((s, x) => s + x.rating, 0) / ANIME.length).toFixed(2);
-  const avgGames = (GAMES.reduce((s, x) => s + x.rating, 0) / GAMES.length).toFixed(2);
+  const all      = SECTION_KEYS.flatMap(k => SECTIONS[k].data);
   const sTier    = all.filter(x => x.rank === 'S').length;
   const awarded  = all.filter(x => x.awards?.length).length;
 
@@ -2605,9 +2619,7 @@ function renderStats() {
       </button>`).join('');
   }
 
-  const byDecade   = arr => topEntries(countBy(arr, x => `${Math.floor(x.year / 10) * 10}s`), 12).sort((a, b) => a[0].localeCompare(b[0]));
-  const topAnime   = [...ANIME].sort((a, b) => b.rating - a.rating);
-  const topGames   = [...GAMES].sort((a, b) => b.rating - a.rating);
+  const byDecade = arr => topEntries(countBy(arr, x => `${Math.floor(x.year / 10) * 10}s`), 12).sort((a, b) => a[0].localeCompare(b[0]));
 
   // ── Personal library stats ──
   const statusCounts = { watched: 0, watching: 0, plan: 0, dropped: 0 };
@@ -2617,12 +2629,30 @@ function renderStats() {
   const tracked  = Object.keys(userStatus).length;
   const myGenres = topEntries(tagCounts(Object.keys(userStatus).map(t => lookup(t)?.item).filter(Boolean)), 8);
 
+  // One "Entries" + one "Avg Rating" overview card per medium, in SECTION_KEYS
+  // order, so a new medium just adds two more cards without touching this code.
+  const overviewCards = SECTION_KEYS.map(k => {
+    const data = SECTIONS[k].data;
+    const avg  = (data.reduce((s, x) => s + x.rating, 0) / data.length).toFixed(2);
+    return `<div class="stat-ov-card"><div class="stat-ov-num">${data.length}</div><div class="stat-ov-label">${SECTIONS[k].nounSingular} Entries</div></div>
+      <div class="stat-ov-card"><div class="stat-ov-num">${avg}</div><div class="stat-ov-label">Avg ${SECTIONS[k].nounSingular} Rating</div></div>`;
+  }).join('');
+
+  // Grouped by chart type (all decade charts, then all genre charts, then all
+  // studio charts) rather than by medium, so charts of the same kind stay
+  // adjacent for comparison regardless of how many mediums exist.
+  const decadeCharts = SECTION_KEYS.map(k =>
+    `<div class="stat-chart-card"><div class="stat-chart-title">${SECTIONS[k].emoji} ${SECTIONS[k].noun} by Decade</div>${barChart(byDecade(SECTIONS[k].data), SECTIONS[k].chartColor)}</div>`).join('');
+  const genreCharts = SECTION_KEYS.map(k =>
+    `<div class="stat-chart-card"><div class="stat-chart-title">${SECTIONS[k].emoji} Top ${SECTIONS[k].nounSingular} Genres</div>${barChart(topEntries(tagCounts(SECTIONS[k].data)), SECTIONS[k].chartColor)}</div>`).join('');
+  const studioCharts = SECTION_KEYS.map(k =>
+    `<div class="stat-chart-card"><div class="stat-chart-title">🏢 Top ${SECTIONS[k].nounSingular} Studios</div>${barChart(topEntries(countBy(SECTIONS[k].data, x => x.studio)), SECTIONS[k].chartColor)}</div>`).join('');
+  const topLists = SECTION_KEYS.map(k =>
+    `<div class="stat-chart-card"><div class="stat-chart-title">⭐ Highest Rated ${SECTIONS[k].noun}</div>${topList([...SECTIONS[k].data].sort((a, b) => b.rating - a.rating))}</div>`).join('');
+
   content.innerHTML = `
     <div class="stats-overview">
-      <div class="stat-ov-card"><div class="stat-ov-num">${ANIME.length}</div><div class="stat-ov-label">Anime Entries</div></div>
-      <div class="stat-ov-card"><div class="stat-ov-num">${GAMES.length}</div><div class="stat-ov-label">Game Entries</div></div>
-      <div class="stat-ov-card"><div class="stat-ov-num">${avgAnime}</div><div class="stat-ov-label">Avg Anime Rating</div></div>
-      <div class="stat-ov-card"><div class="stat-ov-num">${avgGames}</div><div class="stat-ov-label">Avg Game Rating</div></div>
+      ${overviewCards}
       <div class="stat-ov-card"><div class="stat-ov-num">${sTier}</div><div class="stat-ov-label">S-Tier Entries</div></div>
       <div class="stat-ov-card"><div class="stat-ov-num">${awarded}</div><div class="stat-ov-label">Award Winners</div></div>
     </div>
@@ -2652,16 +2682,10 @@ function renderStats() {
 
     <div class="stats-section-head">The Catalogue</div>
     <div class="stats-charts">
-      <div class="stat-chart-card"><div class="stat-chart-title">🎌 Anime by Decade</div>${barChart(byDecade(ANIME))}</div>
-      <div class="stat-chart-card"><div class="stat-chart-title">🎮 Games by Decade</div>${barChart(byDecade(GAMES), 'gold')}</div>
-      <div class="stat-chart-card"><div class="stat-chart-title">🎌 Top Anime Genres</div>${barChart(topEntries(tagCounts(ANIME)), 'pink')}</div>
-      <div class="stat-chart-card"><div class="stat-chart-title">🎮 Top Game Genres</div>${barChart(topEntries(tagCounts(GAMES)))}</div>
-      <div class="stat-chart-card"><div class="stat-chart-title">🏢 Top Anime Studios</div>${barChart(topEntries(countBy(ANIME, x => x.studio)), 'pink')}</div>
-      <div class="stat-chart-card"><div class="stat-chart-title">🏢 Top Game Studios</div>${barChart(topEntries(countBy(GAMES, x => x.studio)), 'gold')}</div>
+      ${decadeCharts}${genreCharts}${studioCharts}
     </div>
     <div class="stats-charts">
-      <div class="stat-chart-card"><div class="stat-chart-title">⭐ Highest Rated Anime</div>${topList(topAnime)}</div>
-      <div class="stat-chart-card"><div class="stat-chart-title">⭐ Highest Rated Games</div>${topList(topGames)}</div>
+      ${topLists}
     </div>`;
 
   requestAnimationFrame(() => {
@@ -2874,7 +2898,10 @@ function setupFranchiseProgress() {
   const done = titles.filter(t => userStatus[t] === 'watched').length;
   if (done === 0) { mount.hidden = true; return; }
 
-  const verb = SECTIONS[sectionOf(titles[0])].isGame ? 'played' : 'watched';
+  /* titles come from a build-time JSON island, not a live lookup — a
+     service-worker-cached hub page whose titles were since renamed in data.js
+     would resolve to no section, so fall back rather than throw. */
+  const verb = (SECTIONS[sectionOf(titles[0])]?.statusLabels.watched || 'finished').toLowerCase();
   const pct  = Math.round((done / titles.length) * 100);
   mount.hidden = false;
   mount.innerHTML = `
@@ -2888,7 +2915,7 @@ SECTION_KEYS.forEach(k => SECTIONS[k].data.forEach(item => SLUG_INDEX.set(slugOf
 
 function compareOptionsHtml() {
   return SECTION_KEYS.map(k => {
-    const label = k === 'anime' ? 'Anime' : 'PC Games';
+    const label = SECTIONS[k].noun;
     const opts = [...SECTIONS[k].data]
       .sort((a, b) => a.title.localeCompare(b.title))
       .map(item => `<option value="${escapeHtml(item.title)}">${escapeHtml(item.title)} (${item.year})</option>`)
@@ -3148,7 +3175,7 @@ function setupOnboarding() {
    visitors in different timezones agree on what "today" picked, rather than
    each seeing a different title depending on when their local midnight falls. */
 function dailyPick() {
-  const all = [...ANIME, ...GAMES];
+  const all = SECTION_KEYS.flatMap(k => SECTIONS[k].data);
   const dateKey = new Date().toISOString().slice(0, 10);
   let hash = 0;
   for (let i = 0; i < dateKey.length; i++) hash = (hash * 31 + dateKey.charCodeAt(i)) >>> 0;
@@ -3172,7 +3199,7 @@ function renderDailyPick() {
       <span class="daily-pick-info">
         <span class="daily-pick-meta">
           <span class="card-rank rank-${item.rank.toLowerCase()}">Tier ${item.rank}</span>
-          <span class="daily-pick-sect">${sect === 'anime' ? '🎌 Anime' : '🎮 PC Game'}</span>
+          <span class="daily-pick-sect">${SECTIONS[sect].emoji} ${SECTIONS[sect].nounSingular}</span>
         </span>
         <span class="daily-pick-title">${escapeHtml(item.title)}</span>
         <span class="daily-pick-sub">${item.year} · ${escapeHtml(item.studio)} · ${item.rating}/10</span>
@@ -3195,7 +3222,7 @@ function renderAnniversaries() {
   if (!wrap || !mount) return;
 
   const thisYear = new Date().getFullYear();
-  const hits = [...ANIME, ...GAMES]
+  const hits = SECTION_KEYS.flatMap(k => SECTIONS[k].data)
     .map(item => ({ item, years: thisYear - item.year }))
     .filter(x => x.years > 0 && x.years % 5 === 0)
     .sort((a, b) => a.years - b.years || b.item.rating - a.item.rating)
@@ -3220,8 +3247,8 @@ function renderAnniversaries() {
 }
 
 function renderHighlights() {
-  const build = (sectKey, mountId) => {
-    const mount = document.getElementById(mountId);
+  const build = sectKey => {
+    const mount = document.getElementById(`highlight-${sectKey}`);
     if (!mount) return;
     const top = [...SECTIONS[sectKey].data].sort((a, b) => b.rating - a.rating).slice(0, 5);
     mount.innerHTML = top.map((item, i) => `
@@ -3239,17 +3266,16 @@ function renderHighlights() {
         <span class="highlight-rating">${item.rating}</span>
       </button>`).join('');
   };
-  build('anime', 'highlight-anime');
-  build('games', 'highlight-games');
+  SECTION_KEYS.forEach(build);
 
   const eras = document.getElementById('era-grid');
   if (!eras) return;
-  const all = [...ANIME, ...GAMES];
+  const all = SECTION_KEYS.flatMap(k => SECTIONS[k].data);
   const decades = [...new Set(all.map(x => Math.floor(x.year / 10) * 10))].sort((a, b) => a - b);
   const root = window.OTAKU_ROOT || '';
   eras.innerHTML = decades.map(d => {
     const count = all.filter(x => Math.floor(x.year / 10) * 10 === d).length;
-    const label = ERA_LABELS[d] || GAME_ERA_LABELS[d] || '';
+    const label = SECTION_KEYS.map(k => SECTIONS[k].eraLabels[d]).find(Boolean) || '';
     return `<a class="era-card" href="${root}anime/#from=${d}&to=${d + 9}">
         <span class="era-decade">${d}s</span>
         <span class="era-label">${escapeHtml(label)}</span>
@@ -3262,9 +3288,8 @@ function renderHighlights() {
 function init() {
   // The landing page shows counters; section pages don't have them.
   const setText = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
-  setText('stat-anime', ANIME.length);
-  setText('stat-games', GAMES.length);
-  setText('stat-years', `${new Date().getFullYear() - Math.min(...[...ANIME, ...GAMES].map(x => x.year))}+`);
+  SECTION_KEYS.forEach(k => setText(`stat-${k}`, SECTIONS[k].data.length));
+  setText('stat-years', `${new Date().getFullYear() - Math.min(...SECTION_KEYS.flatMap(k => SECTIONS[k].data).map(x => x.year))}+`);
 
   /* Entry pages share their section's page key (so the nav highlights correctly)
      but render no catalogue, so gate on the grid actually being present. */

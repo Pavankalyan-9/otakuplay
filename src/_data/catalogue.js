@@ -10,12 +10,19 @@ import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
+import media from './media.js';
 
 const ROOT = path.dirname(path.dirname(path.dirname(fileURLToPath(import.meta.url))));
 const source = fs.readFileSync(path.join(ROOT, 'data.js'), 'utf8');
 
 const { ANIME, GAMES, STREAM_MAP, JP_TITLES, FRANCHISES } =
   vm.runInNewContext(`${source}\n;({ ANIME, GAMES, STREAM_MAP, JP_TITLES, FRANCHISES })`);
+
+// Raw catalogue arrays keyed the same way media.js keys its mediums. A future
+// medium (e.g. SERIES/MOVIES) adds one more entry here plus a matching key in
+// media.js — everything below already loops over Object.keys(media).
+const RAW = { anime: ANIME, games: GAMES };
+const SECTION_KEYS = Object.keys(media);
 
 const slugify = title => title
   .toLowerCase()
@@ -40,13 +47,12 @@ function withSlugs(items, sect) {
   });
 }
 
-const anime = withSlugs(ANIME, 'anime');
-const games = withSlugs(GAMES, 'games');
-const entries = [...anime, ...games];
+const bySect = Object.fromEntries(SECTION_KEYS.map(k => [k, withSlugs(RAW[k], k)]));
+const entries = SECTION_KEYS.flatMap(k => bySect[k]);
 
 // Same tag-overlap rule the modal uses, resolved once at build time.
 const related = entry => {
-  const pool = entry.sect === 'anime' ? anime : games;
+  const pool = bySect[entry.sect];
   return pool
     .filter(x => x.title !== entry.title)
     .map(x => ({ x, overlap: x.tags.filter(t => entry.tags.includes(t)).length }))
@@ -55,10 +61,11 @@ const related = entry => {
     .map(e => e.x);
 };
 
+function byRatingThenYear(a, b) { return b.rating - a.rating || a.year - b.year; }
+
 /* A stable ranking each entry can cite a position in — highest rated first,
    ties broken by year so the order never depends on array insertion order. */
-const ranked = { anime: [...anime].sort(byRatingThenYear), games: [...games].sort(byRatingThenYear) };
-function byRatingThenYear(a, b) { return b.rating - a.rating || a.year - b.year; }
+const ranked = Object.fromEntries(SECTION_KEYS.map(k => [k, [...bySect[k]].sort(byRatingThenYear)]));
 
 function neighbours(entry) {
   const order = ranked[entry.sect];
@@ -69,8 +76,7 @@ function neighbours(entry) {
 }
 
 export default {
-  anime,
-  games,
+  ...bySect,
   entries: entries.map(entry => ({
     ...entry,
     jp: JP_TITLES[entry.title] || null,
@@ -79,5 +85,5 @@ export default {
     related: related(entry),
     ...neighbours(entry),
   })),
-  counts: { anime: anime.length, games: games.length, total: entries.length },
+  counts: { ...Object.fromEntries(SECTION_KEYS.map(k => [k, bySect[k].length])), total: entries.length },
 };
