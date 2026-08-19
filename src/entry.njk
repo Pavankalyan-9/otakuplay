@@ -7,7 +7,7 @@ pagination:
 permalink: "/{{ entry.url }}"
 eleventyComputed:
   pageKey: "{{ entry.sect }}"
-  title: "{{ entry.title }} ({{ entry.year }}) — {{ 'Best Anime' if entry.sect == 'anime' else 'Best PC Games' }} | OtakuPlay"
+  title: "{{ entry.title }} ({{ entry.year }}) — Best {{ media[entry.sect].noun }} | OtakuPlay"
   description: "{{ entry.desc | truncate(155) }}"
   ogImage: "{{ entry.img }}"
 ---
@@ -24,7 +24,7 @@ eleventyComputed:
   </div>
 
   <nav class="entry-crumbs" aria-label="Breadcrumb">
-    <a href="{{ root }}{{ entry.sect }}/">{{ 'Best Anime' if entry.sect == 'anime' else 'Best PC Games' }}</a>
+    <a href="{{ root }}{{ entry.sect }}/">Best {{ media[entry.sect].noun }}</a>
     <span aria-hidden="true">›</span>
     <span>{{ entry.title }}</span>
   </nav>
@@ -112,7 +112,7 @@ eleventyComputed:
 
     <div class="entry-actions">
       {% if not entry.trailer %}
-        <a class="modal-trailer-btn" href="https://www.youtube.com/results?search_query={{ (entry.title + (' gameplay trailer' if entry.sect == 'games' else ' anime trailer')) | urlencode }}" target="_blank" rel="noopener noreferrer">▶ Watch trailer on YouTube</a>
+        <a class="modal-trailer-btn" href="https://www.youtube.com/results?search_query={{ (entry.title + ' ' + media[entry.sect].trailerQuery) | urlencode }}" target="_blank" rel="noopener noreferrer">▶ Watch trailer on YouTube</a>
       {% endif %}
       <button class="modal-share-btn entry-share" data-title="{{ entry.title }}">🔗 Copy link</button>
     </div>
@@ -157,7 +157,7 @@ eleventyComputed:
     {% endif %}
 
     <p class="entry-back">
-      <a href="{{ root }}{{ entry.sect }}/">← Back to all {{ 'anime' if entry.sect == 'anime' else 'PC games' }}</a>
+      <a href="{{ root }}{{ entry.sect }}/">← Back to all {{ media[entry.sect].nounLower }}</a>
     </p>
   </div>
 </article>
@@ -167,7 +167,7 @@ eleventyComputed:
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": {% if entry.sect == 'games' %}"VideoGame"{% elif 'Film' in entry.info %}"Movie"{% else %}"TVSeries"{% endif %},
+  "@type": {% if 'Film' in entry.info and entry.sect != 'games' %}"Movie"{% else %}{{ media[entry.sect].schemaType | dump | safe }}{% endif %},
   "name": {{ entry.title | dump | safe }},
   "description": {{ entry.desc | dump | safe }},
   "url": {{ (entry.url | absoluteUrl(site.url)) | dump | safe }},
@@ -175,7 +175,7 @@ eleventyComputed:
   {% if entry.jp %}"alternateName": {{ entry.jp | dump | safe }},{% endif %}
   "datePublished": "{{ entry.year }}",
   "genre": {{ entry.tags | dump | safe }},
-  {% if entry.sect == 'games' %}"publisher"{% else %}"productionCompany"{% endif %}: {
+  {{ media[entry.sect].schemaPublisherKey | dump | safe }}: {
     "@type": "Organization",
     "name": {{ entry.studio | dump | safe }}
   },

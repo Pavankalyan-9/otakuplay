@@ -13,7 +13,7 @@ eleventyComputed:
 
 <section class="content-section hub">
   <nav class="entry-crumbs" aria-label="Breadcrumb">
-    <a href="{{ root }}{{ hub.sect }}/">{{ 'Best Anime' if hub.sect == 'anime' else 'Best PC Games' }}</a>
+    <a href="{{ root }}{{ hub.sect }}/">Best {{ media[hub.sect].noun }}</a>
     <span aria-hidden="true">›</span>
     <span>{{ hub.heading }}</span>
   </nav>
@@ -62,7 +62,7 @@ eleventyComputed:
 
   <div class="hub-footer">
     <a class="btn-secondary" href="{{ root }}{{ hub.sect }}/{% if hub.kind == 'genre' %}#filter={{ hub.slug }}{% endif %}">
-      Browse all {{ 'anime' if hub.sect == 'anime' else 'PC games' }} →
+      Browse all {{ media[hub.sect].nounLower }} →
     </a>
   </div>
 

@@ -7,11 +7,12 @@
  */
 import catalogue from './catalogue.js';
 import genres from './genres.js';
+import media from './media.js';
+
+const SECTION_KEYS = Object.keys(media);
 
 const LABELS = Object.fromEntries(
-  [...genres.anime, ...genres.games].map(g => [g.id, g.label]));
-
-const SECTION_NOUN = { anime: 'Anime', games: 'PC Games' };
+  SECTION_KEYS.flatMap(sect => genres[sect]).map(g => [g.id, g.label]));
 
 const byRating = (a, b) => b.rating - a.rating || a.year - b.year;
 
@@ -21,7 +22,7 @@ const MIN_ENTRIES = 3;
 
 function genreHubs() {
   const hubs = [];
-  for (const sect of ['anime', 'games']) {
+  for (const sect of SECTION_KEYS) {
     for (const { id, label } of genres[sect]) {
       const entries = catalogue[sect].filter(x => x.tags.includes(id)).sort(byRating);
       if (entries.length < MIN_ENTRIES) continue;
@@ -30,10 +31,10 @@ function genreHubs() {
         sect,
         slug: id,
         url: `${sect}/genre/${id}/`,
-        heading: `Best ${label} ${SECTION_NOUN[sect]}`,
-        title: `Best ${label} ${SECTION_NOUN[sect]} of All Time — ${entries.length} Ranked`,
-        description: `The ${entries.length} best ${label.toLowerCase()} ${sect === 'anime' ? 'anime' : 'PC games'} ever made, ranked — from ${entries[0].title} down, with ratings, studios and where to ${sect === 'anime' ? 'watch' : 'play'}.`,
-        intro: `Every ${label.toLowerCase()} title in the OtakuPlay catalogue, ranked by rating. ${entries.length} of ${catalogue[sect].length} ${sect === 'anime' ? 'anime' : 'games'} qualify.`,
+        heading: `Best ${label} ${media[sect].noun}`,
+        title: `Best ${label} ${media[sect].noun} of All Time — ${entries.length} Ranked`,
+        description: `The ${entries.length} best ${label.toLowerCase()} ${media[sect].nounLower} ever made, ranked — from ${entries[0].title} down, with ratings, studios and where to ${media[sect].verb}.`,
+        intro: `Every ${label.toLowerCase()} title in the OtakuPlay catalogue, ranked by rating. ${entries.length} of ${catalogue[sect].length} ${media[sect].nounLower} qualify.`,
         entries,
       });
     }
@@ -43,7 +44,7 @@ function genreHubs() {
 
 function decadeHubs() {
   const hubs = [];
-  for (const sect of ['anime', 'games']) {
+  for (const sect of SECTION_KEYS) {
     const decades = [...new Set(catalogue[sect].map(x => Math.floor(x.year / 10) * 10))].sort();
     for (const decade of decades) {
       const entries = catalogue[sect]
@@ -55,9 +56,9 @@ function decadeHubs() {
         sect,
         slug: `${decade}s`,
         url: `${sect}/decade/${decade}s/`,
-        heading: `Best ${SECTION_NOUN[sect]} of the ${decade}s`,
-        title: `Best ${SECTION_NOUN[sect]} of the ${decade}s — ${entries.length} Ranked`,
-        description: `The ${entries.length} best ${sect === 'anime' ? 'anime' : 'PC games'} released between ${decade} and ${decade + 9}, ranked — led by ${entries[0].title} (${entries[0].year}).`,
+        heading: `Best ${media[sect].noun} of the ${decade}s`,
+        title: `Best ${media[sect].noun} of the ${decade}s — ${entries.length} Ranked`,
+        description: `The ${entries.length} best ${media[sect].nounLower} released between ${decade} and ${decade + 9}, ranked — led by ${entries[0].title} (${entries[0].year}).`,
         intro: `Everything in the catalogue released between ${decade} and ${decade + 9}, ranked by rating.`,
         entries,
       });
@@ -68,7 +69,7 @@ function decadeHubs() {
 
 function yearHubs() {
   const hubs = [];
-  for (const sect of ['anime', 'games']) {
+  for (const sect of SECTION_KEYS) {
     const years = [...new Set(catalogue[sect].map(x => x.year))].sort();
     for (const year of years) {
       const entries = catalogue[sect].filter(x => x.year === year).sort(byRating);
@@ -78,9 +79,9 @@ function yearHubs() {
         sect,
         slug: `${year}`,
         url: `${sect}/year/${year}/`,
-        heading: `Best ${SECTION_NOUN[sect]} of ${year}`,
-        title: `Best ${SECTION_NOUN[sect]} of ${year} — ${entries.length} Ranked`,
-        description: `The ${entries.length} best ${sect === 'anime' ? 'anime' : 'PC games'} released in ${year}, ranked — led by ${entries[0].title}.`,
+        heading: `Best ${media[sect].noun} of ${year}`,
+        title: `Best ${media[sect].noun} of ${year} — ${entries.length} Ranked`,
+        description: `The ${entries.length} best ${media[sect].nounLower} released in ${year}, ranked — led by ${entries[0].title}.`,
         intro: `Everything in the catalogue released in ${year}, ranked by rating.`,
         entries,
       });
